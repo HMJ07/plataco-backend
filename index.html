@@ -328,7 +328,7 @@ function renderProducts(){
   }
   
   grid.innerHTML = list.map(p=>`
-    <div class="product-card" onclick="openModal(${p.id})">
+    <div class="product-card" data-id="${p.id}">
       ${p.badge?`<div class="badge ${p.isNew?'new':''}">${p.badge}</div>`:''}
       <div class="card-img">${p.svg}<div class="card-overlay"><button class="quick-view-btn">Ver detalle</button></div></div>
       <div class="card-body">
@@ -338,15 +338,34 @@ function renderProducts(){
       </div>
       <div class="card-bottom">
         <span class="card-price"><span class="currency">${currSymbol} </span>${convertPrice(p.price).replace(currSymbol,'').trim()}</span>
-        <button class="add-quick" onclick="event.stopPropagation();quickAdd(${p.id})">+</button>
+        <button class="add-quick" data-id="${p.id}">+</button>
       </div>
     </div>
   `).join('');
+
+  // Attach click events using data-id (safe with UUIDs)
+  document.querySelectorAll('.product-card').forEach(card => {
+    card.addEventListener('click', function(e) {
+      if(e.target.classList.contains('add-quick') || e.target.closest('.add-quick')) return;
+      openModal(this.dataset.id);
+    });
+  });
+  document.querySelectorAll('.add-quick').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      quickAdd(this.dataset.id);
+    });
+  });
 }
 
 function quickAdd(id){
   const p = products.find(x=>x.id===id);
   if(!p) return;
+  if(p.sizes && p.sizes.length > 0){
+    openModal(id);
+    showToast('Selecciona una talla primero');
+    return;
+  }
   addToCart(p, null, 1);
 }
 

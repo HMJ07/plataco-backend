@@ -451,14 +451,26 @@ function showCheckout() {
 }
 
 async function initStripe(){
-  const configRes = await fetch(`${API_URL}/config`);
-  const config = await configRes.json();
-
-  if (!configRes.ok || !config.stripe_publishable_key) {
-    throw new Error('Falta configurar STRIPE_PUBLISHABLE_KEY en el backend.');
+  // Try to get key from backend config endpoint
+  let stripePk = window.PLATACO_STRIPE_PK || null;
+  
+  if (!stripePk) {
+    try {
+      const configRes = await fetch(`${API_URL}/config`);
+      if (configRes.ok) {
+        const config = await configRes.json();
+        stripePk = config.stripe_publishable_key;
+      }
+    } catch(e) {
+      console.warn('Could not fetch config from backend:', e);
+    }
   }
 
-  stripe = Stripe(config.stripe_publishable_key);
+  if (!stripePk) {
+    throw new Error('Falta configurar STRIPE_PUBLISHABLE_KEY. Añádela en Railway → Variables.');
+  }
+
+  stripe = Stripe(stripePk);
   const stripeElements = stripe.elements();
   stripeCardElement = stripeElements.create('card', {
     style: {

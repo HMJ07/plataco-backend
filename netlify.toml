@@ -1,6 +1,3 @@
-# netlify.toml — Configuración de Netlify para PLATACO frontend
-# Sube este archivo junto con index.html y checkout.html
-
 [[redirects]]
   from = "/checkout"
   to = "/checkout.html"
