@@ -1,0 +1,15 @@
+# netlify.toml — Configuración de Netlify para PLATACO frontend
+# Sube este archivo junto con index.html y checkout.html
+
+[[redirects]]
+  from = "/checkout"
+  to = "/checkout.html"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[build]
+  publish = "."
