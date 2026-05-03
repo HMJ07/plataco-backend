@@ -4,14 +4,10 @@
   "description": "Backend API para PLATACO — Tienda de joyería en plata",
   "type": "module",
   "main": "server.js",
-  "engines": {
-    "node": ">=18.0.0"
-  },
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "db:init": "psql $DATABASE_URL -f schema.sql",
-    "db:seed": "psql $DATABASE_URL -f seed.sql"
+    "db:init": "psql $DATABASE_URL -f schema.sql"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

@@ -1,6 +1,6 @@
 // backend/routes/products.js
 import { Router } from 'express';
-import { query } from '../db.js';
+import { query } from './db.js';
 
 const router = Router();
 

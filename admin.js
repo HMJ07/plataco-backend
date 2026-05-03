@@ -1,7 +1,7 @@
 // backend/routes/admin.js
 import { Router } from 'express';
-import { query } from '../db.js';
-import { requireAdmin } from '../middleware/auth.js';
+import { query } from './db.js';
+import { requireAdmin } from './middleware_auth.js';
 
 const router = Router();
 router.use(requireAdmin); // Todas las rutas requieren rol admin

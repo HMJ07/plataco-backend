@@ -1,7 +1,7 @@
 // backend/routes/orders.js
 import { Router } from 'express';
-import { query } from '../db.js';
-import { requireAuth } from '../middleware/auth.js';
+import { query } from './db.js';
+import { requireAuth } from './middleware_auth.js';
 
 const router = Router();
 

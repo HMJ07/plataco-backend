@@ -4,8 +4,8 @@
 // ============================================================
 import { Router } from 'express';
 import Stripe from 'stripe';
-import { query, withTransaction } from '../db.js';
-import { requireAuth } from '../middleware/auth.js';
+import { query, withTransaction } from './db.js';
+import { requireAuth } from './middleware_auth.js';
 
 const router = Router();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);

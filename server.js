@@ -12,12 +12,12 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 
-import authRoutes     from './routes/auth.js';
-import productRoutes  from './routes/products.js';
-import orderRoutes    from './routes/orders.js';
-import paymentRoutes  from './routes/payments.js';
-import adminRoutes    from './routes/admin.js';
-import webhookRoutes  from './routes/webhooks.js';
+import authRoutes     from './auth.js';
+import productRoutes  from './products.js';
+import orderRoutes    from './orders.js';
+import paymentRoutes  from './payments.js';
+import adminRoutes    from './admin.js';
+import webhookRoutes  from './webhooks.js';
 
 dotenv.config();
 

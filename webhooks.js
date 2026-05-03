@@ -9,7 +9,7 @@
 // ============================================================
 import { Router } from 'express';
 import Stripe from 'stripe';
-import { query } from '../db.js';
+import { query } from './db.js';
 
 const router = Router();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
