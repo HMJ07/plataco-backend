@@ -164,6 +164,76 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
 .spec-row{display:flex;justify-content:space-between;font-size:0.8rem;padding:0.4rem 0;border-bottom:1px solid var(--border)}
 .spec-key{color:var(--accent)}
 .spec-val{font-weight:400}
+
+/* ── RESPONSIVE ─────────────────────────────────────────── */
+
+/* Tablet: ≤ 900px */
+@media(max-width:900px){
+  .hero-title{font-size:3rem}
+  .product-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.5rem}
+  .modal{grid-template-columns:1fr}
+  .modal-img{min-height:260px}
+  .cart-panel{width:320px}
+}
+
+/* Mobile: ≤ 600px */
+@media(max-width:600px){
+  /* Header */
+  header{padding:0 1rem}
+  .header-top{flex-wrap:wrap;gap:0.5rem;padding:0.8rem 0}
+  .logo{font-size:1.4rem;order:1}
+  .header-actions{order:2}
+  .search-bar{order:3;width:100%;margin:0 !important;max-width:100% !important;padding:0.5rem 0}
+  .search-input{width:100%}
+
+  /* Nav: scroll horizontal */
+  nav{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  nav::-webkit-scrollbar{display:none}
+  .nav-item{white-space:nowrap;padding:0.7rem 0.9rem;font-size:0.7rem}
+
+  /* Hero */
+  .hero{padding:3rem 1.2rem}
+  .hero-title{font-size:2.2rem}
+  .hero-desc{font-size:0.82rem}
+
+  /* Main */
+  main{padding:2rem 1rem}
+  .section-header{flex-wrap:wrap;gap:0.5rem}
+  .section-line{display:none}
+  .filters{gap:0.4rem}
+  .filter-btn{padding:0.35rem 0.7rem;font-size:0.7rem}
+
+  /* Product grid: 2 columnas ajustadas */
+  .product-grid{grid-template-columns:repeat(2,1fr);gap:0.8rem}
+  .card-img{height:200px}
+  .card-body{padding:0.8rem 0.8rem 0.4rem}
+  .card-name{font-size:1rem}
+  .card-bottom{padding:0 0.8rem 0.8rem}
+  .card-price{font-size:1.1rem}
+
+  /* Modal: pantalla completa en móvil */
+  .modal-overlay{padding:0;align-items:flex-end}
+  .modal{grid-template-columns:1fr;max-height:92vh;border-radius:0;width:100%}
+  .modal-img{min-height:220px}
+  .modal-body{padding:1.5rem}
+  .modal-title{font-size:1.5rem}
+  .modal-price{font-size:1.8rem}
+
+  /* Cart panel: ancho completo */
+  .cart-panel{width:100%;max-width:100%}
+
+  /* Toast */
+  .toast{width:90%;text-align:center}
+
+  /* Shipping banner */
+  .shipping-banner{font-size:0.65rem;padding:0.5rem;letter-spacing:0.1em}
+}
+
+/* Muy pequeño: ≤ 380px */
+@media(max-width:380px){
+  .product-grid{grid-template-columns:1fr}
+  .hero-title{font-size:1.9rem}
+}
 </style>
 </head>
 <body>
