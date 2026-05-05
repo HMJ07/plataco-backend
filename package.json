@@ -1,7 +1,7 @@
 {
   "name": "plataco-backend",
   "version": "1.0.0",
-  "description": "Backend API para PLATACO \u2014 Tienda de joyer\u00eda en plata",
+  "description": "Backend API para PLATACO — Tienda de joyería en plata",
   "type": "module",
   "main": "server.js",
   "scripts": {
@@ -17,9 +17,9 @@
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
+    "nodemailer": "^8.0.7",
     "pg": "^8.12.0",
-    "stripe": "^16.2.0",
     "resend": "^3.0.0",
-    "nodemailer": "^6.9.14"
+    "stripe": "^16.2.0"
   }
 }
