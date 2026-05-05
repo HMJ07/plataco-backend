@@ -65,9 +65,8 @@ router.post('/create-intent', async (req, res) => {
 
     // Crear PaymentIntent en Stripe
     // IMPORTANTE: Stripe limita cada campo de metadata a 500 chars.
-    // Guardamos solo IDs+cantidades+precio (compacto). Si el JSON supera
-    // 500 chars, lo dividimos en items_compact_1, items_compact_2, etc.
-    // El nombre del producto se recupera de la DB en confirm-order.
+    // Guardamos solo IDs+cantidades+precio (compacto). El nombre del
+    // producto se recupera de la DB en confirm-order.
     const compactItems = validatedItems.map(i => ({
       pid: i.product_id,
       vid: i.variant_id || null,
@@ -75,39 +74,12 @@ router.post('/create-intent', async (req, res) => {
       eur: i.unit_price_eur,
     }));
 
-    // Dividir en chunks que quepan en 500 chars cada uno
-    const itemsJson = JSON.stringify(compactItems);
-    const CHUNK_SIZE = 490;
-    const itemsMetadata = {};
-    if (itemsJson.length <= CHUNK_SIZE) {
-      itemsMetadata['items_compact'] = itemsJson;
-    } else {
-      // Serializar item a item y agrupar en chunks
-      let chunk = [];
-      let chunkIndex = 1;
-      for (const item of compactItems) {
-        const candidate = JSON.stringify([...chunk, item]);
-        if (candidate.length > CHUNK_SIZE && chunk.length > 0) {
-          itemsMetadata[`items_compact_${chunkIndex}`] = JSON.stringify(chunk);
-          chunkIndex++;
-          chunk = [item];
-        } else {
-          chunk.push(item);
-        }
-      }
-      if (chunk.length > 0) {
-        itemsMetadata[`items_compact_${chunkIndex}`] = JSON.stringify(chunk);
-        chunkIndex++;
-      }
-      itemsMetadata['items_chunks'] = String(chunkIndex - 1);
-    }
-
     const paymentIntent = await stripe.paymentIntents.create({
       amount: total_customer,
       currency: currency.toLowerCase(),
       automatic_payment_methods: { enabled: true },
       metadata: {
-        ...itemsMetadata,
+        items_compact: JSON.stringify(compactItems),
         total_eur:     total_eur.toFixed(2),
         shipping_eur:  shipping_eur.toFixed(2),
         currency:      currency,
@@ -160,21 +132,10 @@ router.post('/confirm-order', async (req, res) => {
 
     const meta = paymentIntent.metadata;
     // Reconstruir items desde el formato compacto (items_compact)
-    // Soporta: campo único items_compact, chunks items_compact_1/2/...,
-    // o formato antiguo items_json para retrocompatibilidad.
+    // o desde el formato antiguo (items_json) para retrocompatibilidad
     let items;
-    if (meta.items_compact || meta.items_chunks || meta.items_compact_1) {
-      let compact;
-      if (meta.items_chunks) {
-        // Formato chunkeado: reunir todos los fragmentos en orden
-        const numChunks = parseInt(meta.items_chunks, 10);
-        compact = [];
-        for (let i = 1; i <= numChunks; i++) {
-          compact = compact.concat(JSON.parse(meta[`items_compact_${i}`]));
-        }
-      } else {
-        compact = JSON.parse(meta.items_compact);
-      }
+    if (meta.items_compact) {
+      const compact = JSON.parse(meta.items_compact);
       // Recuperar nombres de producto desde la DB
       items = await Promise.all(compact.map(async (c) => {
         const pr = await query('SELECT name FROM products WHERE id=$1', [c.pid]);
