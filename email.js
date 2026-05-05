@@ -1,48 +1,58 @@
 // ============================================================
-// PLATACO — Servicio de Email con Resend
+// PLATACO — Servicio de Email con Nodemailer + Gmail SMTP
 // ============================================================
-// Instalar: npm install resend
-// Variables de entorno necesarias:
-//   RESEND_API_KEY=re_xxxx
-//   EMAIL_FROM=onboarding@resend.dev  (o tu dominio verificado)
+// Variables de entorno necesarias en Railway:
+//   GMAIL_USER=tucuenta@gmail.com
+//   GMAIL_APP_PASSWORD=xxxx xxxx xxxx xxxx   ← contraseña de aplicación de Google
+//   EMAIL_FROM=PLATACO <tucuenta@gmail.com>   (opcional, por defecto usa GMAIL_USER)
+//
+// Cómo obtener la contraseña de aplicación de Google:
+//   1. Ve a myaccount.google.com → Seguridad → Verificación en 2 pasos (actívala)
+//   2. Busca "Contraseñas de aplicación" → Genera una para "Correo / Otro"
+//   3. Copia las 16 letras que te da y ponlas en GMAIL_APP_PASSWORD
 // ============================================================
 
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const EMAIL_FROM = process.env.EMAIL_FROM || 'onboarding@resend.dev';
+import nodemailer from 'nodemailer';
+
+const GMAIL_USER        = process.env.GMAIL_USER;
+const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD;
+const EMAIL_FROM        = process.env.EMAIL_FROM || `PLATACO <${GMAIL_USER}>`;
+
+function createTransporter() {
+  if (!GMAIL_USER || !GMAIL_APP_PASSWORD) {
+    return null;
+  }
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: GMAIL_USER,
+      pass: GMAIL_APP_PASSWORD,
+    },
+  });
+}
 
 /**
- * Envía un email usando la API de Resend.
- * @param {object} opts - { to, subject, html }
+ * Envía un email usando Gmail SMTP.
  */
 async function sendEmail({ to, subject, html }) {
-  if (!RESEND_API_KEY) {
-    console.warn('⚠️  RESEND_API_KEY no configurado — email no enviado');
+  const transporter = createTransporter();
+  if (!transporter) {
+    console.warn('⚠️  GMAIL_USER o GMAIL_APP_PASSWORD no configurados — email no enviado');
     return;
   }
 
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${RESEND_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ from: EMAIL_FROM, to, subject, html }),
+  const info = await transporter.sendMail({
+    from: EMAIL_FROM,
+    to,
+    subject,
+    html,
   });
 
-  if (!res.ok) {
-    const err = await res.text();
-    console.error('Error enviando email con Resend:', err);
-  } else {
-    const data = await res.json();
-    console.log(`📧 Email enviado a ${to} — ID: ${data.id}`);
-  }
+  console.log(`📧 Email enviado a ${to} — ID: ${info.messageId}`);
 }
 
 /**
  * Genera y envía el email de confirmación de pedido.
- * @param {object} order  - fila completa de la tabla orders
- * @param {array}  items  - array de order_items
- * @param {string} email  - dirección de destino
  */
 export async function sendOrderConfirmationEmail(order, items, email) {
   if (!email) return;
@@ -250,7 +260,7 @@ export async function sendOrderConfirmationEmail(order, items, email) {
             <td style="padding:32px 0;text-align:center;">
               <p style="margin:0 0 8px;font-size:13px;color:#888;">
                 ¿Alguna pregunta? Escríbenos a
-                <a href="mailto:${EMAIL_FROM}" style="color:#d4a843;">${EMAIL_FROM}</a>
+                <a href="mailto:${GMAIL_USER}" style="color:#d4a843;">${GMAIL_USER}</a>
               </p>
               <p style="margin:0;font-size:12px;color:#bbb;">
                 © ${new Date().getFullYear()} PLATACO — Joyería en Plata
