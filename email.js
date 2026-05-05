@@ -14,45 +14,38 @@
 
 import nodemailer from 'nodemailer';
 
-const GMAIL_USER        = process.env.GMAIL_USER;
-const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD;
-const EMAIL_FROM        = process.env.EMAIL_FROM || `PLATACO <${GMAIL_USER}>`;
+/**
+ * Envía un email usando Gmail SMTP.
+ * IMPORTANTE: Las variables de entorno se leen aquí dentro (no al importar el módulo)
+ * para garantizar que dotenv ya las ha cargado cuando se llama la función.
+ */
+async function sendEmail({ to, subject, html }) {
+  const GMAIL_USER         = process.env.GMAIL_USER;
+  const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD;
+  const EMAIL_FROM         = process.env.EMAIL_FROM || `PLATACO <${GMAIL_USER}>`;
 
-function createTransporter() {
   if (!GMAIL_USER || !GMAIL_APP_PASSWORD) {
-    return null;
+    console.warn('⚠️  GMAIL_USER o GMAIL_APP_PASSWORD no configurados — email no enviado');
+    return;
   }
-  return nodemailer.createTransport({
+
+  const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
       user: GMAIL_USER,
       pass: GMAIL_APP_PASSWORD,
     },
   });
-}
 
-/**
- * Envía un email usando Gmail SMTP.
- */
-async function sendEmail({ to, subject, html }) {
-  const transporter = createTransporter();
-  if (!transporter) {
-    console.warn('⚠️  GMAIL_USER o GMAIL_APP_PASSWORD no configurados — email no enviado');
-    return;
-  }
-
-  const info = await transporter.sendMail({
-    from: EMAIL_FROM,
-    to,
-    subject,
-    html,
-  });
-
+  const info = await transporter.sendMail({ from: EMAIL_FROM, to, subject, html });
   console.log(`📧 Email enviado a ${to} — ID: ${info.messageId}`);
 }
 
 /**
  * Genera y envía el email de confirmación de pedido.
+ * @param {object} order  - Fila de la tabla orders
+ * @param {Array}  items  - Array de items (campos: product_name, variant_name, quantity, subtotal_eur)
+ * @param {string} email  - Dirección de destino
  */
 export async function sendOrderConfirmationEmail(order, items, email) {
   if (!email) return;
@@ -60,6 +53,8 @@ export async function sendOrderConfirmationEmail(order, items, email) {
   const fecha = new Date(order.created_at).toLocaleDateString('es-ES', {
     year: 'numeric', month: 'long', day: 'numeric',
   });
+
+  const shortId = String(order.id).slice(-8).toUpperCase();
 
   const itemsRows = items.map(item => `
     <tr>
@@ -82,6 +77,8 @@ export async function sendOrderConfirmationEmail(order, items, email) {
     order.ship_state,
     order.ship_country,
   ].filter(Boolean).join('<br>');
+
+  const contactEmail = process.env.GMAIL_USER || 'hola@plataco.com';
 
   const html = `
 <!DOCTYPE html>
@@ -138,7 +135,7 @@ export async function sendOrderConfirmationEmail(order, items, email) {
                     <span style="font-size:12px;color:#888;letter-spacing:1px;text-transform:uppercase;">
                       Pedido nº
                     </span><br>
-                    <strong style="font-size:18px;color:#2c1810;">#${order.id}</strong>
+                    <strong style="font-size:18px;color:#2c1810;">#${shortId}</strong>
                     <span style="float:right;font-size:13px;color:#888;">${fecha}</span>
                   </td>
                 </tr>
@@ -260,7 +257,7 @@ export async function sendOrderConfirmationEmail(order, items, email) {
             <td style="padding:32px 0;text-align:center;">
               <p style="margin:0 0 8px;font-size:13px;color:#888;">
                 ¿Alguna pregunta? Escríbenos a
-                <a href="mailto:${GMAIL_USER}" style="color:#d4a843;">${GMAIL_USER}</a>
+                <a href="mailto:${contactEmail}" style="color:#d4a843;">${contactEmail}</a>
               </p>
               <p style="margin:0;font-size:12px;color:#bbb;">
                 © ${new Date().getFullYear()} PLATACO — Joyería en Plata
@@ -278,7 +275,7 @@ export async function sendOrderConfirmationEmail(order, items, email) {
 
   await sendEmail({
     to: email,
-    subject: `✨ Confirmación de pedido #${order.id} — PLATACO`,
+    subject: `✨ Confirmación de pedido #${shortId} — PLATACO`,
     html,
   });
 }
