@@ -66,6 +66,8 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
 .product-card:hover{transform:translateY(-4px)}
 .product-card:hover .card-overlay{opacity:1}
 .card-img{height:320px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f9f9f9,#f0f0f0);position:relative;overflow:hidden}
+.card-img img{width:100%;height:100%;object-fit:cover;transition:transform 0.5s;display:block}
+.product-card:hover .card-img img{transform:scale(1.07)}
 .card-img svg{transition:transform 0.5s}
 .product-card:hover .card-img svg{transform:scale(1.05)}
 .card-overlay{position:absolute;inset:0;background:rgba(10,10,10,0.6);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.3s}
@@ -86,7 +88,8 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;display:none;align-items:center;justify-content:center;padding:1rem}
 .modal-overlay.open{display:flex}
 .modal{background:var(--cream);max-width:900px;width:100%;max-height:90vh;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr}
-.modal-img{background:linear-gradient(135deg,#f0f0f0,#e8e8e8);display:flex;align-items:center;justify-content:center;min-height:400px;position:relative}
+.modal-img{background:linear-gradient(135deg,#f0f0f0,#e8e8e8);display:flex;align-items:center;justify-content:center;min-height:400px;position:relative;overflow:hidden}
+.modal-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
 .modal-body{padding:2.5rem}
 .modal-category{font-size:0.7rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--accent);margin-bottom:0.5rem}
 .modal-title{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:400;line-height:1.2;margin-bottom:0.5rem}
@@ -127,7 +130,8 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
 .cart-empty{text-align:center;padding:3rem 1rem;color:var(--accent)}
 .cart-empty-icon{font-size:3rem;margin-bottom:1rem;opacity:0.3}
 .cart-item{display:flex;gap:1rem;margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
-.cart-item-img{width:70px;height:70px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cart-item-img{width:70px;height:70px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
+.cart-item-img img{width:100%;height:100%;object-fit:cover}
 .cart-item-info{flex:1}
 .cart-item-name{font-family:'Cormorant Garamond',serif;font-size:1rem;margin-bottom:0.2rem}
 .cart-item-detail{font-size:0.75rem;color:var(--accent);margin-bottom:0.5rem}
@@ -400,7 +404,12 @@ function renderProducts(){
   grid.innerHTML = list.map(p=>`
     <div class="product-card" data-id="${p.id}">
       ${p.badge?`<div class="badge ${p.isNew?'new':''}">${p.badge}</div>`:''}
-      <div class="card-img">${p.svg}<div class="card-overlay"><button class="quick-view-btn">Ver detalle</button></div></div>
+      <div class="card-img">
+        ${p.imageUrl
+          ? `<img src="${p.imageUrl}" alt="${p.name}" loading="lazy" onerror="this.style.display='none'">`
+          : p.svg || ''}
+        <div class="card-overlay"><button class="quick-view-btn">Ver detalle</button></div>
+      </div>
       <div class="card-body">
         <p class="card-category">${p.category}</p>
         <h3 class="card-name">${p.name}</h3>
@@ -450,7 +459,11 @@ function openModal(id){
   document.getElementById('modalName').textContent = p.name;
   document.getElementById('modalMat').textContent = p.material;
   document.getElementById('modalDesc').textContent = p.desc;
-  document.getElementById('modalImg').innerHTML = `<button class="modal-close" onclick="closeModal()">✕</button><div style="transform:scale(1.8)">${p.svg}</div>`;
+  document.getElementById('modalImg').innerHTML = `<button class="modal-close" onclick="closeModal()">✕</button>${
+    p.imageUrl
+      ? `<img src="${p.imageUrl}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0">`
+      : `<div style="transform:scale(1.8)">${p.svg || ''}</div>`
+  }`;
   
   updateModalPrice();
   
@@ -521,6 +534,7 @@ function addToCart(product, size, qty){
     size,
     qty,
     svg: product.svg,
+    imageUrl: product.imageUrl || null,
     variant_id: size ? product.variantMap?.[size] || null : null,
   });
   updateCartUI();
@@ -539,7 +553,11 @@ function updateCartUI(){
   }
   itemsDiv.innerHTML = cart.map((item,idx)=>`
     <div class="cart-item">
-      <div class="cart-item-img" style="transform:scale(0.6)">${item.svg}</div>
+      <div class="cart-item-img">${
+        item.imageUrl
+          ? `<img src="${item.imageUrl}" alt="${item.name}">`
+          : `<div style="transform:scale(0.6)">${item.svg || ''}</div>`
+      }</div>
       <div class="cart-item-info">
         <p class="cart-item-name">${item.name}</p>
         <p class="cart-item-detail">${item.size?'Talla: '+item.size+' · ':''}Cant: ${item.qty}</p>
@@ -613,6 +631,46 @@ function checkout(){
   window.location.href = 'checkout.html';
 }
 
+// Fotos reales de joyería en plata (Unsplash, libres de uso)
+const PRODUCT_IMAGES = {
+  // Anillos
+  'anillo sello oval':        'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&q=80',
+  'anillo medio dedo':        'https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=600&q=80',
+  'anillo':                   'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=600&q=80',
+  // Collares
+  'collar cadena anchor':     'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&q=80',
+  'collar luna creciente':    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&q=80',
+  'collar':                   'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80',
+  // Pulseras
+  'pulsera':                  'https://images.unsplash.com/photo-1573408301185-9519f94ae14e?w=600&q=80',
+  // Pendientes
+  'pendiente':                'https://images.unsplash.com/photo-1630018548696-e1e6e8a2ab31?w=600&q=80',
+  // Genérico joyería plata
+  'default':                  'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80',
+};
+
+function getProductImage(apiProduct) {
+  // 1. Si el backend ya devuelve imagen (Cloudinary), úsala
+  if (apiProduct.main_image_url) return apiProduct.main_image_url;
+  if (apiProduct.main_image_medium) return apiProduct.main_image_medium;
+
+  // 2. Buscar por nombre del producto (coincidencia parcial, sin mayúsculas)
+  const nameLower = (apiProduct.name || '').toLowerCase();
+  for (const [key, url] of Object.entries(PRODUCT_IMAGES)) {
+    if (key !== 'default' && nameLower.includes(key)) return url;
+  }
+
+  // 3. Buscar por categoría
+  const cat = (apiProduct.category_slug || '').toLowerCase();
+  if (cat.includes('anillo'))    return PRODUCT_IMAGES['anillo'];
+  if (cat.includes('collar'))    return PRODUCT_IMAGES['collar'];
+  if (cat.includes('pulsera'))   return PRODUCT_IMAGES['pulsera'];
+  if (cat.includes('pendiente')) return PRODUCT_IMAGES['pendiente'];
+
+  // 4. Fallback genérico
+  return PRODUCT_IMAGES['default'];
+}
+
 function toProductCard(apiProduct){
   const variants = Array.isArray(apiProduct.variants) ? apiProduct.variants : [];
   const sizes = variants.map((variant) => variant.name).filter(Boolean);
@@ -621,6 +679,7 @@ function toProductCard(apiProduct){
     Peso: apiProduct.weight_grams ? `${apiProduct.weight_grams}g` : 'N/D',
     Acabado: apiProduct.finish || 'Estándar',
   };
+  const imageUrl = getProductImage(apiProduct);
 
   return {
     id: apiProduct.id,
@@ -637,7 +696,8 @@ function toProductCard(apiProduct){
       acc[variant.name] = variant.id;
       return acc;
     }, {}),
-    svg: '<svg width="120" height="120" viewBox="0 0 120 120"><circle cx="60" cy="60" r="32" fill="none" stroke="#C0C0C0" stroke-width="6"/><circle cx="60" cy="60" r="16" fill="none" stroke="#E3E3E3" stroke-width="2"/></svg>',
+    imageUrl,
+    svg: null,
   };
 }
 
