@@ -87,6 +87,18 @@ header{background:var(--dark);color:white;padding:1rem 2rem;display:flex;align-i
 .big-spinner{width:40px;height:40px;border:3px solid #ddd;border-top-color:var(--dark);border-radius:50%;animation:spin 0.8s linear infinite}
 .loading-text{font-size:0.85rem;letter-spacing:0.15em;color:var(--accent)}
 
+/* AUTH WALL */
+.auth-wall{display:none;min-height:70vh;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:3rem 2rem}
+.auth-wall.show{display:flex}
+.auth-wall-icon{font-size:3rem;margin-bottom:1.5rem;opacity:0.25}
+.auth-wall h2{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;margin-bottom:0.6rem}
+.auth-wall p{font-size:0.85rem;color:var(--accent);letter-spacing:0.05em;margin-bottom:2rem;max-width:380px;line-height:1.7}
+.auth-wall-actions{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center}
+.auth-wall-btn{background:var(--dark);color:white;border:none;padding:0.85rem 2.5rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.78rem;letter-spacing:0.3em;text-transform:uppercase;transition:opacity 0.2s}
+.auth-wall-btn:hover{opacity:0.8}
+.auth-wall-btn.outline{background:none;border:1px solid var(--dark);color:var(--dark)}
+.auth-wall-btn.outline:hover{background:var(--dark);color:white}
+
 /* ── RESPONSIVE ─────────────────────────────────────────── */
 
 /* Tablet */
@@ -161,6 +173,17 @@ header{background:var(--dark);color:white;padding:1rem 2rem;display:flex;align-i
   <h2 class="result-title">Pago no procesado</h2>
   <p class="result-text" id="errorMessage">Hubo un problema al procesar tu pago. Por favor comprueba los datos de tu tarjeta e inténtalo de nuevo.</p>
   <button class="result-btn" onclick="showCheckout()">Intentar de nuevo</button>
+</div>
+
+<!-- MURO DE AUTENTICACIÓN -->
+<div class="auth-wall" id="authWall">
+  <div class="auth-wall-icon">◇</div>
+  <h2>Inicia sesión para continuar</h2>
+  <p>Necesitas una cuenta para realizar tu pedido. Así podrás hacer seguimiento de tus envíos y consultar tu historial de compras.</p>
+  <div class="auth-wall-actions">
+    <button class="auth-wall-btn" onclick="goToStoreAndOpenLogin()">Iniciar sesión</button>
+    <button class="auth-wall-btn outline" onclick="goToStoreAndOpenRegister()">Crear cuenta</button>
+  </div>
 </div>
 
 <!-- CHECKOUT PRINCIPAL -->
@@ -300,8 +323,32 @@ let stripePaymentIntentId = null;
 let stripeClientSecret = null;
 let stripeCardElement = null;
 let stripe = null;
+let authToken = localStorage.getItem('plataco_token') || null;
+let authUser  = null;
 
 const CART_DEMO = JSON.parse(localStorage.getItem('plataco_cart') || '[]');
+
+// ── Navegación al store con modal de auth ──────────────────
+function goToStoreAndOpenLogin() {
+  sessionStorage.setItem('plataco_auth_intent', 'login');
+  sessionStorage.setItem('plataco_redirect_checkout', '1');
+  window.location.href = 'index.html';
+}
+function goToStoreAndOpenRegister() {
+  sessionStorage.setItem('plataco_auth_intent', 'register');
+  sessionStorage.setItem('plataco_redirect_checkout', '1');
+  window.location.href = 'index.html';
+}
+
+// ── Autorellenar datos del usuario autenticado ─────────────
+function prefillUserData() {
+  if (!authUser) return;
+  const f = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+  f('firstName', authUser.first_name);
+  f('lastName',  authUser.last_name);
+  f('email',     authUser.email);
+  f('phone',     authUser.phone);
+}
 
 function fmtPrice(eur) {
   const v = eur * RATES[currency];
@@ -423,9 +470,11 @@ async function handlePayment() {
 
     if (paymentIntent.status === 'succeeded') {
       // PASO 3: Confirmar el pedido en nuestro backend
+      const confirmHeaders = { 'Content-Type': 'application/json' };
+      if (authToken) confirmHeaders['Authorization'] = 'Bearer ' + authToken;
       const confirmRes = await fetch(`${API_URL}/payments/confirm-order`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: confirmHeaders,
         body: JSON.stringify({
           payment_intent_id: stripePaymentIntentId,
           guest_email: formData.email,
@@ -528,12 +577,37 @@ async function initStripe(){
 }
 
 async function init(){
+  // Verificar autenticación — obligatorio para hacer pedidos
+  if (authToken) {
+    try {
+      const r = await fetch(`${API_URL}/auth/me`, {
+        headers: { 'Authorization': 'Bearer ' + authToken }
+      });
+      if (r.ok) {
+        authUser = await r.json();
+      } else {
+        authToken = null;
+        localStorage.removeItem('plataco_token');
+      }
+    } catch(e) {
+      authToken = null;
+    }
+  }
+
+  if (!authToken || !authUser) {
+    // Mostrar muro de autenticación
+    document.getElementById('checkoutLayout').style.display = 'none';
+    document.getElementById('authWall').classList.add('show');
+    return;
+  }
+
   if (!CART_DEMO.length) {
     showError('No hay productos en el carrito. Vuelve a la tienda para añadir productos.');
     return;
   }
 
   renderSummary();
+  prefillUserData();
   try {
     await initStripe();
   } catch (err) {
