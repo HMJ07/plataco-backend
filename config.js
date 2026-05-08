@@ -14,4 +14,4 @@ window.PLATACO_STRIPE_PK = 'pk_test_51TSdgPLW0qc9Csd80Xawbh5FnCduLNY5YhUsmjbuIwL
 // 2. Tipo: "Web application"
 // 3. Authorized JS origins: tu dominio (ej: https://plataco.netlify.app)
 // 4. Pega aquí el Client ID (termina en .apps.googleusercontent.com)
-window.PLATACO_GOOGLE_CLIENT_ID = ''; // ← pega aquí tu Google Client ID
+window.PLATACO_GOOGLE_CLIENT_ID = '926125143656-nu1b4iu8jm2mndhtekrablhpop76ntor.apps.googleusercontent.com'; // ← pega aquí tu Google Client ID
