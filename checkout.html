@@ -26,7 +26,7 @@ header{background:var(--dark);color:white;padding:1rem 2rem;display:flex;align-i
 .order-summary{background:white;padding:2rem}
 .summary-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:400;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
 .summary-item{display:flex;align-items:center;gap:1rem;padding:0.8rem 0;border-bottom:1px solid var(--border)}
-.item-img{width:56px;height:56px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0}
+.item-img{width:56px;height:56px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;overflow:hidden}
 .item-info{flex:1}
 .item-name{font-size:0.9rem;margin-bottom:0.2rem}
 .item-detail{font-size:0.75rem;color:var(--accent)}
@@ -316,7 +316,7 @@ function renderSummary() {
 
   document.getElementById('summaryItems').innerHTML = CART_DEMO.map(item => `
     <div class="summary-item">
-      <div class="item-img">${item.emoji || '✦'}</div>
+      <div class="item-img">${item.imageUrl ? `<img src="${item.imageUrl}" alt="${item.product_name}" style="width:100%;height:100%;object-fit:cover;display:block">` : (item.emoji || '✦')}</div>
       <div class="item-info">
         <p class="item-name">${item.product_name}</p>
         <p class="item-detail">${item.variant_name ? item.variant_name + ' · ' : ''}Cantidad: ${item.quantity}</p>

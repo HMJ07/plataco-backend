@@ -128,6 +128,13 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
 .modal-overlay.open{display:flex}
 .modal{background:var(--cream);max-width:900px;width:100%;max-height:90vh;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr}
 .modal-img{background:linear-gradient(135deg,#f0f0f0,#e8e8e8);display:flex;align-items:center;justify-content:center;min-height:400px;position:relative}
+.modal-thumbs{position:absolute;bottom:0.7rem;left:50%;transform:translateX(-50%);display:flex;gap:0.4rem;z-index:5}
+.gallery-thumb{width:46px;height:46px;object-fit:cover;cursor:pointer;border:2px solid transparent;opacity:0.65;transition:all 0.2s}
+.gallery-thumb.active{border-color:white;opacity:1}
+.gallery-thumb:hover{opacity:0.9}
+.modal-gallery-nav{position:absolute;top:50%;transform:translateY(-50%);width:100%;display:flex;justify-content:space-between;padding:0 0.5rem;z-index:5;pointer-events:none}
+.gallery-nav-btn{background:rgba(255,255,255,0.85);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;pointer-events:all;transition:background 0.2s;line-height:1}
+.gallery-nav-btn:hover{background:white}
 .modal-body{padding:2.5rem}
 .modal-category{font-size:0.7rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--accent);margin-bottom:0.5rem}
 .modal-title{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:400;line-height:1.2;margin-bottom:0.5rem}
@@ -168,7 +175,7 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
 .cart-empty{text-align:center;padding:3rem 1rem;color:var(--accent)}
 .cart-empty-icon{font-size:3rem;margin-bottom:1rem;opacity:0.3}
 .cart-item{display:flex;gap:1rem;margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
-.cart-item-img{width:70px;height:70px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cart-item-img{width:70px;height:70px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
 .cart-item-info{flex:1}
 .cart-item-name{font-family:'Cormorant Garamond',serif;font-size:1rem;margin-bottom:0.2rem}
 .cart-item-detail{font-size:0.75rem;color:var(--accent);margin-bottom:0.5rem}
@@ -762,11 +769,23 @@ function openModal(id){
   document.getElementById('modalCat').textContent   = currentProduct.category;
   document.getElementById('modalName').textContent  = currentProduct.name;
   document.getElementById('modalMat').textContent   = currentProduct.material;
-  document.getElementById('modalImg').innerHTML = `<button class="modal-close" onclick="closeModal()">✕</button>${
-    currentProduct.imageUrl
-      ? `<img src="${currentProduct.imageUrl}" alt="${currentProduct.name}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0">`
+  currentGalleryIdx = 0;
+  const galleryImgs = getGalleryImages(currentProduct);
+  document.getElementById('modalImg').innerHTML = `
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    ${currentProduct.imageUrl
+      ? `<img id="modalMainImg" src="${galleryImgs[0]}" alt="${currentProduct.name}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;transition:opacity 0.3s">`
       : `<div style="transform:scale(1.8)">${currentProduct.svg || ''}</div>`
-  }`;
+    }
+    ${galleryImgs.length > 1 ? `
+    <div class="modal-gallery-nav">
+      <button class="gallery-nav-btn" onclick="event.stopPropagation();openGalleryImg(Math.max(0,currentGalleryIdx-1))">‹</button>
+      <button class="gallery-nav-btn" onclick="event.stopPropagation();openGalleryImg(Math.min(getGalleryImages(currentProduct).length-1,currentGalleryIdx+1))">›</button>
+    </div>
+    <div class="modal-thumbs">
+      ${galleryImgs.map((u,i)=>`<img class="gallery-thumb${i===0?' active':''}" src="${u}" alt="" onclick="event.stopPropagation();openGalleryImg(${i})" loading="lazy">`).join('')}
+    </div>` : ''}
+  `;
   updateModalPrice();
   const sizesSection = document.getElementById('modalSizesSection');
   const sizesDiv = document.getElementById('modalSizes');
@@ -790,8 +809,8 @@ function handleModalClick(e){if(e.target===document.getElementById('modalOverlay
 
 function selectSize(size, btn){
   selectedSize = size;
-  document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
+  document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
 }
 
 function updateModalPrice(){
@@ -826,7 +845,7 @@ function updateCartUI(){
   if(cart.length===0){ itemsDiv.innerHTML='<div class="cart-empty"><div class="cart-empty-icon">◇</div><p>Tu carrito está vacío</p></div>'; return; }
   itemsDiv.innerHTML = cart.map((item,idx)=>`
     <div class="cart-item">
-      <div class="cart-item-img">${item.imageUrl?`<img src="${item.imageUrl}" alt="${item.name}">` : `<div style="transform:scale(0.6)">${item.svg||''}</div>`}</div>
+      <div class="cart-item-img">${item.imageUrl?`<img src="${item.imageUrl}" alt="${item.name}" style="width:100%;height:100%;object-fit:cover;display:block">` : `<span style="font-size:1.4rem;opacity:0.4">✦</span>`}</div>
       <div class="cart-item-info">
         <p class="cart-item-name">${item.name}${item.size?` <span style="color:var(--accent);font-size:0.75rem">· ${item.size}</span>`:''}</p>
         <p class="cart-item-price">${convertPrice(item.price)}</p>
@@ -878,7 +897,7 @@ function showToast(msg){
 
 function checkout(){
   if(cart.length===0){ showToast('Tu carrito está vacío'); return; }
-  const checkoutItems = cart.map(item=>({ product_id:item.id, product_name:item.name, variant_id:item.variant_id||null, variant_name:item.size||null, quantity:item.qty, unit_price_eur:item.price, emoji:'✦' }));
+  const checkoutItems = cart.map(item=>({ product_id:item.id, product_name:item.name, variant_id:item.variant_id||null, variant_name:item.size||null, quantity:item.qty, unit_price_eur:item.price, emoji:'✦', imageUrl:item.imageUrl||null }));
   localStorage.setItem('plataco_cart', JSON.stringify(checkoutItems));
   if (authToken) localStorage.setItem('plataco_token', authToken);
   window.location.href='checkout.html';
@@ -896,6 +915,60 @@ const PRODUCT_IMAGES = {
   'pendiente':             'https://images.unsplash.com/photo-1630018548696-e1e6e8a2ab31?w=600&q=80',
   'default':               'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80',
 };
+
+// Gallery images per category (3-4 extra shots)
+const GALLERY_IMAGES = {
+  anillos: [
+    'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=600&q=80',
+    'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&q=80',
+    'https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=600&q=80',
+    'https://images.unsplash.com/photo-1589674781759-c21c37956a44?w=600&q=80',
+  ],
+  collares: [
+    'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80',
+    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&q=80',
+    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&q=80',
+    'https://images.unsplash.com/photo-1630080890630-a0afae8d1248?w=600&q=80',
+  ],
+  pulseras: [
+    'https://images.unsplash.com/photo-1573408301185-9519f94ae14e?w=600&q=80',
+    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80',
+    'https://images.unsplash.com/photo-1588671616667-a9e65e0d4b56?w=600&q=80',
+    'https://images.unsplash.com/photo-1576003375022-2b0a3b5a6b36?w=600&q=80',
+  ],
+  pendientes: [
+    'https://images.unsplash.com/photo-1630018548696-e1e6e8a2ab31?w=600&q=80',
+    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80',
+    'https://images.unsplash.com/photo-1599459183200-59c7687a0c70?w=600&q=80',
+    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&q=80',
+  ],
+  default: [
+    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80',
+    'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80',
+    'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=600&q=80',
+  ],
+};
+
+let currentGalleryIdx = 0;
+
+function getGalleryImages(product) {
+  const mainImg = product.imageUrl;
+  const cat = (product.category || '').toLowerCase();
+  let extras = GALLERY_IMAGES[cat] || GALLERY_IMAGES.default;
+  // Put mainImg first, add extras that differ from main
+  const all = [mainImg, ...extras.filter(u => u !== mainImg)].slice(0, 4);
+  return all;
+}
+
+function openGalleryImg(idx) {
+  currentGalleryIdx = idx;
+  const imgs = getGalleryImages(currentProduct);
+  const mainEl = document.getElementById('modalMainImg');
+  if (mainEl) mainEl.src = imgs[idx];
+  document.querySelectorAll('.gallery-thumb').forEach((t, i) => {
+    t.classList.toggle('active', i === idx);
+  });
+}
 function getProductImage(p){
   if(p.main_image_url) return p.main_image_url;
   if(p.main_image_medium) return p.main_image_medium;
