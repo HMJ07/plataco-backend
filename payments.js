@@ -6,6 +6,7 @@ import { Router } from 'express';
 import Stripe from 'stripe';
 import { query, withTransaction } from './db.js';
 import { requireAuth } from './middleware_auth.js';
+import { sendOrderConfirmationEmail } from './email.js';
 
 const router = Router();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -217,6 +218,20 @@ router.post('/confirm-order', async (req, res) => {
       order_id: order.id,
       message: 'Pedido creado correctamente',
     });
+
+    // Enviar email de confirmación (después de responder para no bloquear)
+    const emailAddress = guest_email || (req.user?.email) || null;
+    if (emailAddress) {
+      const itemsForEmail = items.map(i => ({
+        product_name: i.product_name,
+        variant_name: i.variant_name || null,
+        quantity:     i.quantity,
+        subtotal_eur: i.unit_price_eur * i.quantity,
+      }));
+      sendOrderConfirmationEmail(order, itemsForEmail, emailAddress).catch(e =>
+        console.error('Error enviando email confirmación:', e)
+      );
+    }
 
   } catch (err) {
     console.error('Error confirm-order:', err);

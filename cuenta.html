@@ -138,7 +138,7 @@ header{background:var(--dark);color:white;padding:0 2rem;position:sticky;top:0;z
     <div class="account-name" id="userNameEl">—</div>
     <div class="account-email" id="userEmailEl">—</div>
     <nav class="sidebar-nav">
-      <button class="sidebar-item active" onclick="showTab('orders',this)">Mis pedidos</button>
+      <button class="sidebar-item active" onclick="showTab('orders',this)">Mis envíos</button>
       <button class="sidebar-item" onclick="showTab('favorites',this)">Favoritos</button>
       <button class="sidebar-item" onclick="showTab('profile',this)">Mis datos</button>
       <button class="sidebar-item logout-item" onclick="doLogout()">Cerrar sesión</button>
@@ -150,7 +150,7 @@ header{background:var(--dark);color:white;padding:0 2rem;position:sticky;top:0;z
 
     <!-- PEDIDOS -->
     <div class="tab-content active" id="tabOrders">
-      <h2 class="section-title">Mis pedidos</h2>
+      <h2 class="section-title">Mis envíos</h2>
       <div class="silver-line"></div>
       <div id="ordersContainer"><div class="spinner"></div></div>
     </div>
@@ -311,9 +311,9 @@ async function loadOrders() {
   const container = document.getElementById('ordersContainer');
   container.innerHTML = '<div class="spinner"></div>';
   try {
-    const r = await fetch(API_URL + '/auth/orders', { headers: getHeaders() });
+    const r = await fetch(API_URL + '/orders', { headers: getHeaders() });
     const orders = await r.json();
-    if (!orders.length) {
+    if (!Array.isArray(orders) || !orders.length) {
       container.innerHTML = `<div class="empty-state">
         <span class="empty-icon">◇</span>
         <h3>Todavía no tienes pedidos</h3>
@@ -322,20 +322,28 @@ async function loadOrders() {
       </div>`;
       return;
     }
-    container.innerHTML = orders.map(o => renderOrderCard(o)).join('');
-  } catch {
+    // Cargar detalles (items) de cada pedido en paralelo
+    const detailed = await Promise.all(orders.map(async (o) => {
+      try {
+        const dr = await fetch(API_URL + '/orders/' + o.id, { headers: getHeaders() });
+        if (dr.ok) return await dr.json();
+      } catch {}
+      return o;
+    }));
+    container.innerHTML = detailed.map(o => renderOrderCard(o)).join('');
+  } catch(e) {
     container.innerHTML = '<p style="color:#c0392b;font-size:0.85rem">Error al cargar los pedidos</p>';
   }
 }
 
 function renderOrderCard(o) {
   const date  = new Date(o.created_at).toLocaleDateString('es-ES', { day:'2-digit', month:'long', year:'numeric' });
-  const short = o.id.slice(-8).toUpperCase();
+  const short = String(o.id).slice(-8).toUpperCase();
   const status = o.status;
   const statusLabel = { paid:'Pagado', processing:'En proceso', shipped:'Enviado', delivered:'Entregado', pending:'Pendiente', cancelled:'Cancelado', refunded:'Reembolsado' }[status] || status;
   const items = Array.isArray(o.items) ? o.items.filter(i => i && i.product_name) : [];
 
-  const itemsHtml = items.map(i => `
+  const itemsHtml = items.length ? items.map(i => `
     <div class="order-item-row">
       <span>
         <span class="order-item-name">${i.product_name}</span>
@@ -343,10 +351,32 @@ function renderOrderCard(o) {
         <span class="order-item-qty">× ${i.quantity}</span>
       </span>
       <span class="order-item-price">€${parseFloat(i.unit_price_eur * i.quantity).toFixed(2)}</span>
-    </div>`).join('');
+    </div>`).join('')
+    : '<p style="font-size:0.82rem;color:var(--accent)">Sin artículos registrados</p>';
+
+  // Dirección de envío
+  const shipParts = [
+    o.ship_first_name && o.ship_last_name ? `${o.ship_first_name} ${o.ship_last_name}` : null,
+    o.ship_address1,
+    o.ship_city && o.ship_postal_code ? `${o.ship_postal_code} ${o.ship_city}` : (o.ship_city || null),
+    o.ship_country,
+  ].filter(Boolean);
+  const shipHtml = shipParts.length ? `
+    <div style="padding:0.8rem 1.5rem;border-top:1px solid #f0f0f0;font-size:0.78rem;color:var(--accent)">
+      <span style="letter-spacing:0.12em;text-transform:uppercase;font-size:0.68rem;color:#bbb;display:block;margin-bottom:0.3rem">Dirección de envío</span>
+      ${shipParts.join(' · ')}
+    </div>` : '';
 
   const trackingHtml = o.tracking_number
     ? `<div class="order-tracking">📦 Seguimiento: <strong>${o.tracking_number}</strong></div>` : '';
+
+  // Totales
+  const shippingLine = parseFloat(o.shipping_eur || 0) > 0
+    ? `<div style="display:flex;justify-content:space-between;font-size:0.78rem;color:var(--accent);padding:0.3rem 0">
+        <span>Envío</span><span>€${parseFloat(o.shipping_eur).toFixed(2)}</span>
+       </div>` : `<div style="display:flex;justify-content:space-between;font-size:0.78rem;color:#2d7d46;padding:0.3rem 0">
+        <span>Envío</span><span>Gratis</span>
+       </div>`;
 
   return `<div class="order-card">
     <div class="order-header" onclick="toggleOrderItems('${o.id}')">
@@ -361,8 +391,15 @@ function renderOrderCard(o) {
       </div>
     </div>
     <div class="order-items-list" id="items-${o.id}">
-      ${itemsHtml || '<p style="font-size:0.82rem;color:var(--accent)">Sin artículos registrados</p>'}
+      ${itemsHtml}
+      <div style="border-top:1px solid #f5f5f5;margin-top:0.5rem;padding-top:0.5rem">
+        ${shippingLine}
+        <div style="display:flex;justify-content:space-between;font-size:0.88rem;font-weight:500;padding:0.3rem 0;border-top:1px solid #eee;margin-top:0.3rem">
+          <span>Total</span><span>€${parseFloat(o.total_eur).toFixed(2)}</span>
+        </div>
+      </div>
     </div>
+    ${shipHtml}
     ${trackingHtml}
   </div>`;
 }
