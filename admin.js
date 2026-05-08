@@ -2,6 +2,7 @@
 import { Router } from 'express';
 import { query } from './db.js';
 import { requireAdmin } from './middleware_auth.js';
+import { upload, uploadToCloudinary, deleteFromCloudinary } from './cloudinary.js';
 
 const router = Router();
 router.use(requireAdmin); // Todas las rutas requieren rol admin
@@ -28,8 +29,8 @@ router.get('/dashboard', async (req, res) => {
 
     res.json({
       stats: {
-        total_orders:   parseInt(orders.rows[0].count),
-        total_revenue:  parseFloat(revenue.rows[0].total),
+        total_orders:    parseInt(orders.rows[0].count),
+        total_revenue:   parseFloat(revenue.rows[0].total),
         active_products: parseInt(products.rows[0].count),
         total_customers: parseInt(customers.rows[0].count),
       },
@@ -41,11 +42,25 @@ router.get('/dashboard', async (req, res) => {
 });
 
 // ── GET /api/admin/products ────────────────────────────────
+// Devuelve productos con su imagen principal incluida
 router.get('/products', async (req, res) => {
   try {
     const result = await query(`
-      SELECT p.*, c.name AS category_name
-      FROM products p LEFT JOIN categories c ON c.id=p.category_id
+      SELECT
+        p.*,
+        c.name AS category_name,
+        pi.url        AS main_image_url,
+        pi.url_thumb  AS main_image_thumb,
+        pi.url_medium AS main_image_medium
+      FROM products p
+      LEFT JOIN categories c ON c.id = p.category_id
+      LEFT JOIN LATERAL (
+        SELECT url, url_thumb, url_medium
+        FROM product_images
+        WHERE product_id = p.id
+        ORDER BY position ASC
+        LIMIT 1
+      ) pi ON TRUE
       ORDER BY p.created_at DESC
     `);
     res.json(result.rows);
@@ -57,9 +72,13 @@ router.get('/products', async (req, res) => {
 // ── POST /api/admin/products ───────────────────────────────
 router.post('/products', async (req, res) => {
   try {
-    const { name, slug, description, material, price_eur, stock, category_id, badge, weight_grams, purity, finish, is_featured } = req.body;
+    const {
+      name, slug, description, material, price_eur,
+      stock, category_id, badge, weight_grams, purity, finish, is_featured,
+    } = req.body;
     const result = await query(`
-      INSERT INTO products (name, slug, description, material, price_eur, stock, category_id, badge, weight_grams, purity, finish, is_featured)
+      INSERT INTO products
+        (name, slug, description, material, price_eur, stock, category_id, badge, weight_grams, purity, finish, is_featured)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
       RETURNING *
     `, [name, slug, description, material, price_eur, stock || 0, category_id, badge, weight_grams, purity || '925', finish, is_featured || false]);
@@ -83,6 +102,141 @@ router.put('/products/:id', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// ══════════════════════════════════════════════════════════════
+// IMÁGENES DE PRODUCTO
+// ══════════════════════════════════════════════════════════════
+
+// ── GET /api/admin/products/:id/images ────────────────────
+// Lista todas las imágenes de un producto ordenadas por posición
+router.get('/products/:id/images', async (req, res) => {
+  try {
+    const result = await query(`
+      SELECT * FROM product_images
+      WHERE product_id = $1
+      ORDER BY position ASC
+    `, [req.params.id]);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── POST /api/admin/products/:id/images ───────────────────
+// Sube una o varias imágenes (campo: "images", máx 10 archivos)
+router.post('/products/:id/images', upload.array('images', 10), async (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ error: 'No se recibió ninguna imagen' });
+    }
+
+    // Calcular la posición de la próxima imagen
+    const posResult = await query(`
+      SELECT COALESCE(MAX(position), -1) + 1 AS next_pos
+      FROM product_images WHERE product_id = $1
+    `, [req.params.id]);
+    let nextPos = parseInt(posResult.rows[0].next_pos);
+
+    const uploaded = [];
+
+    for (const file of req.files) {
+      // Subir a Cloudinary
+      const cloudResult = await uploadToCloudinary(file.buffer, {
+        folder: `plataco/products/${req.params.id}`,
+      });
+
+      // Guardar en base de datos
+      const alt = req.body.alt_text || '';
+      const dbResult = await query(`
+        INSERT INTO product_images (product_id, cloudinary_id, url, url_thumb, url_medium, position, alt_text)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING *
+      `, [req.params.id, cloudResult.cloudinary_id, cloudResult.url, cloudResult.url_thumb, cloudResult.url_medium, nextPos, alt]);
+
+      uploaded.push(dbResult.rows[0]);
+      nextPos++;
+    }
+
+    res.status(201).json(uploaded);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── DELETE /api/admin/products/:id/images/:imageId ────────
+// Elimina una imagen de Cloudinary y de la base de datos
+router.delete('/products/:id/images/:imageId', async (req, res) => {
+  try {
+    const imgResult = await query(`
+      SELECT * FROM product_images WHERE id = $1 AND product_id = $2
+    `, [req.params.imageId, req.params.id]);
+
+    if (!imgResult.rows[0]) {
+      return res.status(404).json({ error: 'Imagen no encontrada' });
+    }
+
+    // Borrar de Cloudinary
+    await deleteFromCloudinary(imgResult.rows[0].cloudinary_id);
+
+    // Borrar de la base de datos
+    await query(`DELETE FROM product_images WHERE id = $1`, [req.params.imageId]);
+
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── PUT /api/admin/products/:id/images/reorder ────────────
+// Reordena las imágenes. Body: { order: ["uuid1", "uuid2", ...] }
+// El primer UUID de la lista será la foto principal (position = 0)
+router.put('/products/:id/images/reorder', async (req, res) => {
+  try {
+    const { order } = req.body; // array de IDs en el nuevo orden
+    if (!Array.isArray(order)) {
+      return res.status(400).json({ error: 'Se esperaba un array "order"' });
+    }
+
+    // Actualizar cada posición
+    await Promise.all(
+      order.map((imageId, index) =>
+        query(`
+          UPDATE product_images SET position = $1
+          WHERE id = $2 AND product_id = $3
+        `, [index, imageId, req.params.id])
+      )
+    );
+
+    // Devolver las imágenes ya reordenadas
+    const result = await query(`
+      SELECT * FROM product_images WHERE product_id = $1 ORDER BY position ASC
+    `, [req.params.id]);
+
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── PUT /api/admin/products/:id/images/:imageId ───────────
+// Actualiza el alt_text de una imagen
+router.put('/products/:id/images/:imageId', async (req, res) => {
+  try {
+    const { alt_text } = req.body;
+    const result = await query(`
+      UPDATE product_images SET alt_text = $1
+      WHERE id = $2 AND product_id = $3
+      RETURNING *
+    `, [alt_text, req.params.imageId, req.params.id]);
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ══════════════════════════════════════════════════════════════
+// PEDIDOS (sin cambios)
+// ══════════════════════════════════════════════════════════════
 
 // ── GET /api/admin/orders ──────────────────────────────────
 router.get('/orders', async (req, res) => {
@@ -112,7 +266,7 @@ router.get('/orders', async (req, res) => {
   }
 });
 
-// ── GET /api/admin/orders/:id — Detalle completo de un pedido ─
+// ── GET /api/admin/orders/:id ─────────────────────────────
 router.get('/orders/:id', async (req, res) => {
   try {
     const orderResult = await query(`
@@ -170,7 +324,7 @@ router.put('/orders/:id/status', async (req, res) => {
 
     const result = await query(`
       UPDATE orders SET status=$1, tracking_number=$2,
-        shipped_at = CASE WHEN $1='shipped' THEN NOW() ELSE shipped_at END,
+        shipped_at   = CASE WHEN $1='shipped'   THEN NOW() ELSE shipped_at   END,
         delivered_at = CASE WHEN $1='delivered' THEN NOW() ELSE delivered_at END
       WHERE id=$3 RETURNING *
     `, [status, tracking_number || null, req.params.id]);

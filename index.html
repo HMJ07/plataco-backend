@@ -24,6 +24,41 @@ header{background:var(--dark);color:white;padding:0 2rem;position:sticky;top:0;z
 .cart-btn:hover{background:white;color:var(--dark)}
 .cart-count{background:var(--silver);color:var(--dark);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:500}
 
+/* AUTH BUTTON */
+.auth-btn{background:none;border:none;color:#aaa;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;transition:color 0.2s;display:flex;align-items:center;gap:0.4rem;padding:0.4rem 0}
+.auth-btn:hover{color:white}
+.auth-btn svg{width:15px;height:15px}
+.auth-user-name{color:var(--silver);font-size:0.75rem;letter-spacing:0.1em}
+
+/* AUTH MODAL */
+.auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.auth-overlay.open{display:flex}
+.auth-modal{background:#111;border:1px solid #2a2a2a;width:100%;max-width:400px;padding:2.5rem}
+.auth-modal h2{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:white;margin-bottom:0.3rem;letter-spacing:0.05em}
+.auth-modal p{color:#666;font-size:0.8rem;letter-spacing:0.05em;margin-bottom:2rem}
+.auth-tabs{display:flex;gap:0;margin-bottom:2rem;border-bottom:1px solid #222}
+.auth-tab{background:none;border:none;color:#555;padding:0.6rem 1.2rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.75rem;letter-spacing:0.2em;text-transform:uppercase;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s}
+.auth-tab.active{color:var(--silver);border-bottom-color:var(--silver)}
+.auth-field{margin-bottom:1.2rem}
+.auth-field label{display:block;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:#666;margin-bottom:0.5rem}
+.auth-field input{width:100%;background:none;border:none;border-bottom:1px solid #333;color:white;font-family:'Jost',sans-serif;font-size:0.9rem;padding:0.5rem 0;outline:none;transition:border-color 0.2s;letter-spacing:0.03em}
+.auth-field input:focus{border-bottom-color:var(--silver)}
+.auth-field input::placeholder{color:#444}
+.auth-name-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.auth-submit{width:100%;background:var(--silver);color:var(--dark);border:none;padding:0.85rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.8rem;letter-spacing:0.3em;text-transform:uppercase;margin-top:1.5rem;transition:opacity 0.2s}
+.auth-submit:hover{opacity:0.85}
+.auth-submit:disabled{opacity:0.4;cursor:default}
+.auth-error{color:#e57373;font-size:0.78rem;margin-top:0.8rem;letter-spacing:0.03em;display:none}
+.auth-close{position:absolute;top:1rem;right:1.2rem;background:none;border:none;color:#555;font-size:1.4rem;cursor:pointer;line-height:1}
+.auth-close:hover{color:white}
+
+/* WISHLIST HEART */
+.wishlist-btn{background:none;border:1px solid #ddd;color:var(--dark);width:100%;padding:0.8rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.75rem;letter-spacing:0.2em;text-transform:uppercase;margin-top:0.8rem;transition:all 0.3s;display:flex;align-items:center;justify-content:center;gap:0.5rem}
+.wishlist-btn:hover{border-color:var(--dark);background:var(--dark);color:white}
+.wishlist-btn.favorited{background:#1a0a0a;border-color:#c0392b;color:#e74c3c}
+.heart-icon{font-size:1rem;transition:transform 0.2s}
+.wishlist-btn:hover .heart-icon{transform:scale(1.2)}
+
 /* SEARCH */
 .search-bar{padding:0.8rem 0;display:flex;align-items:center;gap:1rem}
 .search-input{flex:1;background:none;border:none;border-bottom:1px solid #444;color:white;font-family:'Jost',sans-serif;font-size:0.9rem;padding:0.4rem 0;outline:none;letter-spacing:0.05em}
@@ -66,8 +101,6 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
 .product-card:hover{transform:translateY(-4px)}
 .product-card:hover .card-overlay{opacity:1}
 .card-img{height:320px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f9f9f9,#f0f0f0);position:relative;overflow:hidden}
-.card-img img{width:100%;height:100%;object-fit:cover;transition:transform 0.5s;display:block}
-.product-card:hover .card-img img{transform:scale(1.07)}
 .card-img svg{transition:transform 0.5s}
 .product-card:hover .card-img svg{transform:scale(1.05)}
 .card-overlay{position:absolute;inset:0;background:rgba(10,10,10,0.6);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.3s}
@@ -88,8 +121,7 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;display:none;align-items:center;justify-content:center;padding:1rem}
 .modal-overlay.open{display:flex}
 .modal{background:var(--cream);max-width:900px;width:100%;max-height:90vh;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr}
-.modal-img{background:linear-gradient(135deg,#f0f0f0,#e8e8e8);display:flex;align-items:center;justify-content:center;min-height:400px;position:relative;overflow:hidden}
-.modal-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.modal-img{background:linear-gradient(135deg,#f0f0f0,#e8e8e8);display:flex;align-items:center;justify-content:center;min-height:400px;position:relative}
 .modal-body{padding:2.5rem}
 .modal-category{font-size:0.7rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--accent);margin-bottom:0.5rem}
 .modal-title{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:400;line-height:1.2;margin-bottom:0.5rem}
@@ -130,8 +162,7 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
 .cart-empty{text-align:center;padding:3rem 1rem;color:var(--accent)}
 .cart-empty-icon{font-size:3rem;margin-bottom:1rem;opacity:0.3}
 .cart-item{display:flex;gap:1rem;margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
-.cart-item-img{width:70px;height:70px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
-.cart-item-img img{width:100%;height:100%;object-fit:cover}
+.cart-item-img{width:70px;height:70px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .cart-item-info{flex:1}
 .cart-item-name{font-family:'Cormorant Garamond',serif;font-size:1rem;margin-bottom:0.2rem}
 .cart-item-detail{font-size:0.75rem;color:var(--accent);margin-bottom:0.5rem}
@@ -252,6 +283,17 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
       <input class="search-input" type="text" id="searchInput" placeholder="Buscar joyas..." oninput="handleSearch()">
     </div>
     <div class="header-actions">
+      <div id="authHeaderBtn">
+        <button class="auth-btn" onclick="openAuthModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>Entrar</span>
+        </button>
+      </div>
+      <div id="authUserBtn" style="display:none;align-items:center;gap:1rem">
+        <span class="auth-user-name" id="authUserGreeting"></span>
+        <button class="auth-btn" onclick="window.location.href='cuenta.html'">Mi cuenta</button>
+        <button class="auth-btn" onclick="doLogout()" style="color:#666">Salir</button>
+      </div>
       <button class="cart-btn" onclick="toggleCart()">
         <span>Carrito</span>
         <span class="cart-count" id="cartCount">0</span>
@@ -321,7 +363,7 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
       <div class="modal-divider"></div>
       <div id="modalSpecs" style="margin-bottom:1.5rem"></div>
       <button class="add-cart-btn" onclick="addFromModal()">Añadir al carrito</button>
-      <button class="wishlist-btn">♡ Añadir a favoritos</button>
+      <button class="wishlist-btn" id="modalWishlistBtn" onclick="toggleFavorite()"><span class="heart-icon">♡</span> <span id="wishlistBtnText">Añadir a favoritos</span></button>
     </div>
   </div>
 </div>
@@ -356,22 +398,230 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
 
 <div class="toast" id="toast"></div>
 
+<!-- AUTH MODAL -->
+<div class="auth-overlay" id="authOverlay" onclick="handleAuthOverlayClick(event)">
+  <div class="auth-modal" style="position:relative" onclick="event.stopPropagation()">
+    <button class="auth-close" onclick="closeAuthModal()">✕</button>
+    <h2 id="authModalTitle">Bienvenida</h2>
+    <p id="authModalSub">Tu colección de plata te espera</p>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Iniciar sesión</button>
+      <button class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">Crear cuenta</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="loginForm">
+      <div class="auth-field">
+        <label>Email</label>
+        <input type="email" id="loginEmail" placeholder="tu@email.com" autocomplete="email">
+      </div>
+      <div class="auth-field">
+        <label>Contraseña</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="auth-submit" id="loginSubmit" onclick="doLogin()">Entrar</button>
+      <div class="auth-error" id="loginError"></div>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="registerForm" style="display:none">
+      <div class="auth-name-row">
+        <div class="auth-field">
+          <label>Nombre</label>
+          <input type="text" id="regFirstName" placeholder="Ana" autocomplete="given-name">
+        </div>
+        <div class="auth-field">
+          <label>Apellido</label>
+          <input type="text" id="regLastName" placeholder="García" autocomplete="family-name">
+        </div>
+      </div>
+      <div class="auth-field">
+        <label>Email</label>
+        <input type="email" id="regEmail" placeholder="tu@email.com" autocomplete="email">
+      </div>
+      <div class="auth-field">
+        <label>Contraseña <span style="color:#555;font-size:0.65rem">(mín. 8 caracteres)</span></label>
+        <input type="password" id="regPassword" placeholder="••••••••" autocomplete="new-password">
+      </div>
+      <button class="auth-submit" id="registerSubmit" onclick="doRegister()">Crear cuenta</button>
+      <div class="auth-error" id="registerError"></div>
+    </div>
+  </div>
+</div>
+
 <script>
 const API_URL = window.PLATACO_API_URL || 'http://localhost:4000/api';
 let products = [];
-
 const rates = {EUR:1, USD:1.08, GBP:0.86, JPY:163.2};
 const symbols = {EUR:'€', USD:'$', GBP:'£', JPY:'¥'};
-let currency = 'EUR';
-let currSymbol = '€';
+let currency = 'EUR', currSymbol = '€';
 let cart = [];
-let currentProduct = null;
-let currentQty = 1;
-let selectedSize = null;
-let currentFilter = 'all';
-let currentSort = 'default';
-let searchTerm = '';
+let currentProduct = null, currentQty = 1, selectedSize = null;
+let currentFilter = 'all', currentSort = 'default', searchTerm = '';
 
+// ── AUTH STATE ─────────────────────────────────────────────
+let authToken  = localStorage.getItem('plataco_token') || null;
+let authUser   = null;
+let favoriteIds = new Set();
+
+function getAuthHeaders() {
+  return authToken ? { 'Authorization': 'Bearer ' + authToken, 'Content-Type': 'application/json' }
+                   : { 'Content-Type': 'application/json' };
+}
+
+async function initAuth() {
+  if (!authToken) return;
+  try {
+    const r = await fetch(API_URL + '/auth/me', { headers: getAuthHeaders() });
+    if (!r.ok) { doLogout(); return; }
+    authUser = await r.json();
+    updateAuthUI();
+    loadFavoriteIds();
+  } catch { /* red sin conexión, no pasa nada */ }
+}
+
+function updateAuthUI() {
+  const loginBtn  = document.getElementById('authHeaderBtn');
+  const userArea  = document.getElementById('authUserBtn');
+  const greeting  = document.getElementById('authUserGreeting');
+  if (authUser) {
+    loginBtn.style.display  = 'none';
+    userArea.style.display  = 'flex';
+    greeting.textContent    = authUser.first_name || authUser.email.split('@')[0];
+  } else {
+    loginBtn.style.display  = 'block';
+    userArea.style.display  = 'none';
+  }
+}
+
+function doLogout() {
+  authToken = null; authUser = null; favoriteIds = new Set();
+  localStorage.removeItem('plataco_token');
+  updateAuthUI();
+  showToast('Sesión cerrada');
+}
+
+// ── AUTH MODAL ─────────────────────────────────────────────
+function openAuthModal(tab) {
+  document.getElementById('authOverlay').classList.add('open');
+  switchAuthTab(tab || 'login');
+  setTimeout(() => {
+    const el = document.getElementById(tab === 'register' ? 'regFirstName' : 'loginEmail');
+    if (el) el.focus();
+  }, 100);
+}
+function closeAuthModal() {
+  document.getElementById('authOverlay').classList.remove('open');
+  ['loginError','registerError'].forEach(id => {
+    const el = document.getElementById(id);
+    el.textContent = ''; el.style.display = 'none';
+  });
+}
+function handleAuthOverlayClick(e) {
+  if (e.target === document.getElementById('authOverlay')) closeAuthModal();
+}
+function switchAuthTab(tab) {
+  document.getElementById('loginForm').style.display    = tab === 'login'    ? 'block' : 'none';
+  document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+  document.getElementById('tabLogin').classList.toggle('active',    tab === 'login');
+  document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  const btn   = document.getElementById('loginSubmit');
+  errEl.style.display = 'none';
+  if (!email || !pass) { showAuthError(errEl, 'Introduce email y contraseña'); return; }
+  btn.disabled = true; btn.textContent = 'Entrando…';
+  try {
+    const r  = await fetch(API_URL + '/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email, password:pass}) });
+    const data = await r.json();
+    if (!r.ok) { showAuthError(errEl, data.error || 'Error al iniciar sesión'); return; }
+    authToken = data.token; authUser = data.user;
+    localStorage.setItem('plataco_token', authToken);
+    updateAuthUI(); closeAuthModal(); loadFavoriteIds();
+    showToast('¡Bienvenida, ' + (authUser.first_name || authUser.email.split('@')[0]) + '!');
+  } catch { showAuthError(errEl, 'Error de conexión'); }
+  finally { btn.disabled = false; btn.textContent = 'Entrar'; }
+}
+
+async function doRegister() {
+  const first = document.getElementById('regFirstName').value.trim();
+  const last  = document.getElementById('regLastName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const pass  = document.getElementById('regPassword').value;
+  const errEl = document.getElementById('registerError');
+  const btn   = document.getElementById('registerSubmit');
+  errEl.style.display = 'none';
+  if (!email || !pass) { showAuthError(errEl, 'Email y contraseña son obligatorios'); return; }
+  if (pass.length < 8) { showAuthError(errEl, 'La contraseña debe tener al menos 8 caracteres'); return; }
+  btn.disabled = true; btn.textContent = 'Creando cuenta…';
+  try {
+    const r = await fetch(API_URL + '/auth/register', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email, password:pass, first_name:first, last_name:last}) });
+    const data = await r.json();
+    if (!r.ok) { showAuthError(errEl, data.error || 'Error al crear la cuenta'); return; }
+    authToken = data.token; authUser = data.user;
+    localStorage.setItem('plataco_token', authToken);
+    updateAuthUI(); closeAuthModal();
+    showToast('¡Cuenta creada! Bienvenida, ' + (authUser.first_name || authUser.email.split('@')[0]) + ' ✦');
+  } catch { showAuthError(errEl, 'Error de conexión'); }
+  finally { btn.disabled = false; btn.textContent = 'Crear cuenta'; }
+}
+
+function showAuthError(el, msg) {
+  el.textContent = msg; el.style.display = 'block';
+}
+
+// Enter key in auth forms
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  if (document.getElementById('loginForm').style.display !== 'none' &&
+      document.getElementById('authOverlay').classList.contains('open')) doLogin();
+  if (document.getElementById('registerForm').style.display !== 'none' &&
+      document.getElementById('authOverlay').classList.contains('open')) doRegister();
+});
+
+// ── FAVORITES ──────────────────────────────────────────────
+async function loadFavoriteIds() {
+  if (!authToken) return;
+  try {
+    const r = await fetch(API_URL + '/auth/favorites/ids', { headers: getAuthHeaders() });
+    if (r.ok) { const ids = await r.json(); favoriteIds = new Set(ids); }
+  } catch {}
+}
+
+async function toggleFavorite() {
+  if (!authUser) { openAuthModal('login'); showToast('Inicia sesión para guardar favoritos'); return; }
+  if (!currentProduct) return;
+  const pid = currentProduct.id;
+  const isFav = favoriteIds.has(pid);
+  try {
+    const r = await fetch(API_URL + '/auth/favorites/' + pid, {
+      method: isFav ? 'DELETE' : 'POST',
+      headers: getAuthHeaders()
+    });
+    if (r.ok) {
+      if (isFav) { favoriteIds.delete(pid); } else { favoriteIds.add(pid); }
+      updateWishlistBtn();
+      showToast(isFav ? 'Eliminado de favoritos' : '♡ Añadido a favoritos');
+    }
+  } catch { showToast('Error al actualizar favoritos'); }
+}
+
+function updateWishlistBtn() {
+  if (!currentProduct) return;
+  const btn  = document.getElementById('modalWishlistBtn');
+  const text = document.getElementById('wishlistBtnText');
+  const isFav = favoriteIds.has(currentProduct.id);
+  if (btn) btn.classList.toggle('favorited', isFav);
+  if (text) text.textContent = isFav ? 'En favoritos' : 'Añadir a favoritos';
+  const heart = btn?.querySelector('.heart-icon');
+  if (heart) heart.textContent = isFav ? '♥' : '♡';
+}
+
+// ── PRICE / RENDER ─────────────────────────────────────────
 function convertPrice(eur){
   const v = eur * rates[currency];
   if(currency==='JPY') return Math.round(v).toLocaleString() + ' ¥';
@@ -381,162 +631,111 @@ function convertPrice(eur){
 function renderProducts(){
   let list = [...products];
   if(currentFilter !== 'all') list = list.filter(p=>p.category===currentFilter);
-  if(searchTerm){
-    const s = searchTerm.toLowerCase();
-    list = list.filter(p=>p.name.toLowerCase().includes(s)||p.category.toLowerCase().includes(s)||p.material.toLowerCase().includes(s));
-  }
-  if(currentSort==='price-asc') list.sort((a,b)=>a.price-b.price);
-  else if(currentSort==='price-desc') list.sort((a,b)=>b.price-a.price);
-  else if(currentSort==='new') list = list.filter(p=>p.isNew).concat(list.filter(p=>!p.isNew));
-  
+  if(searchTerm) list = list.filter(p=>p.name.toLowerCase().includes(searchTerm.toLowerCase())||p.desc.toLowerCase().includes(searchTerm.toLowerCase()));
+  if(currentSort==='price-asc')  list.sort((a,b)=>a.price-b.price);
+  if(currentSort==='price-desc') list.sort((a,b)=>b.price-a.price);
+  if(currentSort==='new')        list = list.filter(p=>p.isNew).concat(list.filter(p=>!p.isNew));
   const grid = document.getElementById('productGrid');
-  const count = document.getElementById('sectionCount');
-  count.textContent = list.length + ' ' + (list.length===1?'pieza':'piezas');
-  
-  const catNames = {all:'Toda la colección',anillos:'Anillos',collares:'Collares',pulseras:'Pulseras',pendientes:'Pendientes',broches:'Broches'};
-  document.querySelector('.section-title').textContent = catNames[currentFilter] || 'Resultados';
-  
-  if(list.length===0){
-    grid.innerHTML = '<div class="no-results"><div class="no-results-title">Sin resultados</div><p>Prueba con otra búsqueda o categoría</p></div>';
-    return;
-  }
-  
-  grid.innerHTML = list.map(p=>`
+  const catNames={all:'Toda la colección',anillos:'Anillos',collares:'Collares',pulseras:'Pulseras',pendientes:'Pendientes',broches:'Broches'};
+  document.getElementById('sectionCount').textContent = list.length + ' piezas';
+  document.getElementById('sectionHeader').querySelector('.section-title').textContent = catNames[currentFilter]||'Colección';
+  if(!list.length){grid.innerHTML='<p style="grid-column:1/-1;text-align:center;color:var(--accent);padding:3rem">No se encontraron piezas</p>';return;}
+  grid.innerHTML = list.map(p => {
+    const isFav = favoriteIds.has(p.id);
+    return `
     <div class="product-card" data-id="${p.id}">
-      ${p.badge?`<div class="badge ${p.isNew?'new':''}">${p.badge}</div>`:''}
+      ${p.badge?`<span class="badge ${p.badge==='New'?'badge-new':p.badge==='Sale'?'badge-sale':'badge-new'}">${p.badge}</span>`:''}
       <div class="card-img">
-        ${p.imageUrl
-          ? `<img src="${p.imageUrl}" alt="${p.name}" loading="lazy" onerror="this.style.display='none'">`
-          : p.svg || ''}
+        ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.name}" loading="lazy" onerror="this.style.display='none'">` : p.svg || ''}
         <div class="card-overlay"><button class="quick-view-btn">Ver detalle</button></div>
+        <button onclick="event.stopPropagation();quickToggleFav('${p.id}',this)" class="card-fav-btn" title="${isFav?'Quitar de favoritos':'Añadir a favoritos'}" style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.5);border:none;color:${isFav?'#e74c3c':'white'};font-size:1.1rem;cursor:pointer;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all 0.2s">${isFav?'♥':'♡'}</button>
       </div>
       <div class="card-body">
         <p class="card-category">${p.category}</p>
         <h3 class="card-name">${p.name}</h3>
         <p class="card-material">${p.material}</p>
+        <p class="card-price">${convertPrice(p.price)}</p>
       </div>
-      <div class="card-bottom">
-        <span class="card-price"><span class="currency">${currSymbol} </span>${convertPrice(p.price).replace(currSymbol,'').trim()}</span>
-        <button class="add-quick" data-id="${p.id}">+</button>
-      </div>
-    </div>
-  `).join('');
-
-  // Attach click events using data-id (safe with UUIDs)
+    </div>`;
+  }).join('');
   document.querySelectorAll('.product-card').forEach(card => {
-    card.addEventListener('click', function(e) {
-      if(e.target.classList.contains('add-quick') || e.target.closest('.add-quick')) return;
-      openModal(this.dataset.id);
-    });
-  });
-  document.querySelectorAll('.add-quick').forEach(btn => {
-    btn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      quickAdd(this.dataset.id);
-    });
+    card.addEventListener('click', () => openModal(card.dataset.id));
   });
 }
 
-function quickAdd(id){
-  const p = products.find(x=>x.id===id);
-  if(!p) return;
-  if(p.sizes && p.sizes.length > 0){
-    openModal(id);
-    showToast('Selecciona una talla primero');
-    return;
-  }
-  addToCart(p, null, 1);
+async function quickToggleFav(pid, btn) {
+  if (!authUser) { openAuthModal('login'); showToast('Inicia sesión para guardar favoritos'); return; }
+  const isFav = favoriteIds.has(pid);
+  try {
+    const r = await fetch(API_URL + '/auth/favorites/' + pid, { method: isFav ? 'DELETE' : 'POST', headers: getAuthHeaders() });
+    if (r.ok) {
+      if (isFav) { favoriteIds.delete(pid); btn.textContent='♡'; btn.style.color='white'; }
+      else       { favoriteIds.add(pid);    btn.textContent='♥'; btn.style.color='#e74c3c'; }
+      showToast(isFav ? 'Eliminado de favoritos' : '♡ Añadido a favoritos');
+    }
+  } catch {}
 }
 
+// ── MODAL ──────────────────────────────────────────────────
 function openModal(id){
-  const p = products.find(x=>x.id===id);
-  if(!p) return;
-  currentProduct = p;
-  currentQty = 1;
-  selectedSize = null;
-  
-  document.getElementById('modalCat').textContent = p.category.toUpperCase();
-  document.getElementById('modalName').textContent = p.name;
-  document.getElementById('modalMat').textContent = p.material;
-  document.getElementById('modalDesc').textContent = p.desc;
+  currentProduct = products.find(x=>x.id===id);
+  if(!currentProduct) return;
+  selectedSize = null; currentQty = 1;
+  document.getElementById('modalCat').textContent   = currentProduct.category;
+  document.getElementById('modalName').textContent  = currentProduct.name;
+  document.getElementById('modalMat').textContent   = currentProduct.material;
   document.getElementById('modalImg').innerHTML = `<button class="modal-close" onclick="closeModal()">✕</button>${
-    p.imageUrl
-      ? `<img src="${p.imageUrl}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0">`
-      : `<div style="transform:scale(1.8)">${p.svg || ''}</div>`
+    currentProduct.imageUrl
+      ? `<img src="${currentProduct.imageUrl}" alt="${currentProduct.name}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0">`
+      : `<div style="transform:scale(1.8)">${currentProduct.svg || ''}</div>`
   }`;
-  
   updateModalPrice();
-  
   const sizesSection = document.getElementById('modalSizesSection');
   const sizesDiv = document.getElementById('modalSizes');
-  if(p.sizes.length > 0){
-    sizesSection.style.display = 'block';
-    sizesDiv.innerHTML = p.sizes.map(s=>`<button class="size-btn" onclick="selectSize('${s}',this)">${s}</button>`).join('');
-  } else {
-    sizesSection.style.display = 'none';
-  }
-  
-  const specsDiv = document.getElementById('modalSpecs');
-  if(Object.keys(p.specs).length > 0){
-    specsDiv.innerHTML = '<span class="label" style="margin-bottom:0.8rem;display:block">Especificaciones</span>' +
-      Object.entries(p.specs).map(([k,v])=>`<div class="spec-row"><span class="spec-key">${k}</span><span class="spec-val">${v}</span></div>`).join('');
-  }
-  
-  document.getElementById('modalOverlay').classList.add('open');
-}
-
-function updateModalPrice(){
-  if(!currentProduct) return;
-  const p = currentProduct;
-  document.getElementById('modalPrice').textContent = convertPrice(p.price);
-  const sub = p.price * currentQty;
-  document.getElementById('modalSubtotal').textContent = currentQty > 1 ? 'Total: ' + convertPrice(sub) : '';
-  document.getElementById('modalQty').textContent = currentQty;
+  if(currentProduct.sizes && currentProduct.sizes.length>0){
+    sizesSection.style.display='block';
+    sizesDiv.innerHTML = currentProduct.sizes.map(s=>`<button class="size-btn" onclick="selectSize('${s}',this)">${s}</button>`).join('');
+  } else { sizesSection.style.display='none'; }
+  document.getElementById('modalSpecs').innerHTML = Object.entries(currentProduct.specs||{}).map(([k,v])=>`<div class="spec-row"><span class="spec-label">${k}</span><span class="spec-value">${v}</span></div>`).join('');
+  updateWishlistBtn();
+  document.getElementById('modalOverlay').style.display='flex';
+  document.body.style.overflow='hidden';
 }
 
 function closeModal(){
-  document.getElementById('modalOverlay').classList.remove('open');
-  currentProduct = null;
+  document.getElementById('modalOverlay').style.display='none';
+  document.body.style.overflow='';
+  currentProduct=null;
 }
 
-function handleModalClick(e){
-  if(e.target === document.getElementById('modalOverlay')) closeModal();
+function handleModalClick(e){if(e.target===document.getElementById('modalOverlay'))closeModal();}
+
+function selectSize(size, btn){
+  selectedSize = size;
+  document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
 }
 
-function selectSize(s,btn){
-  selectedSize = s;
-  document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('selected'));
-  btn.classList.add('selected');
+function updateModalPrice(){
+  document.getElementById('modalPrice').textContent    = convertPrice(currentProduct.price);
+  document.getElementById('modalQty').textContent      = currentQty;
+  document.getElementById('modalSubtotal').textContent = convertPrice(currentProduct.price * currentQty);
 }
 
-function changeQty(delta){
-  currentQty = Math.max(1, currentQty + delta);
-  updateModalPrice();
-}
+function changeQty(delta){ currentQty=Math.max(1,currentQty+delta); updateModalPrice(); }
 
 function addFromModal(){
   if(!currentProduct) return;
-  if(currentProduct.sizes.length > 0 && !selectedSize){
-    showToast('Por favor selecciona una talla');
-    return;
-  }
+  if(currentProduct.sizes.length>0 && !selectedSize){ showToast('Por favor selecciona una talla'); return; }
   addToCart(currentProduct, selectedSize, currentQty);
   closeModal();
 }
 
+// ── CART ───────────────────────────────────────────────────
 function addToCart(product, size, qty){
   const existing = cart.find(i=>i.id===product.id && i.size===size);
   if(existing) existing.qty += qty;
-  else cart.push({
-    id: product.id,
-    name: product.name,
-    price: product.price,
-    size,
-    qty,
-    svg: product.svg,
-    imageUrl: product.imageUrl || null,
-    variant_id: size ? product.variantMap?.[size] || null : null,
-  });
+  else cart.push({ id:product.id, name:product.name, price:product.price, size, qty, svg:product.svg, imageUrl:product.imageUrl||null, variant_id: size ? product.variantMap?.[size]||null : null });
   updateCartUI();
   showToast(product.name + ' añadido al carrito');
 }
@@ -545,175 +744,120 @@ function updateCartUI(){
   const total = cart.reduce((s,i)=>s+i.price*i.qty,0);
   document.getElementById('cartCount').textContent = cart.reduce((s,i)=>s+i.qty,0);
   document.getElementById('cartTotal').textContent = convertPrice(total);
-  
   const itemsDiv = document.getElementById('cartItems');
-  if(cart.length===0){
-    itemsDiv.innerHTML = '<div class="cart-empty"><div class="cart-empty-icon">◇</div><p>Tu carrito está vacío</p></div>';
-    return;
-  }
+  if(cart.length===0){ itemsDiv.innerHTML='<div class="cart-empty"><div class="cart-empty-icon">◇</div><p>Tu carrito está vacío</p></div>'; return; }
   itemsDiv.innerHTML = cart.map((item,idx)=>`
     <div class="cart-item">
-      <div class="cart-item-img">${
-        item.imageUrl
-          ? `<img src="${item.imageUrl}" alt="${item.name}">`
-          : `<div style="transform:scale(0.6)">${item.svg || ''}</div>`
-      }</div>
+      <div class="cart-item-img">${item.imageUrl?`<img src="${item.imageUrl}" alt="${item.name}">` : `<div style="transform:scale(0.6)">${item.svg||''}</div>`}</div>
       <div class="cart-item-info">
-        <p class="cart-item-name">${item.name}</p>
-        <p class="cart-item-detail">${item.size?'Talla: '+item.size+' · ':''}Cant: ${item.qty}</p>
-        <p class="cart-item-price">${convertPrice(item.price * item.qty)}</p>
+        <p class="cart-item-name">${item.name}${item.size?` <span style="color:var(--accent);font-size:0.75rem">· ${item.size}</span>`:''}</p>
+        <p class="cart-item-price">${convertPrice(item.price)}</p>
+        <div class="cart-qty">
+          <button onclick="changeCartQty(${idx},-1)">−</button>
+          <span>${item.qty}</span>
+          <button onclick="changeCartQty(${idx},1)">+</button>
+          <button onclick="removeCartItem(${idx})" style="margin-left:0.5rem;color:#999">✕</button>
+        </div>
       </div>
-      <button class="cart-item-remove" onclick="removeItem(${idx})">✕</button>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
-function removeItem(idx){
-  cart.splice(idx,1);
+function changeCartQty(idx, delta){
+  cart[idx].qty = Math.max(1, cart[idx].qty + delta);
   updateCartUI();
 }
-
+function removeCartItem(idx){ cart.splice(idx,1); updateCartUI(); }
 function toggleCart(){
   document.getElementById('cartPanel').classList.toggle('open');
   document.getElementById('cartBackdrop').classList.toggle('open');
 }
-
 function setCurrency(c,sym,btn){
-  currency = c;
-  currSymbol = sym;
+  currency=c; currSymbol=sym;
   document.querySelectorAll('.currency-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  renderProducts();
-  updateCartUI();
+  renderProducts(); updateCartUI();
   if(currentProduct) updateModalPrice();
 }
-
-function filterCategory(cat, btn){
-  currentFilter = cat;
+function filterCategory(cat,btn){
+  currentFilter=cat;
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   renderProducts();
 }
-
-function applySort(sort, btn){
-  currentSort = sort;
+function applySort(sort,btn){
+  currentSort=sort;
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   renderProducts();
 }
-
-function handleSearch(){
-  searchTerm = document.getElementById('searchInput').value;
-  renderProducts();
-}
+function handleSearch(){ searchTerm=document.getElementById('searchInput').value; renderProducts(); }
 
 function showToast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2500);
 }
 
 function checkout(){
   if(cart.length===0){ showToast('Tu carrito está vacío'); return; }
-
-  const checkoutItems = cart.map((item) => ({
-    product_id: item.id,
-    product_name: item.name,
-    variant_id: item.variant_id || null,
-    variant_name: item.size || null,
-    quantity: item.qty,
-    unit_price_eur: item.price,
-    emoji: '✦',
-  }));
-
+  const checkoutItems = cart.map(item=>({ product_id:item.id, product_name:item.name, variant_id:item.variant_id||null, variant_name:item.size||null, quantity:item.qty, unit_price_eur:item.price, emoji:'✦' }));
   localStorage.setItem('plataco_cart', JSON.stringify(checkoutItems));
-  window.location.href = 'checkout.html';
+  if (authToken) localStorage.setItem('plataco_token', authToken);
+  window.location.href='checkout.html';
 }
 
-// Fotos reales de joyería en plata (Unsplash, libres de uso)
+// ── IMAGES ─────────────────────────────────────────────────
 const PRODUCT_IMAGES = {
-  // Anillos
-  'anillo sello oval':        'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&q=80',
-  'anillo medio dedo':        'https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=600&q=80',
-  'anillo':                   'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=600&q=80',
-  // Collares
-  'collar cadena anchor':     'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&q=80',
-  'collar luna creciente':    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&q=80',
-  'collar':                   'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80',
-  // Pulseras
-  'pulsera':                  'https://images.unsplash.com/photo-1573408301185-9519f94ae14e?w=600&q=80',
-  // Pendientes
-  'pendiente':                'https://images.unsplash.com/photo-1630018548696-e1e6e8a2ab31?w=600&q=80',
-  // Genérico joyería plata
-  'default':                  'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80',
+  'anillo sello oval':     'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&q=80',
+  'anillo medio dedo':     'https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=600&q=80',
+  'anillo':                'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=600&q=80',
+  'collar cadena anchor':  'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&q=80',
+  'collar luna creciente': 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&q=80',
+  'collar':                'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80',
+  'pulsera':               'https://images.unsplash.com/photo-1573408301185-9519f94ae14e?w=600&q=80',
+  'pendiente':             'https://images.unsplash.com/photo-1630018548696-e1e6e8a2ab31?w=600&q=80',
+  'default':               'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80',
 };
-
-function getProductImage(apiProduct) {
-  // 1. Si el backend ya devuelve imagen (Cloudinary), úsala
-  if (apiProduct.main_image_url) return apiProduct.main_image_url;
-  if (apiProduct.main_image_medium) return apiProduct.main_image_medium;
-
-  // 2. Buscar por nombre del producto (coincidencia parcial, sin mayúsculas)
-  const nameLower = (apiProduct.name || '').toLowerCase();
-  for (const [key, url] of Object.entries(PRODUCT_IMAGES)) {
-    if (key !== 'default' && nameLower.includes(key)) return url;
-  }
-
-  // 3. Buscar por categoría
-  const cat = (apiProduct.category_slug || '').toLowerCase();
-  if (cat.includes('anillo'))    return PRODUCT_IMAGES['anillo'];
-  if (cat.includes('collar'))    return PRODUCT_IMAGES['collar'];
-  if (cat.includes('pulsera'))   return PRODUCT_IMAGES['pulsera'];
-  if (cat.includes('pendiente')) return PRODUCT_IMAGES['pendiente'];
-
-  // 4. Fallback genérico
+function getProductImage(p){
+  if(p.main_image_url) return p.main_image_url;
+  if(p.main_image_medium) return p.main_image_medium;
+  const n=(p.name||'').toLowerCase();
+  for(const [k,u] of Object.entries(PRODUCT_IMAGES)){ if(k!=='default'&&n.includes(k)) return u; }
+  const c=(p.category_slug||'').toLowerCase();
+  if(c.includes('anillo'))    return PRODUCT_IMAGES['anillo'];
+  if(c.includes('collar'))    return PRODUCT_IMAGES['collar'];
+  if(c.includes('pulsera'))   return PRODUCT_IMAGES['pulsera'];
+  if(c.includes('pendiente')) return PRODUCT_IMAGES['pendiente'];
   return PRODUCT_IMAGES['default'];
 }
-
 function toProductCard(apiProduct){
-  const variants = Array.isArray(apiProduct.variants) ? apiProduct.variants : [];
-  const sizes = variants.map((variant) => variant.name).filter(Boolean);
-  const specs = {
-    Pureza: apiProduct.purity ? `${apiProduct.purity}‰` : '925‰',
-    Peso: apiProduct.weight_grams ? `${apiProduct.weight_grams}g` : 'N/D',
-    Acabado: apiProduct.finish || 'Estándar',
-  };
-  const imageUrl = getProductImage(apiProduct);
-
+  const variants=Array.isArray(apiProduct.variants)?apiProduct.variants:[];
+  const sizes=variants.map(v=>v.name).filter(Boolean);
   return {
-    id: apiProduct.id,
-    name: apiProduct.name,
-    category: apiProduct.category_slug || 'sin-categoria',
-    material: apiProduct.material || 'Plata 925',
-    price: Number(apiProduct.price_eur),
-    desc: apiProduct.description || 'Sin descripción',
-    sizes,
-    specs,
-    badge: apiProduct.badge || null,
-    isNew: apiProduct.badge === 'New',
-    variantMap: variants.reduce((acc, variant) => {
-      acc[variant.name] = variant.id;
-      return acc;
-    }, {}),
-    imageUrl,
-    svg: null,
+    id:apiProduct.id, name:apiProduct.name,
+    category:apiProduct.category_slug||'sin-categoria',
+    material:apiProduct.material||'Plata 925',
+    price:Number(apiProduct.price_eur),
+    desc:apiProduct.description||'Sin descripción',
+    sizes, badge:apiProduct.badge||null, isNew:apiProduct.badge==='New',
+    specs:{ Pureza:apiProduct.purity?`${apiProduct.purity}‰`:'925‰', Peso:apiProduct.weight_grams?`${apiProduct.weight_grams}g`:'N/D', Acabado:apiProduct.finish||'Estándar' },
+    variantMap:variants.reduce((acc,v)=>{acc[v.name]=v.id;return acc;},{}),
+    imageUrl:getProductImage(apiProduct), svg:null,
   };
 }
 
 async function loadProductsFromApi(){
   try {
-    const res = await fetch(`${API_URL}/products?limit=100`);
-    if (!res.ok) throw new Error('No se pudo cargar la colección');
-    const data = await res.json();
-    products = (data.products || []).map(toProductCard);
+    const r = await fetch(API_URL + '/products?limit=100');
+    if(!r.ok) throw new Error();
+    const data = await r.json();
+    products = (data.products||[]).map(toProductCard);
     renderProducts();
-  } catch (err) {
-    showToast('No se pudo conectar con el backend');
-    console.error(err);
-  }
+  } catch { showToast('No se pudo conectar con el servidor'); }
 }
 
+// ── INIT ───────────────────────────────────────────────────
+initAuth();
 loadProductsFromApi();
 updateCartUI();
 </script>

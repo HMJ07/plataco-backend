@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="config.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<title>Mi cuenta — PLATACO</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--silver:#C0C0C0;--dark:#0a0a0a;--cream:#f8f5f0;--accent:#8a8a8a;--border:#ddd}
+body{font-family:'Jost',sans-serif;background:var(--cream);color:var(--dark);min-height:100vh}
+h1,h2,h3{font-family:'Cormorant Garamond',serif}
+
+/* HEADER */
+header{background:var(--dark);color:white;padding:0 2rem;position:sticky;top:0;z-index:100}
+.header-top{display:flex;align-items:center;justify-content:space-between;padding:1rem 0}
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;letter-spacing:0.3em;color:var(--silver);cursor:pointer}
+.logo span{font-style:italic;color:white}
+.header-right{display:flex;align-items:center;gap:1.5rem}
+.header-btn{background:none;border:none;color:#aaa;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;transition:color 0.2s}
+.header-btn:hover{color:white}
+
+/* LAYOUT */
+.account-wrap{max-width:1100px;margin:0 auto;padding:3rem 2rem;display:grid;grid-template-columns:220px 1fr;gap:2.5rem}
+
+/* SIDEBAR */
+.account-sidebar{position:sticky;top:80px;height:fit-content}
+.account-avatar{width:64px;height:64px;background:var(--dark);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--silver);margin-bottom:1rem;border:1px solid #333}
+.account-name{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:400;margin-bottom:0.2rem}
+.account-email{font-size:0.78rem;color:var(--accent);margin-bottom:2rem;letter-spacing:0.03em}
+.sidebar-nav{display:flex;flex-direction:column;gap:0}
+.sidebar-item{background:none;border:none;text-align:left;padding:0.75rem 1rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.78rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--accent);transition:all 0.2s;border-left:2px solid transparent}
+.sidebar-item:hover{color:var(--dark);border-left-color:#ccc}
+.sidebar-item.active{color:var(--dark);border-left-color:var(--dark);font-weight:500}
+.logout-item{margin-top:2rem;color:#999}
+.logout-item:hover{color:#c0392b;border-left-color:#c0392b}
+
+/* MAIN */
+.account-main{}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;margin-bottom:0.3rem}
+.section-sub{font-size:0.8rem;color:var(--accent);letter-spacing:0.05em;margin-bottom:2rem}
+.silver-line{width:50px;height:1px;background:var(--silver);margin:0.8rem 0 2rem}
+
+/* TABS */
+.tab-content{display:none}.tab-content.active{display:block}
+
+/* ORDERS */
+.order-card{background:white;border:1px solid var(--border);margin-bottom:1.2rem;overflow:hidden}
+.order-header{padding:1.2rem 1.5rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f0f0f0;cursor:pointer;transition:background 0.15s}
+.order-header:hover{background:#fafafa}
+.order-id{font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);margin-bottom:0.2rem}
+.order-date{font-size:0.82rem;color:var(--dark)}
+.order-right{display:flex;align-items:center;gap:1.5rem}
+.order-total{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:400}
+.order-badge{padding:0.25rem 0.8rem;font-size:0.68rem;letter-spacing:0.15em;text-transform:uppercase;border-radius:2px;font-weight:500}
+.badge-paid,.badge-delivered{background:#e8f5ed;color:#2d7d46}
+.badge-processing{background:#dbeafe;color:#1d4ed8}
+.badge-shipped{background:#ede9fe;color:#6d28d9}
+.badge-pending{background:#fef3c7;color:#b45309}
+.badge-cancelled{background:#fee2e2;color:#b91c1c}
+.badge-refunded{background:#f3f4f6;color:#374151}
+.order-items-list{padding:1.2rem 1.5rem;display:none}
+.order-items-list.open{display:block}
+.order-item-row{display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid #f5f5f5;font-size:0.85rem}
+.order-item-row:last-child{border-bottom:none}
+.order-item-name{color:var(--dark)}
+.order-item-variant{color:var(--accent);font-size:0.78rem;margin-left:0.3rem}
+.order-item-qty{color:var(--accent);margin-left:0.5rem}
+.order-item-price{font-weight:500}
+.order-tracking{padding:0.8rem 1.5rem;background:#fafafa;border-top:1px solid #f0f0f0;font-size:0.8rem;color:var(--accent);display:flex;align-items:center;gap:0.5rem}
+.order-expand-btn{color:var(--accent);font-size:0.75rem;letter-spacing:0.1em;transition:transform 0.2s;display:inline-block}
+.empty-state{text-align:center;padding:4rem 2rem;color:var(--accent)}
+.empty-state .empty-icon{font-size:3rem;margin-bottom:1rem;display:block;opacity:0.3}
+.empty-state h3{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;margin-bottom:0.5rem;color:var(--dark)}
+.empty-state p{font-size:0.85rem;letter-spacing:0.05em}
+.empty-cta{display:inline-block;margin-top:1.5rem;background:var(--dark);color:white;padding:0.75rem 2rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.75rem;letter-spacing:0.25em;text-transform:uppercase;border:none;transition:opacity 0.2s}
+.empty-cta:hover{opacity:0.8}
+
+/* FAVORITES */
+.fav-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1.2rem}
+.fav-card{background:white;border:1px solid var(--border);overflow:hidden;position:relative;transition:transform 0.2s}
+.fav-card:hover{transform:translateY(-3px)}
+.fav-img{height:200px;overflow:hidden;background:#f5f5f5}
+.fav-img img{width:100%;height:100%;object-fit:cover;transition:transform 0.4s}
+.fav-card:hover .fav-img img{transform:scale(1.05)}
+.fav-body{padding:0.9rem 1rem}
+.fav-name{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:400;margin-bottom:0.2rem}
+.fav-price{font-size:0.82rem;color:var(--accent)}
+.fav-remove{position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.5);border:none;color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:0.85rem;display:flex;align-items:center;justify-content:center;transition:background 0.2s}
+.fav-remove:hover{background:rgba(192,57,43,0.8)}
+.fav-shop-btn{width:100%;background:none;border:1px solid var(--dark);padding:0.5rem;font-family:'Jost',sans-serif;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;margin-top:0.5rem;transition:all 0.2s}
+.fav-shop-btn:hover{background:var(--dark);color:white}
+
+/* PROFILE FORM */
+.profile-form{max-width:480px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.2rem}
+.form-field{margin-bottom:1.2rem}
+.form-field label{display:block;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);margin-bottom:0.5rem}
+.form-field input{width:100%;background:none;border:none;border-bottom:1px solid var(--border);font-family:'Jost',sans-serif;font-size:0.9rem;padding:0.5rem 0;outline:none;transition:border-color 0.2s;color:var(--dark)}
+.form-field input:focus{border-bottom-color:var(--dark)}
+.form-save{background:var(--dark);color:white;border:none;padding:0.8rem 2.5rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.75rem;letter-spacing:0.25em;text-transform:uppercase;transition:opacity 0.2s;margin-top:0.5rem}
+.form-save:hover{opacity:0.8}
+.form-msg{font-size:0.8rem;margin-top:0.8rem;display:none}
+.form-msg.ok{color:#2d7d46}.form-msg.err{color:#c0392b}
+
+/* SPINNER */
+.spinner{width:24px;height:24px;border:2px solid #ddd;border-top-color:var(--dark);border-radius:50%;animation:spin 0.7s linear infinite;margin:3rem auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .account-wrap{grid-template-columns:1fr;padding:1.5rem 1rem}
+  .account-sidebar{position:static}
+  .sidebar-nav{flex-direction:row;flex-wrap:wrap;gap:0}
+  .account-avatar{display:none}
+  .fav-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="logo" onclick="window.location.href='index.html'">PLATA<span>&</span>CO</div>
+    <div class="header-right">
+      <button class="header-btn" onclick="window.location.href='index.html'">← Volver a la tienda</button>
+      <button class="header-btn" id="logoutBtn" onclick="doLogout()">Cerrar sesión</button>
+    </div>
+  </div>
+</header>
+
+<div class="account-wrap" id="accountWrap" style="display:none">
+  <!-- SIDEBAR -->
+  <aside class="account-sidebar">
+    <div class="account-avatar" id="avatarEl"></div>
+    <div class="account-name" id="userNameEl">—</div>
+    <div class="account-email" id="userEmailEl">—</div>
+    <nav class="sidebar-nav">
+      <button class="sidebar-item active" onclick="showTab('orders',this)">Mis pedidos</button>
+      <button class="sidebar-item" onclick="showTab('favorites',this)">Favoritos</button>
+      <button class="sidebar-item" onclick="showTab('profile',this)">Mis datos</button>
+      <button class="sidebar-item logout-item" onclick="doLogout()">Cerrar sesión</button>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="account-main">
+
+    <!-- PEDIDOS -->
+    <div class="tab-content active" id="tabOrders">
+      <h2 class="section-title">Mis pedidos</h2>
+      <div class="silver-line"></div>
+      <div id="ordersContainer"><div class="spinner"></div></div>
+    </div>
+
+    <!-- FAVORITOS -->
+    <div class="tab-content" id="tabFavorites">
+      <h2 class="section-title">Favoritos</h2>
+      <div class="silver-line"></div>
+      <div id="favoritesContainer"><div class="spinner"></div></div>
+    </div>
+
+    <!-- PERFIL -->
+    <div class="tab-content" id="tabProfile">
+      <h2 class="section-title">Mis datos</h2>
+      <div class="silver-line"></div>
+      <div class="profile-form">
+        <div class="form-row">
+          <div class="form-field"><label>Nombre</label><input type="text" id="pfFirstName"></div>
+          <div class="form-field"><label>Apellido</label><input type="text" id="pfLastName"></div>
+        </div>
+        <div class="form-field"><label>Email</label><input type="email" id="pfEmail" disabled style="opacity:0.5"></div>
+        <div class="form-field"><label>Teléfono</label><input type="tel" id="pfPhone" placeholder="(opcional)"></div>
+        <button class="form-save" onclick="saveProfile()">Guardar cambios</button>
+        <div class="form-msg" id="profileMsg"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- NOT LOGGED IN -->
+<div id="notLoggedIn" style="display:none;text-align:center;padding:6rem 2rem">
+  <div style="font-size:3rem;margin-bottom:1rem;opacity:0.3">◇</div>
+  <h2 style="font-family:'Cormorant Garamond',serif;font-weight:300;font-size:2rem;margin-bottom:0.5rem">Área privada</h2>
+  <p style="color:var(--accent);font-size:0.85rem;margin-bottom:2rem">Inicia sesión para ver tus pedidos y favoritos</p>
+  <button class="empty-cta" onclick="window.location.href='index.html'">Volver a la tienda</button>
+</div>
+
+<script>
+const API_URL = window.PLATACO_API_URL || 'http://localhost:4000/api';
+let authToken = localStorage.getItem('plataco_token') || null;
+let authUser  = null;
+let favoritesData = [];
+
+function getHeaders() {
+  return { 'Authorization': 'Bearer ' + authToken, 'Content-Type': 'application/json' };
+}
+
+async function init() {
+  if (!authToken) { showNotLoggedIn(); return; }
+  try {
+    const r = await fetch(API_URL + '/auth/me', { headers: getHeaders() });
+    if (!r.ok) { showNotLoggedIn(); return; }
+    authUser = await r.json();
+    showAccount();
+  } catch { showNotLoggedIn(); }
+}
+
+function showNotLoggedIn() {
+  document.getElementById('notLoggedIn').style.display = 'block';
+}
+
+function showAccount() {
+  document.getElementById('accountWrap').style.display = 'grid';
+  const initial = (authUser.first_name || authUser.email || '?')[0].toUpperCase();
+  document.getElementById('avatarEl').textContent    = initial;
+  document.getElementById('userNameEl').textContent  = [authUser.first_name, authUser.last_name].filter(Boolean).join(' ') || '—';
+  document.getElementById('userEmailEl').textContent = authUser.email;
+  loadOrders();
+}
+
+function doLogout() {
+  localStorage.removeItem('plataco_token');
+  window.location.href = 'index.html';
+}
+
+function showTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab' + name.charAt(0).toUpperCase() + name.slice(1)).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'favorites') loadFavorites();
+  if (name === 'profile')   fillProfile();
+}
+
+// ── ORDERS ─────────────────────────────────────────────────
+async function loadOrders() {
+  const container = document.getElementById('ordersContainer');
+  container.innerHTML = '<div class="spinner"></div>';
+  try {
+    const r = await fetch(API_URL + '/auth/orders', { headers: getHeaders() });
+    const orders = await r.json();
+    if (!orders.length) {
+      container.innerHTML = `<div class="empty-state">
+        <span class="empty-icon">◇</span>
+        <h3>Todavía no tienes pedidos</h3>
+        <p>Cuando realices una compra, aparecerá aquí</p>
+        <button class="empty-cta" onclick="window.location.href='index.html'">Ver la colección</button>
+      </div>`;
+      return;
+    }
+    container.innerHTML = orders.map(o => renderOrderCard(o)).join('');
+  } catch {
+    container.innerHTML = '<p style="color:#c0392b;font-size:0.85rem">Error al cargar los pedidos</p>';
+  }
+}
+
+function renderOrderCard(o) {
+  const date  = new Date(o.created_at).toLocaleDateString('es-ES', { day:'2-digit', month:'long', year:'numeric' });
+  const short = o.id.slice(-8).toUpperCase();
+  const status = o.status;
+  const statusLabel = { paid:'Pagado', processing:'En proceso', shipped:'Enviado', delivered:'Entregado', pending:'Pendiente', cancelled:'Cancelado', refunded:'Reembolsado' }[status] || status;
+  const items = Array.isArray(o.items) ? o.items.filter(i => i && i.product_name) : [];
+
+  const itemsHtml = items.map(i => `
+    <div class="order-item-row">
+      <span>
+        <span class="order-item-name">${i.product_name}</span>
+        ${i.variant_name ? `<span class="order-item-variant">(${i.variant_name})</span>` : ''}
+        <span class="order-item-qty">× ${i.quantity}</span>
+      </span>
+      <span class="order-item-price">€${parseFloat(i.unit_price_eur * i.quantity).toFixed(2)}</span>
+    </div>`).join('');
+
+  const trackingHtml = o.tracking_number
+    ? `<div class="order-tracking">📦 Seguimiento: <strong>${o.tracking_number}</strong></div>` : '';
+
+  return `<div class="order-card">
+    <div class="order-header" onclick="toggleOrderItems('${o.id}')">
+      <div>
+        <div class="order-id">Pedido #${short}</div>
+        <div class="order-date">${date}</div>
+      </div>
+      <div class="order-right">
+        <span class="order-badge badge-${status}">${statusLabel}</span>
+        <span class="order-total">€${parseFloat(o.total_eur).toFixed(2)}</span>
+        <span class="order-expand-btn" id="exp-${o.id}">▾</span>
+      </div>
+    </div>
+    <div class="order-items-list" id="items-${o.id}">
+      ${itemsHtml || '<p style="font-size:0.82rem;color:var(--accent)">Sin artículos registrados</p>'}
+    </div>
+    ${trackingHtml}
+  </div>`;
+}
+
+function toggleOrderItems(id) {
+  const list = document.getElementById('items-' + id);
+  const btn  = document.getElementById('exp-' + id);
+  list.classList.toggle('open');
+  btn.style.transform = list.classList.contains('open') ? 'rotate(180deg)' : '';
+}
+
+// ── FAVORITES ──────────────────────────────────────────────
+async function loadFavorites() {
+  const container = document.getElementById('favoritesContainer');
+  container.innerHTML = '<div class="spinner"></div>';
+  try {
+    const r = await fetch(API_URL + '/auth/favorites', { headers: getHeaders() });
+    favoritesData = await r.json();
+    if (!favoritesData.length) {
+      container.innerHTML = `<div class="empty-state">
+        <span class="empty-icon">♡</span>
+        <h3>Sin favoritos todavía</h3>
+        <p>Pulsa el corazón en cualquier producto para guardarlo aquí</p>
+        <button class="empty-cta" onclick="window.location.href='index.html'">Explorar la colección</button>
+      </div>`;
+      return;
+    }
+    renderFavorites();
+  } catch {
+    container.innerHTML = '<p style="color:#c0392b;font-size:0.85rem">Error al cargar favoritos</p>';
+  }
+}
+
+function renderFavorites() {
+  const container = document.getElementById('favoritesContainer');
+  const IMGS = {
+    'anillo sello oval':'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=400&q=80',
+    'anillo medio dedo':'https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=400&q=80',
+    'anillo':'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=400&q=80',
+    'collar cadena anchor':'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400&q=80',
+    'collar luna creciente':'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400&q=80',
+    'collar':'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&q=80',
+    'pulsera':'https://images.unsplash.com/photo-1573408301185-9519f94ae14e?w=400&q=80',
+    'pendiente':'https://images.unsplash.com/photo-1630018548696-e1e6e8a2ab31?w=400&q=80',
+    'default':'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=400&q=80',
+  };
+  function imgFor(p) {
+    if (p.main_image_url) return p.main_image_url;
+    const n = (p.name||'').toLowerCase();
+    for (const [k,u] of Object.entries(IMGS)) { if(k!=='default'&&n.includes(k)) return u; }
+    return IMGS['default'];
+  }
+  container.innerHTML = `<div class="fav-grid">${favoritesData.map(p => `
+    <div class="fav-card">
+      <div class="fav-img"><img src="${imgFor(p)}" alt="${p.name}" loading="lazy"></div>
+      <button class="fav-remove" onclick="removeFavorite('${p.id}')" title="Quitar de favoritos">✕</button>
+      <div class="fav-body">
+        <div class="fav-name">${p.name}</div>
+        <div class="fav-price">€${parseFloat(p.price_eur).toFixed(2)}</div>
+        <button class="fav-shop-btn" onclick="window.location.href='index.html'">Ver en tienda →</button>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+async function removeFavorite(pid) {
+  try {
+    const r = await fetch(API_URL + '/auth/favorites/' + pid, { method:'DELETE', headers: getHeaders() });
+    if (r.ok) {
+      favoritesData = favoritesData.filter(p => p.id !== pid);
+      if (!favoritesData.length) loadFavorites(); else renderFavorites();
+    }
+  } catch {}
+}
+
+// ── PROFILE ────────────────────────────────────────────────
+function fillProfile() {
+  document.getElementById('pfFirstName').value = authUser.first_name || '';
+  document.getElementById('pfLastName').value  = authUser.last_name  || '';
+  document.getElementById('pfEmail').value     = authUser.email      || '';
+  document.getElementById('pfPhone').value     = authUser.phone      || '';
+}
+
+async function saveProfile() {
+  const msg = document.getElementById('profileMsg');
+  msg.style.display = 'none';
+  const body = {
+    first_name: document.getElementById('pfFirstName').value.trim(),
+    last_name:  document.getElementById('pfLastName').value.trim(),
+    phone:      document.getElementById('pfPhone').value.trim(),
+  };
+  try {
+    const r = await fetch(API_URL + '/auth/me', { method:'PUT', headers: getHeaders(), body: JSON.stringify(body) });
+    const data = await r.json();
+    if (!r.ok) { showMsg(msg, data.error || 'Error al guardar', 'err'); return; }
+    authUser = { ...authUser, ...data };
+    document.getElementById('userNameEl').textContent = [authUser.first_name, authUser.last_name].filter(Boolean).join(' ') || '—';
+    document.getElementById('avatarEl').textContent   = (authUser.first_name || authUser.email)[0].toUpperCase();
+    showMsg(msg, 'Datos guardados correctamente ✓', 'ok');
+  } catch { showMsg(msg, 'Error de conexión', 'err'); }
+}
+
+function showMsg(el, text, type) {
+  el.textContent = text;
+  el.className = 'form-msg ' + type;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 3500);
+}
+
+init();
+</script>
+</body>
+</html>
