@@ -7,6 +7,7 @@ import Stripe from 'stripe';
 import { query, withTransaction } from './db.js';
 import { requireAuth } from './middleware_auth.js';
 import { sendOrderConfirmationEmail } from './email.js';
+import jwt from 'jsonwebtoken';
 
 const router = Router();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -107,7 +108,20 @@ router.post('/create-intent', async (req, res) => {
 // ── POST /api/payments/confirm-order ──────────────────────
 // Llamado por el frontend DESPUÉS de que Stripe confirma el pago.
 // Crea el pedido en la base de datos.
-router.post('/confirm-order', async (req, res) => {
+// Middleware inline: intenta autenticar con JWT si viene el header,
+// pero NO bloquea si no hay token (para invitados).
+
+router.post('/confirm-order', (req, res, next) => {
+  const header = req.headers.authorization;
+  if (header && header.startsWith('Bearer ')) {
+    try {
+      req.user = jwt.verify(header.split(' ')[1], process.env.JWT_SECRET);
+    } catch {
+      req.user = null; // Token inválido → tratar como invitado
+    }
+  }
+  next();
+}, async (req, res) => {
   try {
     const {
       payment_intent_id,
@@ -220,18 +234,34 @@ router.post('/confirm-order', async (req, res) => {
     });
 
     // Enviar email de confirmación (después de responder para no bloquear)
-    const emailAddress = guest_email || (req.user?.email) || null;
-    if (emailAddress) {
-      const itemsForEmail = items.map(i => ({
-        product_name: i.product_name,
-        variant_name: i.variant_name || null,
-        quantity:     i.quantity,
-        subtotal_eur: i.unit_price_eur * i.quantity,
-      }));
-      sendOrderConfirmationEmail(order, itemsForEmail, emailAddress).catch(e =>
-        console.error('Error enviando email confirmación:', e)
-      );
-    }
+    // Prioridad: guest_email del body → email del JWT → email de la BD por user_id
+    (async () => {
+      try {
+        let emailAddress = guest_email || req.user?.email || null;
+
+        // Si hay user_id pero aún no tenemos email, buscarlo en la BD
+        if (!emailAddress && req.user?.id) {
+          const userRow = await query('SELECT email FROM users WHERE id=$1', [req.user.id]);
+          emailAddress = userRow.rows[0]?.email || null;
+        }
+
+        if (!emailAddress) {
+          console.warn('No se encontró email para confirmar pedido', order.id);
+          return;
+        }
+
+        const itemsForEmail = items.map(i => ({
+          product_name: i.product_name,
+          variant_name: i.variant_name || null,
+          quantity:     i.quantity,
+          subtotal_eur: i.unit_price_eur * i.quantity,
+        }));
+        await sendOrderConfirmationEmail(order, itemsForEmail, emailAddress);
+        console.log('Email confirmación enviado a ' + emailAddress + ' (pedido #' + order.id + ')');
+      } catch (e) {
+        console.error('Error enviando email confirmación:', e);
+      }
+    })();
 
   } catch (err) {
     console.error('Error confirm-order:', err);
