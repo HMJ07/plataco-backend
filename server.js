@@ -18,6 +18,8 @@ import orderRoutes    from './orders.js';
 import paymentRoutes  from './payments.js';
 import adminRoutes    from './admin.js';
 import webhookRoutes  from './webhooks.js';
+import favoritesRoutes  from './favorites.js';
+import googleAuthRoutes from './google_auth.js';
 
 dotenv.config();
 
@@ -48,12 +50,14 @@ app.use('/api/webhooks/stripe', express.raw({ type: 'application/json' }));
 app.use(express.json());
 
 // ── Rutas ──────────────────────────────────────────────────
-app.use('/api/auth',     authRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/orders',   orderRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/admin',    adminRoutes);
-app.use('/api/webhooks', webhookRoutes);
+app.use('/api/auth',          authRoutes);
+app.use('/api/auth/favorites', favoritesRoutes);
+app.use('/api/auth/google',    googleAuthRoutes);
+app.use('/api/products',      productRoutes);
+app.use('/api/orders',        orderRoutes);
+app.use('/api/payments',      paymentRoutes);
+app.use('/api/admin',         adminRoutes);
+app.use('/api/webhooks',      webhookRoutes);
 
 // ── Health check ───────────────────────────────────────────
 app.get('/api/health', (req, res) => {
