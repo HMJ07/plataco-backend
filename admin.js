@@ -341,7 +341,7 @@ router.put('/orders/:id/status', async (req, res) => {
 // GET /api/admin/reviews — Listar todas las reseñas pendientes o todas
 router.get('/reviews', async (req, res) => {
   try {
-    const { approved } = req.query; // 'true' | 'false' | undefined (todas)
+    const { approved, sort = 'recent' } = req.query;
     const conditions = [];
     const params = [];
     if (approved !== undefined) {
@@ -349,6 +349,13 @@ router.get('/reviews', async (req, res) => {
       conditions.push(`r.is_approved = $${params.length}`);
     }
     const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+    const sortMap = {
+      recent:      'r.created_at DESC',
+      oldest:      'r.created_at ASC',
+      rating_desc: 'r.rating DESC, r.created_at DESC',
+      rating_asc:  'r.rating ASC,  r.created_at DESC',
+    };
+    const orderBy = sortMap[sort] || 'r.created_at DESC';
 
     const result = await query(`
       SELECT r.*, p.name AS product_name, p.slug AS product_slug,
@@ -357,7 +364,7 @@ router.get('/reviews', async (req, res) => {
       JOIN products p ON p.id = r.product_id
       LEFT JOIN users u ON u.id = r.user_id
       ${where}
-      ORDER BY r.created_at DESC
+      ORDER BY ${orderBy}
     `, params);
     res.json(result.rows);
   } catch (err) {
@@ -365,14 +372,25 @@ router.get('/reviews', async (req, res) => {
   }
 });
 
-// PUT /api/admin/reviews/:id — Aprobar / rechazar reseña
+// PUT /api/admin/reviews/:id — Editar reseña (rating, título, cuerpo, estado)
 router.put('/reviews/:id', async (req, res) => {
   try {
-    const { is_approved } = req.body;
-    const result = await query(
-      'UPDATE product_reviews SET is_approved=$1 WHERE id=$2 RETURNING *',
-      [is_approved, req.params.id]
-    );
+    const { is_approved, rating, title, body } = req.body;
+    const result = await query(`
+      UPDATE product_reviews
+      SET is_approved = COALESCE($1, is_approved),
+          rating      = COALESCE($2, rating),
+          title       = COALESCE($3, title),
+          body        = COALESCE($4, body),
+          updated_at  = NOW()
+      WHERE id = $5 RETURNING *
+    `, [
+      is_approved !== undefined ? is_approved : null,
+      rating || null,
+      title !== undefined ? title : null,
+      body  !== undefined ? body  : null,
+      req.params.id,
+    ]);
     if (!result.rows[0]) return res.status(404).json({ error: 'Reseña no encontrada' });
     res.json(result.rows[0]);
   } catch (err) {
