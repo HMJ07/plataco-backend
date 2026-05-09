@@ -1,55 +1,42 @@
 // ============================================================
-// PLATACO — Servicio de Email con Nodemailer + Gmail SMTP
+// PLATACO — Servicio de Email con Resend
 // ============================================================
 // Variables de entorno necesarias en Railway:
-//   GMAIL_USER=tucuenta@gmail.com
-//   GMAIL_APP_PASSWORD=xxxx xxxx xxxx xxxx   ← contraseña de aplicación de Google
-//   EMAIL_FROM=PLATACO <tucuenta@gmail.com>   (opcional, por defecto usa GMAIL_USER)
+//   RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxx
+//   EMAIL_FROM=PLATACO <onboarding@resend.dev>   ← mientras no tengas dominio propio
 //
-// Cómo obtener la contraseña de aplicación de Google:
-//   1. Ve a myaccount.google.com → Seguridad → Verificación en 2 pasos (actívala)
-//   2. Busca "Contraseñas de aplicación" → Genera una para "Correo / Otro"
-//   3. Copia las 16 letras que te da y ponlas en GMAIL_APP_PASSWORD
+// Cuando tengas dominio verificado en Resend cambia EMAIL_FROM a:
+//   PLATACO <hola@tudominio.com>
 // ============================================================
 
-import nodemailer from 'nodemailer';
-
-/**
- * Envía un email usando Gmail SMTP.
- * IMPORTANTE: Las variables de entorno se leen aquí dentro (no al importar el módulo)
- * para garantizar que dotenv ya las ha cargado cuando se llama la función.
- */
 async function sendEmail({ to, subject, html }) {
-  const GMAIL_USER         = process.env.GMAIL_USER;
-  const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD;
-  const EMAIL_FROM         = process.env.EMAIL_FROM || `PLATACO <${GMAIL_USER}>`;
+  const RESEND_API_KEY = process.env.RESEND_API_KEY;
+  const EMAIL_FROM     = process.env.EMAIL_FROM || 'PLATACO <onboarding@resend.dev>';
 
-  if (!GMAIL_USER || !GMAIL_APP_PASSWORD) {
-    console.warn('⚠️  GMAIL_USER o GMAIL_APP_PASSWORD no configurados — email no enviado');
+  if (!RESEND_API_KEY) {
+    console.warn('⚠️  RESEND_API_KEY no configurada — email no enviado');
     return;
   }
 
-  const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    family: 4,
-    secure: true,       // puerto 587 usa STARTTLS (no SSL directo)
-    auth: {
-      user: GMAIL_USER,
-      pass: GMAIL_APP_PASSWORD,
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${RESEND_API_KEY}`,
+      'Content-Type': 'application/json',
     },
+    body: JSON.stringify({ from: EMAIL_FROM, to, subject, html }),
   });
 
-  const info = await transporter.sendMail({ from: EMAIL_FROM, to, subject, html });
-  console.log(`📧 Email enviado a ${to} — ID: ${info.messageId}`);
+  const data = await res.json();
+
+  if (!res.ok) {
+    console.error('❌ Resend error:', data);
+    throw new Error(data.message || 'Error enviando email');
+  }
+
+  console.log(`📧 Email enviado a ${to} — ID: ${data.id}`);
 }
 
-/**
- * Genera y envía el email de confirmación de pedido.
- * @param {object} order  - Fila de la tabla orders
- * @param {Array}  items  - Array de items (campos: product_name, variant_name, quantity, subtotal_eur)
- * @param {string} email  - Dirección de destino
- */
 export async function sendOrderConfirmationEmail(order, items, email) {
   if (!email) return;
 
@@ -81,7 +68,9 @@ export async function sendOrderConfirmationEmail(order, items, email) {
     order.ship_country,
   ].filter(Boolean).join('<br>');
 
-  const contactEmail = process.env.GMAIL_USER || 'hola@plataco.com';
+  const contactEmail = process.env.EMAIL_FROM
+    ? process.env.EMAIL_FROM.replace(/.*<(.+)>/, '$1')
+    : 'hola@plataco.com';
 
   const html = `
 <!DOCTYPE html>
