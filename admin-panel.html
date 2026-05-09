@@ -261,6 +261,13 @@
     <input type="password" id="loginPassword" placeholder="••••••••" />
     <button class="login-btn" onclick="doLogin()">Entrar</button>
     <div id="loginError"></div>
+    <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border)">
+      <div style="font-size:0.75rem;color:var(--gray);margin-bottom:6px">URL del backend:</div>
+      <div id="currentApiUrl" style="font-size:0.72rem;color:var(--accent);font-family:monospace;word-break:break-all;margin-bottom:10px">—</div>
+      <button onclick="resetApiUrl()" style="width:100%;padding:8px;background:transparent;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;color:var(--gray);cursor:pointer;font-family:var(--font)">
+        Cambiar URL del backend
+      </button>
+    </div>
   </div>
 </div>
 
@@ -478,6 +485,21 @@ let currentPage = 1;
 const PER_PAGE = 20;
 
 // Prompt API URL on first load if not set
+function resetApiUrl() {
+  localStorage.removeItem('plataco_api');
+  const url = prompt('Introduce la URL de tu backend Railway (ej: https://tu-app.up.railway.app):');
+  if (url && url.trim()) {
+    localStorage.setItem('plataco_api', url.trim().replace(/\/$/, ''));
+    location.reload();
+  }
+}
+
+function updateApiUrlDisplay() {
+  const url = localStorage.getItem('plataco_api') || '';
+  const el = document.getElementById('currentApiUrl');
+  if (el) el.textContent = url || '(sin configurar)';
+}
+
 function ensureApiUrl() {
   if (!API) {
     const url = prompt('Introduce la URL de tu backend Railway (ej: https://tu-app.up.railway.app):');
@@ -1246,6 +1268,7 @@ async function deleteReview(id) {
 // ── Init ──────────────────────────────────────────────────
 (async () => {
   ensureApiUrl();
+  updateApiUrlDisplay();
   if (TOKEN) {
     const ok = await checkAuth();
     if (ok) { showApp(); return; }
