@@ -575,6 +575,391 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
   .product-grid{grid-template-columns:1fr}
   .hero-title{font-size:2rem}
 }
+
+/* ══════════════════════════════════════
+   GUÍA DE TALLAS POR FOTO
+══════════════════════════════════════ */
+.size-guide-trigger {
+  background: none;
+  border: none;
+  color: var(--gold);
+  font-family: 'Jost', sans-serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0;
+  margin-left: 0.8rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  opacity: 0.85;
+  transition: opacity 0.2s;
+}
+.size-guide-trigger:hover { opacity: 1; }
+
+.size-guide-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 600;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  backdrop-filter: blur(6px);
+}
+.size-guide-overlay.open { display: flex; }
+
+.size-guide-modal {
+  background: #0d0d0d;
+  border: 1px solid #2a2a2a;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  animation: fadeUp 0.3s ease;
+}
+.size-guide-header {
+  padding: 1.5rem 1.8rem 1rem;
+  border-bottom: 1px solid #1e1e1e;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.size-guide-header h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: white;
+  letter-spacing: 0.05em;
+}
+.size-guide-header p {
+  font-size: 0.72rem;
+  color: #666;
+  letter-spacing: 0.08em;
+  margin-top: 0.2rem;
+  text-transform: uppercase;
+}
+.size-guide-close {
+  background: none;
+  border: none;
+  color: #555;
+  font-size: 1.3rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  flex-shrink: 0;
+  margin-left: 1rem;
+  transition: color 0.2s;
+}
+.size-guide-close:hover { color: white; }
+
+.size-guide-body { padding: 1.5rem 1.8rem; }
+
+.sg-step { display: none; }
+.sg-step.active { display: block; }
+
+.sg-category-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 1rem;
+}
+.sg-cat-btn {
+  background: #111;
+  border: 1px solid #2a2a2a;
+  color: #888;
+  padding: 1.2rem 1rem;
+  cursor: pointer;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-align: center;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+.sg-cat-btn:hover, .sg-cat-btn.selected {
+  border-color: var(--gold);
+  color: var(--gold-light);
+  background: rgba(201,168,76,0.06);
+}
+.sg-cat-icon { font-size: 1.6rem; }
+
+.sg-instruction {
+  background: #111;
+  border: 1px solid #1e1e1e;
+  border-left: 2px solid var(--gold);
+  padding: 1rem 1.2rem;
+  margin-bottom: 1rem;
+}
+.sg-instruction p {
+  font-size: 0.8rem;
+  color: #aaa;
+  line-height: 1.7;
+  letter-spacing: 0.02em;
+}
+.sg-instruction strong { color: var(--gold-light); }
+
+.sg-upload-zone {
+  border: 1px dashed #333;
+  padding: 2rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  margin-bottom: 1rem;
+}
+.sg-upload-zone:hover { border-color: var(--gold); }
+.sg-upload-zone input[type=file] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+.sg-upload-icon { font-size: 2rem; margin-bottom: 0.5rem; color: #444; }
+.sg-upload-label {
+  font-size: 0.75rem;
+  color: #555;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  display: block;
+}
+.sg-upload-sub {
+  font-size: 0.68rem;
+  color: #3a3a3a;
+  margin-top: 0.3rem;
+  display: block;
+}
+.sg-preview-img {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  display: none;
+  margin-bottom: 1rem;
+  border: 1px solid #1e1e1e;
+}
+
+.sg-analyzing {
+  display: none;
+  text-align: center;
+  padding: 2rem;
+}
+.sg-analyzing.show { display: block; }
+.sg-spinner {
+  width: 36px;
+  height: 36px;
+  border: 2px solid #222;
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 1rem;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.sg-analyzing p {
+  font-size: 0.75rem;
+  color: #555;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.sg-result {
+  display: none;
+  animation: fadeUp 0.4s ease;
+}
+.sg-result.show { display: block; }
+
+.sg-result-main {
+  background: linear-gradient(135deg, rgba(201,168,76,0.08), rgba(201,168,76,0.03));
+  border: 1px solid rgba(201,168,76,0.25);
+  padding: 1.5rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.sg-result-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.6rem;
+  display: block;
+}
+.sg-result-size {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 3rem;
+  font-weight: 300;
+  color: white;
+  line-height: 1;
+  margin-bottom: 0.4rem;
+}
+.sg-result-mm {
+  font-size: 0.75rem;
+  color: #666;
+  letter-spacing: 0.1em;
+}
+.sg-result-note {
+  font-size: 0.75rem;
+  color: #555;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  margin-top: 0.8rem;
+}
+.sg-result-confidence {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  font-size: 0.68rem;
+  color: #444;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.sg-confidence-bar {
+  flex: 1;
+  height: 2px;
+  background: #1e1e1e;
+  position: relative;
+  overflow: hidden;
+}
+.sg-confidence-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  background: var(--gold);
+  transition: width 0.8s ease;
+}
+
+.sg-apply-btn {
+  width: 100%;
+  background: var(--gold);
+  color: var(--dark);
+  border: none;
+  padding: 0.9rem;
+  cursor: pointer;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  transition: opacity 0.2s;
+  margin-top: 0.5rem;
+}
+.sg-apply-btn:hover { opacity: 0.85; }
+
+.sg-retry-btn {
+  width: 100%;
+  background: none;
+  color: #555;
+  border: 1px solid #1e1e1e;
+  padding: 0.7rem;
+  cursor: pointer;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-top: 0.6rem;
+  transition: all 0.2s;
+}
+.sg-retry-btn:hover { border-color: #444; color: #888; }
+
+.sg-error {
+  display: none;
+  background: rgba(231,76,60,0.08);
+  border: 1px solid rgba(231,76,60,0.2);
+  padding: 1rem 1.2rem;
+  margin-bottom: 1rem;
+}
+.sg-error.show { display: block; }
+.sg-error p {
+  font-size: 0.78rem;
+  color: #e57373;
+  letter-spacing: 0.02em;
+}
+
+.sg-nav {
+  display: flex;
+  gap: 8px;
+  margin-top: 1.2rem;
+}
+.sg-btn-primary {
+  flex: 1;
+  background: var(--dark);
+  color: white;
+  border: 1px solid #333;
+  padding: 0.75rem;
+  cursor: pointer;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: all 0.2s;
+}
+.sg-btn-primary:hover { border-color: var(--gold); color: var(--gold-light); }
+.sg-btn-primary:disabled { opacity: 0.3; cursor: default; }
+.sg-btn-secondary {
+  background: none;
+  color: #555;
+  border: 1px solid #1e1e1e;
+  padding: 0.75rem 1.2rem;
+  cursor: pointer;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  transition: all 0.2s;
+}
+.sg-btn-secondary:hover { border-color: #333; color: #888; }
+
+.sg-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid #1e1e1e;
+  margin-bottom: 1.2rem;
+}
+.sg-tab {
+  background: none;
+  border: none;
+  color: #444;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border-bottom: 1px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.2s;
+}
+.sg-tab.active { color: var(--gold-light); border-bottom-color: var(--gold); }
+.sg-tab-content { display: none; }
+.sg-tab-content.active { display: block; }
+
+.sg-tip-list { list-style: none; padding: 0; }
+.sg-tip-list li {
+  font-size: 0.78rem;
+  color: #666;
+  line-height: 1.6;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #111;
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+}
+.sg-tip-list li::before {
+  content: '—';
+  color: var(--gold);
+  flex-shrink: 0;
+  font-size: 0.6rem;
+}
+
 </style>
 </head>
 <body>
@@ -858,7 +1243,10 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
       <div class="modal-divider"></div>
       <p class="modal-desc" id="modalDesc"></p>
       <div id="modalSizesSection">
-        <span class="label">Talla</span>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem">
+          <span class="label">Talla</span>
+          <button class="size-guide-trigger" onclick="openSizeGuide()">&#128207; Guía de tallas</button>
+        </div>
         <div class="sizes" id="modalSizes"></div>
       </div>
       <div class="modal-divider"></div>
@@ -906,6 +1294,86 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
             <textarea class="review-input" id="reviewBodyInput" rows="3" placeholder="Cuéntanos tu experiencia..." style="resize:vertical"></textarea>
             <button class="review-submit-btn" id="reviewSubmitBtn" onclick="submitReview()">Enviar reseña</button>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- GUÍA DE TALLAS MODAL -->
+<div class="size-guide-overlay" id="sizeGuideOverlay" onclick="handleSizeGuideClick(event)">
+  <div class="size-guide-modal" onclick="event.stopPropagation()">
+    <div class="size-guide-header">
+      <div>
+        <h3>Guía de tallas</h3>
+        <p>Medición inteligente por foto</p>
+      </div>
+      <button class="size-guide-close" onclick="closeSizeGuide()">&#x2715;</button>
+    </div>
+    <div class="size-guide-body">
+      <!-- STEP 1: categoría -->
+      <div class="sg-step active" id="sgStep1">
+        <p style="font-size:0.78rem;color:#555;letter-spacing:0.05em;margin-bottom:0.2rem">¿Para qué tipo de joya necesitas la talla?</p>
+        <div class="sg-category-grid">
+          <button class="sg-cat-btn" onclick="selectSgCategory('anillo',this)"><span class="sg-cat-icon">&#128141;</span>Anillo</button>
+          <button class="sg-cat-btn" onclick="selectSgCategory('pulsera',this)"><span class="sg-cat-icon">&#128255;</span>Pulsera</button>
+          <button class="sg-cat-btn" onclick="selectSgCategory('collar',this)"><span class="sg-cat-icon">&#10024;</span>Collar</button>
+          <button class="sg-cat-btn" onclick="selectSgCategory('pendiente',this)"><span class="sg-cat-icon">&#128066;</span>Pendiente</button>
+        </div>
+        <div class="sg-nav">
+          <button class="sg-btn-secondary" onclick="closeSizeGuide()">Cancelar</button>
+          <button class="sg-btn-primary" id="sgNextBtn1" onclick="goSgStep(2)" disabled>Continuar &#8594;</button>
+        </div>
+      </div>
+      <!-- STEP 2: foto + análisis -->
+      <div class="sg-step" id="sgStep2">
+        <div class="sg-tabs">
+          <button class="sg-tab active" onclick="switchSgTab('instrucciones',this)">Cómo hacerlo</button>
+          <button class="sg-tab" onclick="switchSgTab('consejos',this)">Consejos</button>
+        </div>
+        <div class="sg-tab-content active" id="sgTabInstrucciones">
+          <div class="sg-instruction" id="sgInstructionText"></div>
+        </div>
+        <div class="sg-tab-content" id="sgTabConsejos">
+          <ul class="sg-tip-list">
+            <li>Usa luz natural o de techo, evita contraluz</li>
+            <li>Cámara bien perpendicular, no en ángulo</li>
+            <li>La moneda debe verse completa y plana</li>
+            <li>Que la parte a medir ocupe al menos la mitad de la foto</li>
+            <li>Foto nítida, sin movimiento</li>
+          </ul>
+        </div>
+        <img id="sgPreviewImg" class="sg-preview-img" alt="Preview" />
+        <div class="sg-upload-zone" id="sgUploadZone">
+          <input type="file" accept="image/*" capture="environment" id="sgFileInput" onchange="handleSgFile(event)" />
+          <div class="sg-upload-icon">&#128247;</div>
+          <span class="sg-upload-label">Toca para hacer una foto</span>
+          <span class="sg-upload-sub">o sube una imagen desde la galería</span>
+        </div>
+        <div class="sg-error" id="sgError"><p id="sgErrorText">Error analizando la imagen.</p></div>
+        <div class="sg-analyzing" id="sgAnalyzing">
+          <div class="sg-spinner"></div>
+          <p>Analizando medidas…</p>
+        </div>
+        <div class="sg-result" id="sgResult">
+          <div class="sg-result-main">
+            <span class="sg-result-label">Tu talla recomendada</span>
+            <div class="sg-result-size" id="sgResultSize">—</div>
+            <div class="sg-result-mm" id="sgResultMm"></div>
+            <div class="sg-result-confidence">
+              <span>Confianza</span>
+              <div class="sg-confidence-bar"><div class="sg-confidence-fill" id="sgConfidenceFill" style="width:0%"></div></div>
+              <span id="sgConfidenceVal">—</span>
+            </div>
+          </div>
+          <p class="sg-result-note" id="sgResultNote"></p>
+          <button class="sg-apply-btn" onclick="applySgSize()" id="sgApplyBtn">Seleccionar esta talla</button>
+          <button class="sg-retry-btn" onclick="retrySgPhoto()">Volver a intentarlo</button>
+        </div>
+        <div class="sg-nav" id="sgStep2Nav">
+          <button class="sg-btn-secondary" onclick="goSgStep(1)">&#8592; Atrás</button>
+          <button class="sg-btn-primary" id="sgAnalyzeBtn" onclick="analyzeSgPhoto()" disabled>Analizar foto &#8594;</button>
         </div>
       </div>
     </div>
@@ -1860,5 +2328,235 @@ loadProductsFromApi();
 updateCartUI();
 renderSubcategoryBar('all');
 </script>
+
+<script>
+// ══════════════════════════════════════════════════
+// PLATACO · Guía de tallas por foto
+// Claude Vision API · claude-sonnet-4-20250514
+// ══════════════════════════════════════════════════
+
+const SG_API = 'https://api.anthropic.com/v1/messages';
+
+let sgCategory = null;
+let sgImageBase64 = null;
+let sgResultData = null;
+let sgCurrentStep = 1;
+
+const SG_INSTRUCTIONS = {
+  anillo: 'Coloca un <strong>euro (€1)</strong> plano sobre una mesa junto a tu dedo anular (o el dedo para el que quieres la talla), con la palma hacia abajo. Haz la foto desde arriba, bien perpendicular a la mesa.',
+  pulsera: 'Rodea tu muñeca con una <strong>cinta de papel</strong> y marca donde se cruza. Extiéndela sobre la mesa junto a un <strong>euro (€1)</strong> y fotografíalo desde arriba.',
+  collar: 'Coloca una cinta métrica extendida a la longitud deseada junto a un <strong>euro (€1)</strong> sobre la mesa y fotografíalo desde arriba.',
+  pendiente: 'Coloca el pendiente actual (o una regla mostrando el tamaño deseado) junto a un <strong>euro (€1)</strong> sobre la mesa y fotografíalo desde arriba.',
+};
+
+const SG_SIZE_TABLES = {
+  anillo: [
+    { label:'XS', min:14.0, max:15.2, eu:'44–48' },
+    { label:'S',  min:15.3, max:16.5, eu:'48–52' },
+    { label:'M',  min:16.6, max:17.8, eu:'52–56' },
+    { label:'L',  min:17.9, max:19.0, eu:'56–60' },
+    { label:'XL', min:19.1, max:21.0, eu:'60–66' },
+  ],
+  pulsera: [
+    { label:'XS', min:140, max:155, eu:'14–15.5 cm' },
+    { label:'S',  min:156, max:165, eu:'15.5–16.5 cm' },
+    { label:'M',  min:166, max:175, eu:'16.5–17.5 cm' },
+    { label:'L',  min:176, max:185, eu:'17.5–18.5 cm' },
+    { label:'XL', min:186, max:210, eu:'18.5–21 cm' },
+  ],
+  collar: [
+    { label:'40 cm', min:380, max:420, eu:'Clavícula' },
+    { label:'45 cm', min:430, max:470, eu:'Escote' },
+    { label:'50 cm', min:480, max:530, eu:'Princesa' },
+    { label:'60 cm', min:540, max:650, eu:'Matinée' },
+  ],
+  pendiente: [
+    { label:'S',  min:0,  max:10, eu:'Hasta 10mm' },
+    { label:'M',  min:11, max:20, eu:'10–20mm' },
+    { label:'L',  min:21, max:40, eu:'20–40mm' },
+    { label:'XL', min:41, max:100, eu:'Más de 40mm' },
+  ],
+};
+
+function buildSgPrompt(category) {
+  const prompts = {
+    anillo: `Eres un experto en joyería y medición. En la imagen hay una moneda de 1 euro (diámetro exacto: 23.25mm) como referencia de escala. Usando esa escala, mide el diámetro del dedo visible. Si no hay dedo, mide cualquier objeto circular presente. Responde SOLO con este JSON exacto, sin texto adicional ni backticks: {"medida_mm":número,"talla_sugerida":"XS|S|M|L|XL","confianza":0-100,"nota":"texto corto máx 100 chars","moneda_detectada":true|false}`,
+    pulsera: `Eres un experto en joyería. En la imagen hay una moneda de 1 euro (diámetro: 23.25mm) como referencia. Calcula la longitud de la cinta o el perímetro de la muñeca visible en mm. Responde SOLO con este JSON exacto: {"medida_mm":número,"talla_sugerida":"XS|S|M|L|XL","confianza":0-100,"nota":"texto corto máx 100 chars","moneda_detectada":true|false}`,
+    collar: `Eres un experto en joyería. En la imagen hay una moneda de 1 euro (diámetro: 23.25mm) como referencia. Mide la longitud de la cinta métrica o el objeto visible en mm. Responde SOLO con este JSON exacto: {"medida_mm":número,"talla_sugerida":"40 cm|45 cm|50 cm|60 cm","confianza":0-100,"nota":"texto corto máx 100 chars","moneda_detectada":true|false}`,
+    pendiente: `Eres un experto en joyería. En la imagen hay una moneda de 1 euro (diámetro: 23.25mm) como referencia. Mide el objeto o lóbulo visible en mm. Responde SOLO con este JSON exacto: {"medida_mm":número,"talla_sugerida":"S|M|L|XL","confianza":0-100,"nota":"texto corto máx 100 chars","moneda_detectada":true|false}`,
+  };
+  return prompts[category] || prompts.anillo;
+}
+
+function openSizeGuide() {
+  if (currentProduct) {
+    const cat = (currentProduct.category || '').toLowerCase();
+    if (cat.includes('anillo')) autoSelectSgCategory('anillo');
+    else if (cat.includes('pulsera')) autoSelectSgCategory('pulsera');
+    else if (cat.includes('collar')) autoSelectSgCategory('collar');
+    else if (cat.includes('pendiente')) autoSelectSgCategory('pendiente');
+  }
+  document.getElementById('sizeGuideOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSizeGuide() {
+  document.getElementById('sizeGuideOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function handleSizeGuideClick(e) {
+  if (e.target === document.getElementById('sizeGuideOverlay')) closeSizeGuide();
+}
+
+function autoSelectSgCategory(cat) {
+  sgCategory = cat;
+  document.querySelectorAll('.sg-cat-btn').forEach(b => {
+    b.classList.toggle('selected', b.getAttribute('onclick').includes("'" + cat + "'"));
+  });
+  document.getElementById('sgNextBtn1').disabled = false;
+}
+
+function selectSgCategory(cat, btn) {
+  sgCategory = cat;
+  document.querySelectorAll('.sg-cat-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('sgNextBtn1').disabled = false;
+}
+
+function goSgStep(step) {
+  document.getElementById('sgStep' + sgCurrentStep).classList.remove('active');
+  sgCurrentStep = step;
+  document.getElementById('sgStep' + step).classList.add('active');
+  if (step === 2) {
+    document.getElementById('sgInstructionText').innerHTML = '<p>' + (SG_INSTRUCTIONS[sgCategory] || SG_INSTRUCTIONS.anillo) + '</p>';
+    resetSgStep2();
+  }
+}
+
+function switchSgTab(tab, btn) {
+  document.querySelectorAll('.sg-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.sg-tab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  const id = 'sgTab' + tab.charAt(0).toUpperCase() + tab.slice(1);
+  document.getElementById(id).classList.add('active');
+}
+
+function resetSgStep2() {
+  sgImageBase64 = null;
+  sgResultData = null;
+  document.getElementById('sgPreviewImg').style.display = 'none';
+  document.getElementById('sgUploadZone').style.display = 'block';
+  document.getElementById('sgAnalyzing').classList.remove('show');
+  document.getElementById('sgResult').classList.remove('show');
+  document.getElementById('sgError').classList.remove('show');
+  document.getElementById('sgStep2Nav').style.display = 'flex';
+  document.getElementById('sgAnalyzeBtn').disabled = true;
+  document.getElementById('sgFileInput').value = '';
+}
+
+function retrySgPhoto() { resetSgStep2(); }
+
+function handleSgFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    sgImageBase64 = e.target.result.split(',')[1];
+    const preview = document.getElementById('sgPreviewImg');
+    preview.src = e.target.result;
+    preview.style.display = 'block';
+    document.getElementById('sgUploadZone').style.display = 'none';
+    document.getElementById('sgAnalyzeBtn').disabled = false;
+    document.getElementById('sgError').classList.remove('show');
+    document.getElementById('sgResult').classList.remove('show');
+  };
+  reader.readAsDataURL(file);
+}
+
+async function analyzeSgPhoto() {
+  if (!sgImageBase64 || !sgCategory) return;
+  document.getElementById('sgStep2Nav').style.display = 'none';
+  document.getElementById('sgAnalyzing').classList.add('show');
+  document.getElementById('sgResult').classList.remove('show');
+  document.getElementById('sgError').classList.remove('show');
+  try {
+    const res = await fetch(SG_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 256,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: sgImageBase64 } },
+            { type: 'text', text: buildSgPrompt(sgCategory) }
+          ]
+        }]
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Error en la API');
+    const raw = (data.content?.find(c => c.type === 'text')?.text || '').replace(/```json|```/g, '').trim();
+    let parsed;
+    try { parsed = JSON.parse(raw); }
+    catch { throw new Error('No se pudo interpretar la respuesta. Intenta con una foto más clara.'); }
+    sgResultData = parsed;
+    showSgResult(parsed);
+  } catch(err) {
+    document.getElementById('sgAnalyzing').classList.remove('show');
+    document.getElementById('sgStep2Nav').style.display = 'flex';
+    document.getElementById('sgError').classList.add('show');
+    document.getElementById('sgErrorText').textContent = err.message || 'Error analizando la imagen.';
+  }
+}
+
+function showSgResult(data) {
+  document.getElementById('sgAnalyzing').classList.remove('show');
+  const table = SG_SIZE_TABLES[sgCategory] || [];
+  const entry = table.find(t => t.label === data.talla_sugerida);
+  document.getElementById('sgResultSize').textContent = data.talla_sugerida || '—';
+  const isRing = sgCategory === 'anillo';
+  const mmVal = data.medida_mm;
+  const mmText = mmVal ? (isRing ? '∅ ' + mmVal + ' mm' : (mmVal / 10).toFixed(1) + ' cm') : '';
+  const euText = entry ? ' · ' + entry.eu : '';
+  document.getElementById('sgResultMm').textContent = mmText + euText;
+  const conf = Math.min(100, Math.max(0, data.confianza || 70));
+  document.getElementById('sgConfidenceFill').style.width = conf + '%';
+  document.getElementById('sgConfidenceVal').textContent = conf + '%';
+  let nota = data.nota || '';
+  if (!data.moneda_detectada) nota = '⚠️ No detecté la moneda claramente, el resultado puede ser menos preciso. ' + nota;
+  document.getElementById('sgResultNote').textContent = nota;
+  const applyBtn = document.getElementById('sgApplyBtn');
+  if (currentProduct && currentProduct.sizes && currentProduct.sizes.length > 0) {
+    const exists = currentProduct.sizes.includes(data.talla_sugerida);
+    applyBtn.disabled = !exists;
+    applyBtn.textContent = exists ? 'Seleccionar esta talla' : 'Talla ' + data.talla_sugerida + ' no disponible en este producto';
+    applyBtn.style.opacity = exists ? '1' : '0.4';
+  }
+  document.getElementById('sgResult').classList.add('show');
+}
+
+function applySgSize() {
+  if (!sgResultData?.talla_sugerida) return;
+  const size = sgResultData.talla_sugerida;
+  let found = false;
+  document.querySelectorAll('#modalSizes .size-btn').forEach(btn => {
+    if (btn.textContent.trim() === size) { btn.click(); found = true; }
+  });
+  if (found) {
+    closeSizeGuide();
+    const sec = document.getElementById('modalSizesSection');
+    if (sec) {
+      sec.style.transition = 'background 0.3s';
+      sec.style.background = 'rgba(201,168,76,0.08)';
+      setTimeout(() => { sec.style.background = ''; }, 900);
+    }
+  }
+}
+// ── Fin guía de tallas ──────────────────────────────────────
+</script>
+
 </body>
 </html>
