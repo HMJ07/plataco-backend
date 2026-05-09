@@ -10,43 +10,82 @@
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
   --silver:#C0C0C0;--dark:#0a0a0a;--cream:#f8f5f0;--accent:#8a8a8a;
-  --gold-light:#e8d5b0;--border:#ddd;
+  --gold:#C9A84C;--gold-light:#e8d5b0;--gold-pale:#f5ecd7;
+  --rose-gold:#b76e79;--platinum:#e5e4e2;
+  --border:#ddd;--border-dark:#2a2a2a;
+  --bg-section-alt:#f2ede6;
 }
-body{font-family:'Jost',sans-serif;background:var(--cream);color:var(--dark);min-height:100vh}
+body{font-family:'Jost',sans-serif;background:var(--cream);color:var(--dark);min-height:100vh;overflow-x:hidden}
 h1,h2,h3,.price{font-family:'Cormorant Garamond',serif}
 
-/* HEADER */
-header{background:var(--dark);color:white;padding:0 2rem;position:sticky;top:0;z-index:100}
-.header-top{display:flex;align-items:center;justify-content:space-between;padding:1rem 0;border-bottom:1px solid #222}
-.logo{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;letter-spacing:0.3em;color:var(--silver)}
-.logo span{font-style:italic;color:white}
+/* ══════════════════════════════════════
+   ANIMATIONS
+══════════════════════════════════════ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+@keyframes float{0%,100%{transform:translateY(0) rotate(0deg)}33%{transform:translateY(-8px) rotate(1deg)}66%{transform:translateY(-4px) rotate(-1deg)}}
+@keyframes spin3d{0%{transform:perspective(400px) rotateY(0deg)}100%{transform:perspective(400px) rotateY(360deg)}}
+@keyframes glimmer{0%,100%{opacity:0.3}50%{opacity:1}}
+@keyframes slideIn{from{transform:translateX(-20px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes pulse-ring{0%{transform:scale(0.8);opacity:1}100%{transform:scale(1.4);opacity:0}}
+@keyframes scroll-band{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@keyframes reveal{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0% 0 0)}}
+
+.fade-in{animation:fadeUp 0.7s ease both}
+.fade-in-d1{animation:fadeUp 0.7s ease 0.1s both}
+.fade-in-d2{animation:fadeUp 0.7s ease 0.2s both}
+.fade-in-d3{animation:fadeUp 0.7s ease 0.3s both}
+
+/* ══════════════════════════════════════
+   SCROLLING MARQUEE BANNER
+══════════════════════════════════════ */
+.marquee-strip{
+  background:var(--gold);color:var(--dark);
+  padding:0.5rem 0;overflow:hidden;white-space:nowrap;
+}
+.marquee-inner{
+  display:inline-block;
+  animation:scroll-band 22s linear infinite;
+}
+.marquee-inner span{
+  font-size:0.72rem;letter-spacing:0.25em;text-transform:uppercase;
+  padding:0 2.5rem;
+}
+.marquee-inner span::before{content:'✦';margin-right:2.5rem}
+
+/* ══════════════════════════════════════
+   HEADER
+══════════════════════════════════════ */
+header{background:var(--dark);color:white;padding:0 2rem;position:sticky;top:0;z-index:100;border-bottom:1px solid #181818}
+.header-top{display:flex;align-items:center;justify-content:space-between;padding:1rem 0;border-bottom:1px solid #1e1e1e}
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;letter-spacing:0.3em;color:var(--silver);transition:color 0.3s}
+.logo:hover{color:var(--gold-light)}
+.logo span{font-style:italic;color:var(--gold)}
 .header-actions{display:flex;align-items:center;gap:1.5rem}
 .cart-btn{background:none;border:1px solid #444;color:white;padding:0.5rem 1.2rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.8rem;letter-spacing:0.15em;text-transform:uppercase;transition:all 0.3s;display:flex;align-items:center;gap:0.5rem}
-.cart-btn:hover{background:white;color:var(--dark)}
-.cart-count{background:var(--silver);color:var(--dark);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:500}
+.cart-btn:hover{background:var(--gold);color:var(--dark);border-color:var(--gold)}
+.cart-count{background:var(--gold);color:var(--dark);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:600}
 
-/* AUTH BUTTON */
 .auth-btn{background:none;border:none;color:#aaa;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;transition:color 0.2s;display:flex;align-items:center;gap:0.4rem;padding:0.4rem 0}
 .auth-btn:hover{color:white}
 .auth-btn svg{width:15px;height:15px}
-.auth-user-name{color:var(--silver);font-size:0.75rem;letter-spacing:0.1em}
+.auth-user-name{color:var(--gold-light);font-size:0.75rem;letter-spacing:0.1em}
 
-/* AUTH MODAL */
-.auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
 .auth-overlay.open{display:flex}
-.auth-modal{background:#111;border:1px solid #2a2a2a;width:100%;max-width:400px;padding:2.5rem}
+.auth-modal{background:#111;border:1px solid #2a2a2a;width:100%;max-width:400px;padding:2.5rem;position:relative;animation:fadeUp 0.3s ease}
 .auth-modal h2{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:white;margin-bottom:0.3rem;letter-spacing:0.05em}
 .auth-modal p{color:#666;font-size:0.8rem;letter-spacing:0.05em;margin-bottom:2rem}
 .auth-tabs{display:flex;gap:0;margin-bottom:2rem;border-bottom:1px solid #222}
 .auth-tab{background:none;border:none;color:#555;padding:0.6rem 1.2rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.75rem;letter-spacing:0.2em;text-transform:uppercase;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s}
-.auth-tab.active{color:var(--silver);border-bottom-color:var(--silver)}
+.auth-tab.active{color:var(--gold-light);border-bottom-color:var(--gold)}
 .auth-field{margin-bottom:1.2rem}
 .auth-field label{display:block;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:#666;margin-bottom:0.5rem}
 .auth-field input{width:100%;background:none;border:none;border-bottom:1px solid #333;color:white;font-family:'Jost',sans-serif;font-size:0.9rem;padding:0.5rem 0;outline:none;transition:border-color 0.2s;letter-spacing:0.03em}
-.auth-field input:focus{border-bottom-color:var(--silver)}
+.auth-field input:focus{border-bottom-color:var(--gold)}
 .auth-field input::placeholder{color:#444}
 .auth-name-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-.auth-submit{width:100%;background:var(--silver);color:var(--dark);border:none;padding:0.85rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.8rem;letter-spacing:0.3em;text-transform:uppercase;margin-top:1.5rem;transition:opacity 0.2s}
+.auth-submit{width:100%;background:var(--gold);color:var(--dark);border:none;padding:0.85rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.8rem;letter-spacing:0.3em;text-transform:uppercase;margin-top:1.5rem;transition:opacity 0.2s}
 .auth-submit:hover{opacity:0.85}
 .auth-submit:disabled{opacity:0.4;cursor:default}
 .auth-error{color:#e57373;font-size:0.78rem;margin-top:0.8rem;letter-spacing:0.03em;display:none}
@@ -58,99 +97,297 @@ header{background:var(--dark);color:white;padding:0 2rem;position:sticky;top:0;z
 .google-btn{width:100%;background:#fff;color:#222;border:1px solid #ddd;padding:0.75rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.82rem;letter-spacing:0.05em;display:flex;align-items:center;justify-content:center;gap:0.6rem;transition:background 0.2s,box-shadow 0.2s;margin-top:0.5rem}
 .google-btn:hover{background:#f7f7f7;box-shadow:0 1px 4px rgba(0,0,0,0.15)}
 
-/* WISHLIST HEART */
-.wishlist-btn{background:none;border:1px solid #ddd;color:var(--dark);width:100%;padding:0.8rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.75rem;letter-spacing:0.2em;text-transform:uppercase;margin-top:0.8rem;transition:all 0.3s;display:flex;align-items:center;justify-content:center;gap:0.5rem}
-.wishlist-btn:hover{border-color:var(--dark);background:var(--dark);color:white}
-.wishlist-btn.favorited{background:#1a0a0a;border-color:#c0392b;color:#e74c3c}
-.heart-icon{font-size:1rem;transition:transform 0.2s}
-.wishlist-btn:hover .heart-icon{transform:scale(1.2)}
-
 /* SEARCH */
 .search-bar{padding:0.8rem 0;display:flex;align-items:center;gap:1rem}
-.search-input{flex:1;background:none;border:none;border-bottom:1px solid #444;color:white;font-family:'Jost',sans-serif;font-size:0.9rem;padding:0.4rem 0;outline:none;letter-spacing:0.05em}
-.search-input::placeholder{color:#666}
-.search-icon{color:#666;font-size:1rem}
+.search-input{flex:1;background:none;border:none;border-bottom:1px solid #333;color:white;font-family:'Jost',sans-serif;font-size:0.9rem;padding:0.4rem 0;outline:none;letter-spacing:0.05em;transition:border-color 0.3s}
+.search-input::placeholder{color:#555}
+.search-input:focus{border-bottom-color:var(--gold)}
+.search-icon{color:#555;font-size:1rem}
 
 /* NAV */
-nav{display:flex;gap:0}
-.nav-item{background:none;border:none;color:#888;padding:0.7rem 1.2rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.75rem;letter-spacing:0.2em;text-transform:uppercase;transition:all 0.3s;border-bottom:2px solid transparent;position:relative}
-.nav-item:hover,.nav-item.active{color:white;border-bottom-color:var(--silver)}
+nav{display:flex;gap:0;border-top:1px solid #111}
+.nav-item{background:none;border:none;color:#777;padding:0.75rem 1.3rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.75rem;letter-spacing:0.2em;text-transform:uppercase;transition:all 0.3s;border-bottom:2px solid transparent;position:relative}
+.nav-item:hover,.nav-item.active{color:white;border-bottom-color:var(--gold)}
 
-/* HERO */
-.hero{background:linear-gradient(135deg,#0a0a0a 0%,#1a1a1a 60%,#0f0f0f 100%);padding:5rem 2rem;text-align:center;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(192,192,192,0.05) 0%,transparent 70%)}
-.hero-subtitle{font-size:0.75rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--silver);margin-bottom:1.5rem}
-.hero-title{font-family:'Cormorant Garamond',serif;font-size:4rem;font-weight:300;color:white;line-height:1.1;margin-bottom:1.5rem}
-.hero-title em{font-style:italic;color:var(--silver)}
-.hero-desc{color:#888;font-size:0.9rem;letter-spacing:0.1em;max-width:400px;margin:0 auto 2.5rem}
-.hero-cta{background:none;border:1px solid var(--silver);color:var(--silver);padding:0.9rem 2.5rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.8rem;letter-spacing:0.3em;text-transform:uppercase;transition:all 0.3s}
-.hero-cta:hover{background:var(--silver);color:var(--dark)}
-.silver-line{width:80px;height:1px;background:var(--silver);margin:2rem auto}
+/* ══════════════════════════════════════
+   HERO — con joya flotante animada
+══════════════════════════════════════ */
+.hero{
+  background:linear-gradient(150deg,#080808 0%,#111 50%,#0c0c0c 100%);
+  padding:5rem 2rem 4rem;
+  text-align:center;position:relative;overflow:hidden;
+  min-height:520px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+/* Fondo con partículas doradas */
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 50%, rgba(201,168,76,0.08) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 60% at 80% 40%, rgba(192,192,192,0.06) 0%,transparent 60%),
+    radial-gradient(ellipse 40% 40% at 50% 100%, rgba(201,168,76,0.05) 0%,transparent 50%);
+  pointer-events:none;
+}
+.hero-glow{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(201,168,76,0.07) 0%,transparent 70%);
+  pointer-events:none;
+  animation:glimmer 4s ease-in-out infinite;
+}
 
-/* MAIN CONTENT */
+/* Joya central animada (SVG) */
+.hero-jewel-wrap{
+  position:relative;margin-bottom:2rem;
+  display:inline-block;
+}
+.hero-jewel{
+  width:140px;height:140px;position:relative;
+  animation:float 5s ease-in-out infinite;
+  filter:drop-shadow(0 20px 40px rgba(201,168,76,0.4));
+}
+.hero-jewel-ring{
+  position:absolute;inset:-20px;border-radius:50%;
+  border:1px solid rgba(201,168,76,0.2);
+  animation:pulse-ring 3s ease-out infinite;
+}
+.hero-jewel-ring2{
+  position:absolute;inset:-35px;border-radius:50%;
+  border:1px solid rgba(201,168,76,0.1);
+  animation:pulse-ring 3s ease-out infinite 1s;
+}
+
+.hero-subtitle{font-size:0.72rem;letter-spacing:0.5em;text-transform:uppercase;color:var(--gold);margin-bottom:1.2rem;animation:fadeUp 0.8s ease 0.2s both}
+.hero-title{font-family:'Cormorant Garamond',serif;font-size:4rem;font-weight:300;color:white;line-height:1.1;margin-bottom:1.5rem;animation:fadeUp 0.8s ease 0.35s both}
+.hero-title em{font-style:italic;
+  background:linear-gradient(135deg,var(--gold-light),var(--gold),#e8c97a,var(--gold-light));
+  background-size:200% auto;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:shimmer 3s linear infinite;
+}
+.hero-desc{color:#888;font-size:0.9rem;letter-spacing:0.1em;max-width:420px;margin:0 auto 2.5rem;animation:fadeUp 0.8s ease 0.5s both}
+.hero-cta{
+  background:none;border:1px solid var(--gold);color:var(--gold);
+  padding:0.9rem 2.5rem;cursor:pointer;font-family:'Jost',sans-serif;
+  font-size:0.8rem;letter-spacing:0.3em;text-transform:uppercase;
+  transition:all 0.4s;position:relative;overflow:hidden;
+  animation:fadeUp 0.8s ease 0.65s both;
+}
+.hero-cta::before{content:'';position:absolute;inset:0;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform 0.4s ease}
+.hero-cta:hover::before{transform:scaleX(1)}
+.hero-cta:hover{color:var(--dark)}
+.hero-cta span{position:relative;z-index:1}
+.gold-line{width:60px;height:1px;background:linear-gradient(to right,transparent,var(--gold),transparent);margin:2rem auto}
+
+/* ══════════════════════════════════════
+   VIDEO STRIP — sección joya en movimiento
+══════════════════════════════════════ */
+.video-strip{
+  position:relative;overflow:hidden;
+  background:var(--dark);
+  display:grid;grid-template-columns:1fr 1fr;
+  min-height:420px;
+}
+.video-strip-video{
+  position:relative;overflow:hidden;
+}
+.video-strip-video video{
+  width:100%;height:100%;object-fit:cover;display:block;
+  filter:brightness(0.85) contrast(1.05);
+}
+/* Fallback animado si no hay vídeo */
+.video-jewel-demo{
+  width:100%;height:100%;min-height:420px;
+  background:linear-gradient(135deg,#0d0d0d,#1a1a1a);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.jewel-3d-wrap{
+  position:relative;width:220px;height:220px;
+  animation:spin3d 8s linear infinite;
+}
+.video-strip-content{
+  padding:4rem 3rem;display:flex;flex-direction:column;justify-content:center;
+  background:linear-gradient(135deg,#0f0f0f,#141414);
+}
+.video-strip-label{font-size:0.7rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);margin-bottom:1.2rem}
+.video-strip-title{font-family:'Cormorant Garamond',serif;font-size:2.6rem;font-weight:300;color:white;line-height:1.2;margin-bottom:1.5rem}
+.video-strip-title em{font-style:italic;color:var(--gold-light)}
+.video-strip-text{color:#777;font-size:0.9rem;line-height:1.9;letter-spacing:0.03em;margin-bottom:2rem}
+.video-strip-btn{
+  display:inline-flex;align-items:center;gap:0.7rem;
+  color:var(--gold-light);font-size:0.8rem;letter-spacing:0.2em;text-transform:uppercase;
+  background:none;border:none;cursor:pointer;padding:0;font-family:'Jost',sans-serif;
+  transition:gap 0.3s;width:fit-content;
+}
+.video-strip-btn:hover{gap:1.2rem}
+.video-strip-btn svg{width:20px;height:20px;transition:transform 0.3s}
+.video-strip-btn:hover svg{transform:translateX(4px)}
+
+/* ══════════════════════════════════════
+   STATS / TRUST BAR
+══════════════════════════════════════ */
+.trust-bar{
+  background:var(--gold);padding:1.5rem 2rem;
+  display:flex;justify-content:center;align-items:center;gap:4rem;flex-wrap:wrap;
+}
+.trust-item{text-align:center}
+.trust-num{font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--dark);font-weight:400}
+.trust-label{font-size:0.65rem;letter-spacing:0.25em;text-transform:uppercase;color:rgba(0,0,0,0.6);margin-top:0.2rem}
+
+/* ══════════════════════════════════════
+   MAIN CONTENT
+══════════════════════════════════════ */
 main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
-.section-header{display:flex;align-items:center;gap:1rem;margin-bottom:2.5rem}
-.section-title{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:400;letter-spacing:0.05em}
-.section-line{flex:1;height:1px;background:linear-gradient(to right,var(--border),transparent)}
-.section-count{font-size:0.75rem;color:var(--accent);letter-spacing:0.2em}
 
-/* FILTERS */
+/* ══════════════════════════════════════
+   SECTION HEADER + SUBCATEGORY TABS
+══════════════════════════════════════ */
+.section-header{display:flex;align-items:baseline;gap:1.2rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:400;letter-spacing:0.04em;position:relative}
+.section-title::after{
+  content:'';position:absolute;bottom:-6px;left:0;width:40px;height:2px;
+  background:var(--gold);
+}
+.section-count{font-size:0.72rem;color:var(--accent);letter-spacing:0.2em;align-self:flex-end;padding-bottom:2px}
+.section-line{flex:1;height:1px;background:linear-gradient(to right,var(--border),transparent);align-self:center;min-width:30px}
+
+/* SUBCATEGORY PILLS */
+.subcategory-bar{
+  display:flex;gap:0.6rem;margin-bottom:2rem;flex-wrap:wrap;
+  padding:1.2rem 1.5rem;
+  background:white;border-left:3px solid var(--gold);
+  border-radius:0 4px 4px 0;
+  box-shadow:0 2px 12px rgba(0,0,0,0.06);
+  animation:slideIn 0.4s ease;
+}
+.subcategory-bar.hidden{display:none}
+.subcat-label{
+  font-size:0.65rem;letter-spacing:0.25em;text-transform:uppercase;
+  color:var(--accent);align-self:center;margin-right:0.4rem;white-space:nowrap;
+}
+.subcat-pill{
+  background:none;border:1px solid var(--border);
+  padding:0.35rem 1rem;cursor:pointer;
+  font-family:'Jost',sans-serif;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;
+  transition:all 0.25s;color:var(--accent);border-radius:50px;
+  white-space:nowrap;
+}
+.subcat-pill:hover{border-color:var(--gold);color:var(--gold)}
+.subcat-pill.active{background:var(--gold);color:var(--dark);border-color:var(--gold);font-weight:500}
+.subcat-pill.gold{border-color:#c9a84c44}
+.subcat-pill.silver{border-color:#c0c0c044}
+.subcat-pill.new{border-color:var(--rose-gold);color:var(--rose-gold)}
+.subcat-pill.new.active{background:var(--rose-gold);border-color:var(--rose-gold);color:white}
+
+/* SORT FILTERS */
 .filters{display:flex;gap:0.5rem;margin-bottom:2rem;flex-wrap:wrap}
 .filter-btn{background:none;border:1px solid var(--border);padding:0.4rem 1rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;transition:all 0.3s;color:var(--accent)}
 .filter-btn:hover,.filter-btn.active{background:var(--dark);color:white;border-color:var(--dark)}
 
-/* PRODUCT GRID */
+/* ══════════════════════════════════════
+   PRODUCT GRID
+══════════════════════════════════════ */
 .product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:2rem}
 
 /* PRODUCT CARD */
-.product-card{background:white;position:relative;overflow:hidden;cursor:pointer;transition:transform 0.3s}
-.product-card:hover{transform:translateY(-4px)}
+.product-card{
+  background:white;position:relative;overflow:hidden;cursor:pointer;
+  transition:transform 0.4s cubic-bezier(0.25,0.8,0.25,1), box-shadow 0.4s;
+  animation:fadeUp 0.5s ease both;
+}
+.product-card:hover{transform:translateY(-6px);box-shadow:0 20px 50px rgba(0,0,0,0.12)}
 .product-card:hover .card-overlay{opacity:1}
-.card-img{height:320px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f9f9f9,#f0f0f0);position:relative;overflow:hidden}
-.card-img svg{transition:transform 0.5s}
-.product-card:hover .card-img svg{transform:scale(1.05)}
-.card-overlay{position:absolute;inset:0;background:rgba(10,10,10,0.6);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.3s}
-.quick-view-btn{background:white;color:var(--dark);border:none;padding:0.6rem 1.5rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.75rem;letter-spacing:0.2em;text-transform:uppercase}
-.card-body{padding:1.2rem 1.2rem 0.8rem}
-.card-category{font-size:0.7rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--accent);margin-bottom:0.4rem}
+.product-card:hover .card-img img,.product-card:hover .card-img svg{transform:scale(1.06)}
+
+.card-img{height:320px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f9f9f9,#efefef);position:relative;overflow:hidden}
+.card-img img,.card-img svg{transition:transform 0.6s cubic-bezier(0.25,0.8,0.25,1);width:100%;height:100%;object-fit:cover}
+
+.card-overlay{position:absolute;inset:0;background:rgba(10,10,10,0.55);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.35s;backdrop-filter:blur(2px)}
+.quick-view-btn{background:white;color:var(--dark);border:none;padding:0.7rem 1.8rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.75rem;letter-spacing:0.2em;text-transform:uppercase;transition:background 0.2s}
+.quick-view-btn:hover{background:var(--gold-light)}
+
+.card-body{padding:1.2rem 1.2rem 0.6rem}
+.card-category{font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:0.4rem}
 .card-name{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:400;margin-bottom:0.3rem}
 .card-material{font-size:0.75rem;color:var(--accent);margin-bottom:0.8rem}
-.card-bottom{display:flex;align-items:center;justify-content:space-between;padding:0 1.2rem 1.2rem}
-.card-price{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300}
-.card-price .currency{font-size:0.9rem;color:var(--accent)}
-.add-quick{background:var(--dark);color:white;border:none;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;transition:background 0.3s}
-.add-quick:hover{background:var(--accent)}
-.badge{position:absolute;top:1rem;left:1rem;background:var(--dark);color:white;font-size:0.65rem;letter-spacing:0.15em;padding:0.3rem 0.6rem;text-transform:uppercase}
-.badge.new{background:var(--silver);color:var(--dark)}
 
-/* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;display:none;align-items:center;justify-content:center;padding:1rem}
+.card-bottom{display:flex;align-items:center;justify-content:space-between;padding:0 1.2rem 1.2rem}
+.card-price{font-family:'Cormorant Garamond',serif;font-size:1.45rem;font-weight:300}
+.card-price .currency{font-size:0.9rem;color:var(--accent)}
+.add-quick{background:var(--dark);color:white;border:none;width:38px;height:38px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;transition:background 0.3s}
+.add-quick:hover{background:var(--gold);color:var(--dark)}
+
+/* BADGE */
+.badge{position:absolute;top:1rem;left:1rem;font-size:0.65rem;letter-spacing:0.15em;padding:0.3rem 0.7rem;text-transform:uppercase;z-index:2}
+.badge.new{background:var(--rose-gold);color:white}
+.badge.sale{background:var(--gold);color:var(--dark)}
+.badge.bestseller{background:var(--dark);color:var(--gold-light);border:1px solid var(--gold)}
+
+/* MATERIAL TAG on card */
+.card-material-tag{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:0.4rem 0.8rem;font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;
+  display:flex;align-items:center;gap:0.4rem;
+}
+.tag-gold{background:linear-gradient(90deg,rgba(201,168,76,0.15),rgba(201,168,76,0.05));color:var(--gold);border-top:1px solid rgba(201,168,76,0.2)}
+.tag-silver{background:linear-gradient(90deg,rgba(192,192,192,0.15),rgba(192,192,192,0.05));color:var(--accent);border-top:1px solid rgba(192,192,192,0.2)}
+.tag-rose{background:linear-gradient(90deg,rgba(183,110,121,0.12),rgba(183,110,121,0.04));color:var(--rose-gold);border-top:1px solid rgba(183,110,121,0.2)}
+.tag-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.tag-dot-gold{background:var(--gold)}
+.tag-dot-silver{background:var(--silver)}
+.tag-dot-rose{background:var(--rose-gold)}
+
+/* ══════════════════════════════════════
+   FEATURED COLLECTION BAND
+══════════════════════════════════════ */
+.featured-band{
+  background:linear-gradient(135deg,#0f0f0f,#1a1a14);
+  padding:4rem 2rem;margin:4rem 0;text-align:center;
+  position:relative;overflow:hidden;
+}
+.featured-band::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(to right,transparent,var(--gold),transparent);
+}
+.featured-band::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(to right,transparent,var(--gold),transparent);
+}
+.featured-band-sub{font-size:0.7rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem}
+.featured-band-title{font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:300;color:white;margin-bottom:1rem}
+.featured-band-title em{font-style:italic;color:var(--gold-light)}
+.featured-band-desc{color:#777;font-size:0.88rem;letter-spacing:0.06em;max-width:460px;margin:0 auto 2rem;line-height:1.9}
+
+/* ══════════════════════════════════════
+   MODAL
+══════════════════════════════════════ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200;display:none;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(6px)}
 .modal-overlay.open{display:flex}
-.modal{background:var(--cream);max-width:900px;width:100%;max-height:90vh;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr}
-.modal-img{background:linear-gradient(135deg,#f0f0f0,#e8e8e8);display:flex;align-items:center;justify-content:center;min-height:400px;position:relative}
+.modal{background:var(--cream);max-width:920px;width:100%;max-height:90vh;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;box-shadow:0 40px 100px rgba(0,0,0,0.5)}
+.modal-img{background:linear-gradient(135deg,#f0f0f0,#e8e8e8);display:flex;align-items:center;justify-content:center;min-height:420px;position:relative;overflow:hidden}
+.modal-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;transition:opacity 0.35s}
 .modal-thumbs{position:absolute;bottom:0.7rem;left:50%;transform:translateX(-50%);display:flex;gap:0.4rem;z-index:5}
 .gallery-thumb{width:46px;height:46px;object-fit:cover;cursor:pointer;border:2px solid transparent;opacity:0.65;transition:all 0.2s}
-.gallery-thumb.active{border-color:white;opacity:1}
+.gallery-thumb.active{border-color:var(--gold);opacity:1}
 .gallery-thumb:hover{opacity:0.9}
 .modal-gallery-nav{position:absolute;top:50%;transform:translateY(-50%);width:100%;display:flex;justify-content:space-between;padding:0 0.5rem;z-index:5;pointer-events:none}
-.gallery-nav-btn{background:rgba(255,255,255,0.85);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;pointer-events:all;transition:background 0.2s;line-height:1}
-.gallery-nav-btn:hover{background:white}
+.gallery-nav-btn{background:rgba(255,255,255,0.9);border:none;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;pointer-events:all;transition:background 0.2s;line-height:1}
+.gallery-nav-btn:hover{background:white;color:var(--gold)}
+
 .modal-body{padding:2.5rem}
-.modal-category{font-size:0.7rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--accent);margin-bottom:0.5rem}
+.modal-category{font-size:0.67rem;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem}
 .modal-title{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:400;line-height:1.2;margin-bottom:0.5rem}
 .modal-subtitle{font-size:0.85rem;color:var(--accent);margin-bottom:1.5rem;letter-spacing:0.05em}
-.modal-price{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;margin-bottom:1.5rem}
+.modal-price{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;margin-bottom:1.5rem;color:var(--dark)}
 .modal-divider{height:1px;background:var(--border);margin:1.2rem 0}
-.label{font-size:0.7rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--accent);margin-bottom:0.6rem;display:block}
-.modal-desc{font-size:0.9rem;line-height:1.8;color:#555;margin-bottom:1.5rem}
+.label{font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:var(--accent);margin-bottom:0.6rem;display:block}
+.modal-desc{font-size:0.9rem;line-height:1.85;color:#555;margin-bottom:1.5rem}
 
-/* SIZES */
 .sizes{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem}
 .size-btn{background:none;border:1px solid var(--border);width:42px;height:42px;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.8rem;transition:all 0.2s}
-.size-btn:hover{border-color:var(--dark)}
+.size-btn:hover{border-color:var(--gold)}
 .size-btn.selected{background:var(--dark);color:white;border-color:var(--dark)}
 
-/* QTY */
 .qty-row{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem}
 .qty-controls{display:flex;align-items:center;border:1px solid var(--border)}
 .qty-btn{background:none;border:none;width:36px;height:36px;cursor:pointer;font-size:1.1rem;transition:background 0.2s}
@@ -158,19 +395,29 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
 .qty-num{width:40px;text-align:center;font-size:0.9rem;font-family:'Jost',sans-serif;border-left:1px solid var(--border);border-right:1px solid var(--border);padding:0.5rem 0}
 .subtotal{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--accent)}
 
-/* ADD TO CART BTN */
 .add-cart-btn{width:100%;background:var(--dark);color:white;border:none;padding:1rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.8rem;letter-spacing:0.3em;text-transform:uppercase;transition:background 0.3s;margin-bottom:0.8rem}
-.add-cart-btn:hover{background:#333}
-.wishlist-btn{width:100%;background:none;border:1px solid var(--border);color:var(--dark);padding:0.8rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.75rem;letter-spacing:0.2em;text-transform:uppercase;transition:all 0.3s}
-.wishlist-btn:hover{border-color:var(--dark)}
-.modal-close{position:absolute;top:1rem;right:1rem;background:white;border:none;width:36px;height:36px;cursor:pointer;font-size:1.2rem;z-index:10;display:flex;align-items:center;justify-content:center}
+.add-cart-btn:hover{background:var(--gold);color:var(--dark)}
+.wishlist-btn{width:100%;background:none;border:1px solid var(--border);color:var(--dark);padding:0.8rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.75rem;letter-spacing:0.2em;text-transform:uppercase;margin-top:0.8rem;transition:all 0.3s;display:flex;align-items:center;justify-content:center;gap:0.5rem}
+.wishlist-btn:hover{border-color:var(--gold);color:var(--gold)}
+.wishlist-btn.favorited{background:#1a0a0a;border-color:#c0392b;color:#e74c3c}
+.heart-icon{font-size:1rem;transition:transform 0.2s}
+.wishlist-btn:hover .heart-icon{transform:scale(1.2)}
+.modal-close{position:absolute;top:1rem;right:1rem;background:white;border:none;width:36px;height:36px;cursor:pointer;font-size:1.2rem;z-index:10;display:flex;align-items:center;justify-content:center;transition:background 0.2s}
+.modal-close:hover{background:var(--gold-light)}
 
-/* CART PANEL */
-.cart-panel{position:fixed;right:0;top:0;bottom:0;width:380px;background:var(--cream);z-index:300;transform:translateX(100%);transition:transform 0.4s;box-shadow:-4px 0 30px rgba(0,0,0,0.15);display:flex;flex-direction:column}
+.spec-row{display:flex;justify-content:space-between;font-size:0.8rem;padding:0.4rem 0;border-bottom:1px solid var(--border)}
+.spec-label{color:var(--accent)}
+.spec-value{font-weight:400}
+
+/* ══════════════════════════════════════
+   CART PANEL
+══════════════════════════════════════ */
+.cart-panel{position:fixed;right:0;top:0;bottom:0;width:380px;background:var(--cream);z-index:300;transform:translateX(100%);transition:transform 0.4s cubic-bezier(0.25,0.8,0.25,1);box-shadow:-4px 0 40px rgba(0,0,0,0.18);display:flex;flex-direction:column}
 .cart-panel.open{transform:translateX(0)}
 .cart-header{background:var(--dark);color:white;padding:1.5rem;display:flex;justify-content:space-between;align-items:center}
 .cart-header h3{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;letter-spacing:0.1em}
-.cart-close{background:none;border:none;color:white;cursor:pointer;font-size:1.3rem}
+.cart-close{background:none;border:none;color:white;cursor:pointer;font-size:1.3rem;transition:color 0.2s}
+.cart-close:hover{color:var(--gold)}
 .cart-items{flex:1;overflow-y:auto;padding:1.5rem}
 .cart-empty{text-align:center;padding:3rem 1rem;color:var(--accent)}
 .cart-empty-icon{font-size:3rem;margin-bottom:1rem;opacity:0.3}
@@ -188,61 +435,62 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
 .cart-total-price{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300}
 .currency-selector{display:flex;gap:0.5rem;margin-bottom:1rem}
 .currency-btn{background:none;border:1px solid var(--border);padding:0.3rem 0.7rem;cursor:pointer;font-size:0.75rem;letter-spacing:0.1em;transition:all 0.2s}
-.currency-btn.active{background:var(--dark);color:white;border-color:var(--dark)}
-.checkout-btn{width:100%;background:var(--dark);color:white;border:none;padding:1rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.8rem;letter-spacing:0.3em;text-transform:uppercase;margin-bottom:0.7rem}
-.checkout-btn:hover{background:#333}
+.currency-btn.active{background:var(--gold);color:var(--dark);border-color:var(--gold)}
+.checkout-btn{width:100%;background:var(--gold);color:var(--dark);border:none;padding:1rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.8rem;letter-spacing:0.3em;text-transform:uppercase;margin-bottom:0.7rem;transition:opacity 0.2s;font-weight:500}
+.checkout-btn:hover{opacity:0.88}
 .secure-note{text-align:center;font-size:0.7rem;color:var(--accent);letter-spacing:0.1em}
+.cart-qty{display:flex;align-items:center;gap:0.3rem;margin-top:0.4rem}
+.cart-qty button{background:none;border:1px solid #ddd;width:22px;height:22px;cursor:pointer;font-size:0.8rem;transition:all 0.2s;display:flex;align-items:center;justify-content:center}
+.cart-qty button:hover{background:var(--gold);border-color:var(--gold);color:var(--dark)}
+.cart-qty span{min-width:20px;text-align:center;font-size:0.85rem}
 
-/* CART BACKDROP */
 .cart-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:250;display:none}
 .cart-backdrop.open{display:block}
 
-/* SHIPPING BANNER */
-.shipping-banner{background:var(--dark);color:var(--silver);text-align:center;padding:0.6rem;font-size:0.75rem;letter-spacing:0.2em}
+/* ══════════════════════════════════════
+   TOAST
+══════════════════════════════════════ */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--dark);color:white;padding:0.8rem 2rem;font-size:0.8rem;letter-spacing:0.15em;z-index:400;opacity:0;transition:opacity 0.3s;pointer-events:none;border-left:3px solid var(--gold)}
+.toast.show{opacity:1}
 
 /* NO RESULTS */
 .no-results{text-align:center;padding:4rem;color:var(--accent);grid-column:1/-1}
 .no-results-title{font-family:'Cormorant Garamond',serif;font-size:1.5rem;margin-bottom:0.5rem}
 
-/* TOAST */
-.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--dark);color:white;padding:0.8rem 2rem;font-size:0.8rem;letter-spacing:0.15em;z-index:400;opacity:0;transition:opacity 0.3s;pointer-events:none}
-.toast.show{opacity:1}
-
-/* SPECS */
-.spec-row{display:flex;justify-content:space-between;font-size:0.8rem;padding:0.4rem 0;border-bottom:1px solid var(--border)}
-.spec-key{color:var(--accent)}
-.spec-val{font-weight:400}
-
-/* ── RESPONSIVE ─────────────────────────────────────────── */
-
-/* Tablet: ≤ 900px */
+/* ══════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════ */
 @media(max-width:900px){
   .hero-title{font-size:3rem}
+  .hero-jewel{width:110px;height:110px}
   .product-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.5rem}
   .modal{grid-template-columns:1fr}
-  .modal-img{min-height:260px}
-  .cart-panel{width:320px}
+  .modal-img{min-height:280px}
+  .cart-panel{width:340px}
+  .video-strip{grid-template-columns:1fr}
+  .video-strip-video{min-height:280px}
+  .trust-bar{gap:2.5rem;padding:1.2rem 1.5rem}
 }
 
-/* Mobile: ≤ 600px */
-@media(max-width:600px){
+@media(max-width:700px){
   /* Header */
   header{padding:0 1rem}
   .header-top{flex-wrap:wrap;gap:0.5rem;padding:0.8rem 0}
   .logo{font-size:1.4rem;order:1}
   .header-actions{order:2}
-  .search-bar{order:3;width:100%;margin:0 !important;max-width:100% !important;padding:0.5rem 0}
+  .search-bar{order:3;width:100%;margin:0!important;max-width:100%!important;padding:0.5rem 0}
   .search-input{width:100%}
 
-  /* Nav: scroll horizontal */
+  /* Nav */
   nav{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   nav::-webkit-scrollbar{display:none}
   .nav-item{white-space:nowrap;padding:0.7rem 0.9rem;font-size:0.7rem}
 
   /* Hero */
-  .hero{padding:3rem 1.2rem}
-  .hero-title{font-size:2.2rem}
-  .hero-desc{font-size:0.82rem}
+  .hero{padding:2.5rem 1.2rem 3rem}
+  .hero-title{font-size:2.4rem}
+  .hero-desc{font-size:0.83rem}
+  .hero-jewel{width:90px;height:90px}
 
   /* Main */
   main{padding:2rem 1rem}
@@ -251,15 +499,21 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
   .filters{gap:0.4rem}
   .filter-btn{padding:0.35rem 0.7rem;font-size:0.7rem}
 
-  /* Product grid: 2 columnas ajustadas */
+  /* Product grid: 2 col */
   .product-grid{grid-template-columns:repeat(2,1fr);gap:0.8rem}
-  .card-img{height:200px}
-  .card-body{padding:0.8rem 0.8rem 0.4rem}
+  .card-img{height:190px}
+  .card-body{padding:0.75rem 0.75rem 0.4rem}
   .card-name{font-size:1rem}
-  .card-bottom{padding:0 0.8rem 0.8rem}
+  .card-bottom{padding:0 0.75rem 0.75rem}
   .card-price{font-size:1.1rem}
+  .add-quick{width:32px;height:32px;font-size:1rem}
 
-  /* Modal: pantalla completa en móvil */
+  /* Subcategory */
+  .subcategory-bar{padding:0.8rem 1rem;gap:0.4rem}
+  .subcat-label{display:none}
+  .subcat-pill{padding:0.3rem 0.7rem;font-size:0.65rem}
+
+  /* Modal */
   .modal-overlay{padding:0;align-items:flex-end}
   .modal{grid-template-columns:1fr;max-height:92vh;border-radius:0;width:100%}
   .modal-img{min-height:220px}
@@ -267,30 +521,52 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
   .modal-title{font-size:1.5rem}
   .modal-price{font-size:1.8rem}
 
-  /* Cart panel: ancho completo */
+  /* Cart */
   .cart-panel{width:100%;max-width:100%}
+
+  /* Trust bar */
+  .trust-bar{gap:1.5rem;padding:1rem}
+  .trust-num{font-size:1.4rem}
+
+  /* Video strip */
+  .video-strip-content{padding:2.5rem 1.5rem}
+  .video-strip-title{font-size:2rem}
+  .featured-band{padding:3rem 1.5rem;margin:2.5rem 0}
+  .featured-band-title{font-size:2rem}
 
   /* Toast */
   .toast{width:90%;text-align:center}
-
-  /* Shipping banner */
-  .shipping-banner{font-size:0.65rem;padding:0.5rem;letter-spacing:0.1em}
 }
 
-/* Muy pequeño: ≤ 380px */
 @media(max-width:380px){
   .product-grid{grid-template-columns:1fr}
-  .hero-title{font-size:1.9rem}
+  .hero-title{font-size:2rem}
 }
 </style>
 </head>
 <body>
 
-<div class="shipping-banner">✦ Envío gratuito en pedidos superiores a 80€ · Plata 925 certificada · Envío internacional</div>
+<!-- MARQUEE BANNER -->
+<div class="marquee-strip">
+  <div class="marquee-inner">
+    <span>Envío gratuito en pedidos superiores a 80€</span>
+    <span>Plata 925 certificada</span>
+    <span>Oro 18k disponible</span>
+    <span>Envío internacional</span>
+    <span>Devolución 30 días</span>
+    <span>Grabado personalizado</span>
+    <span>Envío gratuito en pedidos superiores a 80€</span>
+    <span>Plata 925 certificada</span>
+    <span>Oro 18k disponible</span>
+    <span>Envío internacional</span>
+    <span>Devolución 30 días</span>
+    <span>Grabado personalizado</span>
+  </div>
+</div>
 
 <header>
   <div class="header-top">
-    <div class="logo">PLATA<span>&</span>CO</div>
+    <div class="logo">PLATA<span>&amp;</span>CO</div>
     <div class="search-bar" style="flex:1;max-width:400px;margin:0 3rem">
       <span class="search-icon">⌕</span>
       <input class="search-input" type="text" id="searchInput" placeholder="Buscar joyas..." oninput="handleSearch()">
@@ -305,7 +581,7 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
       <div id="authUserBtn" style="display:none;align-items:center;gap:1rem">
         <span class="auth-user-name" id="authUserGreeting"></span>
         <button class="auth-btn" onclick="window.location.href='cuenta.html'">Mi cuenta</button>
-        <button class="auth-btn" onclick="doLogout()" style="color:#666">Salir</button>
+        <button class="auth-btn" onclick="doLogout()" style="color:#555">Salir</button>
       </div>
       <button class="cart-btn" onclick="toggleCart()">
         <span>Carrito</span>
@@ -323,28 +599,131 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
   </nav>
 </header>
 
+<!-- HERO con joya animada -->
 <div class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-jewel-wrap fade-in">
+    <div class="hero-jewel-ring"></div>
+    <div class="hero-jewel-ring2"></div>
+    <svg class="hero-jewel" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="gemGrad" cx="40%" cy="35%" r="65%">
+          <stop offset="0%" stop-color="#fff9e6"/>
+          <stop offset="30%" stop-color="#e8c97a"/>
+          <stop offset="70%" stop-color="#C9A84C"/>
+          <stop offset="100%" stop-color="#7a5c1e"/>
+        </radialGradient>
+        <radialGradient id="gemGrad2" cx="60%" cy="60%" r="50%">
+          <stop offset="0%" stop-color="rgba(255,255,255,0.6)"/>
+          <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+        </radialGradient>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <!-- Ring base -->
+      <circle cx="70" cy="70" r="65" fill="none" stroke="url(#gemGrad)" stroke-width="6" opacity="0.6"/>
+      <!-- Gem shape - diamond -->
+      <polygon points="70,18 105,60 70,108 35,60" fill="url(#gemGrad)" filter="url(#glow)"/>
+      <!-- Facets -->
+      <polygon points="70,18 105,60 70,60" fill="rgba(255,255,200,0.25)"/>
+      <polygon points="70,18 35,60 70,60" fill="rgba(0,0,0,0.15)"/>
+      <polygon points="70,60 105,60 70,108" fill="rgba(201,168,76,0.5)"/>
+      <polygon points="70,60 35,60 70,108" fill="rgba(201,168,76,0.3)"/>
+      <!-- Highlight -->
+      <ellipse cx="58" cy="38" rx="10" ry="6" fill="rgba(255,255,255,0.5)" transform="rotate(-20,58,38)"/>
+      <!-- Sparkles -->
+      <g fill="white" opacity="0.8">
+        <polygon points="18,30 20,24 22,30 28,32 22,34 20,40 18,34 12,32" style="animation:glimmer 2.5s ease-in-out infinite"/>
+        <polygon points="115,85 117,80 119,85 124,87 119,89 117,94 115,89 110,87" style="animation:glimmer 2.5s ease-in-out infinite 1s"/>
+        <polygon points="25,98 26,94 27,98 31,99 27,100 26,104 25,100 21,99" style="animation:glimmer 2.5s ease-in-out 0.5s infinite"/>
+      </g>
+    </svg>
+  </div>
   <p class="hero-subtitle">Colección 2025</p>
   <h1 class="hero-title">Joyería de<br><em>Plata Pura</em></h1>
-  <div class="silver-line"></div>
-  <p class="hero-desc">Cada pieza, una historia. Plata 925 trabajada a mano por artesanos especializados.</p>
-  <button class="hero-cta" onclick="document.querySelector('main').scrollIntoView({behavior:'smooth'})">Explorar colección</button>
+  <div class="gold-line"></div>
+  <p class="hero-desc">Cada pieza, una historia. Plata 925 y oro 18k trabajados a mano por artesanos especializados.</p>
+  <button class="hero-cta" onclick="document.querySelector('main').scrollIntoView({behavior:'smooth'})">
+    <span>Explorar colección</span>
+  </button>
+</div>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  <div class="trust-item">
+    <div class="trust-num">925</div>
+    <div class="trust-label">Plata certificada</div>
+  </div>
+  <div class="trust-item">
+    <div class="trust-num">18K</div>
+    <div class="trust-label">Oro de ley</div>
+  </div>
+  <div class="trust-item">
+    <div class="trust-num">+500</div>
+    <div class="trust-label">Clientes felices</div>
+  </div>
+  <div class="trust-item">
+    <div class="trust-num">30</div>
+    <div class="trust-label">Días devolución</div>
+  </div>
+</div>
+
+<!-- VIDEO / JOYA INTERACTIVA -->
+<div class="video-strip" id="videoStrip">
+  <div class="video-strip-video">
+    <div class="video-jewel-demo" id="jewelDemo">
+      <!-- Joya 3D interactiva con canvas -->
+      <canvas id="jewelCanvas" width="380" height="420" style="cursor:grab;max-width:100%"></canvas>
+    </div>
+  </div>
+  <div class="video-strip-content">
+    <p class="video-strip-label">Artesanía · Pasión · Detalle</p>
+    <h2 class="video-strip-title">Cada joya,<br><em>una obra única</em></h2>
+    <p class="video-strip-text">
+      Nuestros artesanos trabajan cada pieza con la misma dedicación de siempre. Desde la selección de la plata 925 más pura hasta el pulido final, cada detalle importa.<br><br>
+      Arrastra la joya para explorarla desde todos los ángulos.
+    </p>
+    <button class="video-strip-btn" onclick="document.querySelector('main').scrollIntoView({behavior:'smooth'})">
+      <span>Ver colección</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </div>
 </div>
 
 <main>
   <div id="sectionHeader" class="section-header">
-    <h2 class="section-title">Toda la colección</h2>
+    <h2 class="section-title" id="sectionTitleEl">Toda la colección</h2>
     <span class="section-count" id="sectionCount">18 piezas</span>
     <div class="section-line"></div>
   </div>
+
+  <!-- SUBCATEGORÍAS dinámicas -->
+  <div class="subcategory-bar" id="subcategoryBar">
+    <span class="subcat-label">Filtrar por:</span>
+    <!-- Se rellenan por JS según la categoría activa -->
+  </div>
+
   <div class="filters" id="filtersBar">
     <button class="filter-btn active" onclick="applySort('default',this)">Destacados</button>
     <button class="filter-btn" onclick="applySort('price-asc',this)">Precio: menor</button>
     <button class="filter-btn" onclick="applySort('price-desc',this)">Precio: mayor</button>
     <button class="filter-btn" onclick="applySort('new',this)">Novedades</button>
   </div>
+
   <div class="product-grid" id="productGrid"></div>
 </main>
+
+<!-- BANDA DESTACADA -->
+<div class="featured-band">
+  <p class="featured-band-sub">Edición Limitada</p>
+  <h2 class="featured-band-title">Colección <em>Oro & Plata</em></h2>
+  <p class="featured-band-desc">Una fusión única entre el brillo atemporal de la plata 925 y la calidez del oro 18k. Piezas exclusivas diseñadas para quien sabe lo que quiere.</p>
+  <button class="hero-cta" onclick="filterCategory('collares',document.querySelector('.nav-item:nth-child(3)'));document.querySelector('main').scrollIntoView({behavior:'smooth'})">
+    <span>Descubrir la colección</span>
+  </button>
+</div>
 
 <!-- MODAL -->
 <div class="modal-overlay" id="modalOverlay" onclick="handleModalClick(event)">
@@ -413,7 +792,7 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
 
 <!-- AUTH MODAL -->
 <div class="auth-overlay" id="authOverlay" onclick="handleAuthOverlayClick(event)">
-  <div class="auth-modal" style="position:relative" onclick="event.stopPropagation()">
+  <div class="auth-modal" onclick="event.stopPropagation()">
     <button class="auth-close" onclick="closeAuthModal()">✕</button>
     <h2 id="authModalTitle">Bienvenida</h2>
     <p id="authModalSub">Tu colección de plata te espera</p>
@@ -421,51 +800,29 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
       <button class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Iniciar sesión</button>
       <button class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">Crear cuenta</button>
     </div>
-
-    <!-- LOGIN FORM -->
     <div id="loginForm">
-      <div class="auth-field">
-        <label>Email</label>
-        <input type="email" id="loginEmail" placeholder="tu@email.com" autocomplete="email">
-      </div>
-      <div class="auth-field">
-        <label>Contraseña</label>
-        <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
-      </div>
+      <div class="auth-field"><label>Email</label><input type="email" id="loginEmail" placeholder="tu@email.com" autocomplete="email"></div>
+      <div class="auth-field"><label>Contraseña</label><input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password"></div>
       <button class="auth-submit" id="loginSubmit" onclick="doLogin()">Entrar</button>
       <div class="auth-error" id="loginError"></div>
       <div class="auth-divider"><span>o</span></div>
       <button class="google-btn" onclick="triggerGoogleSignIn()" type="button">
-        <svg width="18" height="18" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
         Continuar con Google
       </button>
     </div>
-
-    <!-- REGISTER FORM -->
     <div id="registerForm" style="display:none">
       <div class="auth-name-row">
-        <div class="auth-field">
-          <label>Nombre</label>
-          <input type="text" id="regFirstName" placeholder="Ana" autocomplete="given-name">
-        </div>
-        <div class="auth-field">
-          <label>Apellido</label>
-          <input type="text" id="regLastName" placeholder="García" autocomplete="family-name">
-        </div>
+        <div class="auth-field"><label>Nombre</label><input type="text" id="regFirstName" placeholder="Ana" autocomplete="given-name"></div>
+        <div class="auth-field"><label>Apellido</label><input type="text" id="regLastName" placeholder="García" autocomplete="family-name"></div>
       </div>
-      <div class="auth-field">
-        <label>Email</label>
-        <input type="email" id="regEmail" placeholder="tu@email.com" autocomplete="email">
-      </div>
-      <div class="auth-field">
-        <label>Contraseña <span style="color:#555;font-size:0.65rem">(mín. 8 caracteres)</span></label>
-        <input type="password" id="regPassword" placeholder="••••••••" autocomplete="new-password">
-      </div>
+      <div class="auth-field"><label>Email</label><input type="email" id="regEmail" placeholder="tu@email.com" autocomplete="email"></div>
+      <div class="auth-field"><label>Contraseña <span style="color:#555;font-size:0.65rem">(mín. 8 caracteres)</span></label><input type="password" id="regPassword" placeholder="••••••••" autocomplete="new-password"></div>
       <button class="auth-submit" id="registerSubmit" onclick="doRegister()">Crear cuenta</button>
       <div class="auth-error" id="registerError"></div>
       <div class="auth-divider"><span>o</span></div>
       <button class="google-btn" onclick="triggerGoogleSignIn()" type="button">
-        <svg width="18" height="18" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
         Registrarse con Google
       </button>
     </div>
@@ -481,371 +838,326 @@ let currency = 'EUR', currSymbol = '€';
 let cart = [];
 let currentProduct = null, currentQty = 1, selectedSize = null;
 let currentFilter = 'all', currentSort = 'default', searchTerm = '';
+let currentSubcat = 'all';
 
-// ── AUTH STATE ─────────────────────────────────────────────
-let authToken  = localStorage.getItem('plataco_token') || null;
-let authUser   = null;
+// ── AUTH ──────────────────────────────────────────────────
+let authToken = localStorage.getItem('plataco_token') || null;
+let authUser = null;
 let favoriteIds = new Set();
+function getAuthHeaders(){ return authToken?{'Authorization':'Bearer '+authToken,'Content-Type':'application/json'}:{'Content-Type':'application/json'}; }
 
-function getAuthHeaders() {
-  return authToken ? { 'Authorization': 'Bearer ' + authToken, 'Content-Type': 'application/json' }
-                   : { 'Content-Type': 'application/json' };
+async function initAuth(){
+  if(!authToken) return;
+  try{
+    const r=await fetch(API_URL+'/auth/me',{headers:getAuthHeaders()});
+    if(!r.ok){doLogout();return;}
+    authUser=await r.json(); updateAuthUI(); loadFavoriteIds();
+  }catch{}
 }
-
-async function initAuth() {
-  if (!authToken) return;
-  try {
-    const r = await fetch(API_URL + '/auth/me', { headers: getAuthHeaders() });
-    if (!r.ok) { doLogout(); return; }
-    authUser = await r.json();
-    updateAuthUI();
-    loadFavoriteIds();
-  } catch { /* red sin conexión, no pasa nada */ }
+function updateAuthUI(){
+  const loginBtn=document.getElementById('authHeaderBtn');
+  const userArea=document.getElementById('authUserBtn');
+  const greeting=document.getElementById('authUserGreeting');
+  if(authUser){ loginBtn.style.display='none'; userArea.style.display='flex'; greeting.textContent=authUser.first_name||authUser.email.split('@')[0]; }
+  else{ loginBtn.style.display='block'; userArea.style.display='none'; }
 }
+function doLogout(){ authToken=null;authUser=null;favoriteIds=new Set(); localStorage.removeItem('plataco_token'); updateAuthUI(); showToast('Sesión cerrada'); }
 
-function updateAuthUI() {
-  const loginBtn  = document.getElementById('authHeaderBtn');
-  const userArea  = document.getElementById('authUserBtn');
-  const greeting  = document.getElementById('authUserGreeting');
-  if (authUser) {
-    loginBtn.style.display  = 'none';
-    userArea.style.display  = 'flex';
-    greeting.textContent    = authUser.first_name || authUser.email.split('@')[0];
-  } else {
-    loginBtn.style.display  = 'block';
-    userArea.style.display  = 'none';
-  }
-}
-
-function doLogout() {
-  authToken = null; authUser = null; favoriteIds = new Set();
-  localStorage.removeItem('plataco_token');
-  updateAuthUI();
-  showToast('Sesión cerrada');
-}
-
-// ── AUTH MODAL ─────────────────────────────────────────────
-
-// ── GOOGLE SIGN-IN ─────────────────────────────────────────
-const GOOGLE_CLIENT_ID = window.PLATACO_GOOGLE_CLIENT_ID || '';
-
-function initGoogleSignIn() {
-  if (!GOOGLE_CLIENT_ID || !window.google) return;
-  window.google.accounts.id.initialize({
-    client_id: GOOGLE_CLIENT_ID,
-    callback: handleGoogleCredential,
-    auto_select: false,
-    cancel_on_tap_outside: true,
+// ── GOOGLE ────────────────────────────────────────────────
+const GOOGLE_CLIENT_ID = window.PLATACO_GOOGLE_CLIENT_ID||'';
+function initGoogleSignIn(){ if(!GOOGLE_CLIENT_ID||!window.google)return; window.google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,callback:handleGoogleCredential,auto_select:false,cancel_on_tap_outside:true}); }
+function triggerGoogleSignIn(){
+  if(!GOOGLE_CLIENT_ID){showToast('Google Sign-In no está configurado');return;}
+  if(!window.google){showToast('Librería de Google no disponible');return;}
+  window.google.accounts.id.prompt(n=>{
+    if(n.isNotDisplayed()||n.isSkippedMoment()){ const u=`https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin+'/google-callback')}&response_type=token&scope=email%20profile`; window.open(u,'_blank','width=500,height=600'); }
   });
 }
+async function handleGoogleCredential(response){
+  try{
+    const r=await fetch(API_URL+'/auth/google',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({credential:response.credential})});
+    const data=await r.json(); if(!r.ok)throw new Error(data.error||'Error con Google');
+    authToken=data.token; authUser=data.user; localStorage.setItem('plataco_token',authToken);
+    updateAuthUI(); closeAuthModal(); await loadFavoriteIds();
+    showToast('✓ Bienvenida, '+(authUser.first_name||authUser.email.split('@')[0]));
+  }catch(err){ showToast('Error: '+err.message); }
+}
+window.onload=()=>{ if(window.google)initGoogleSignIn(); };
+document.addEventListener('DOMContentLoaded',()=>{ const t=setInterval(()=>{ if(window.google){initGoogleSignIn();clearInterval(t);} },200); setTimeout(()=>clearInterval(t),5000); });
 
-function triggerGoogleSignIn() {
-  if (!GOOGLE_CLIENT_ID) {
-    showToast('Google Sign-In no está configurado aún');
-    return;
-  }
-  if (!window.google) {
-    showToast('La librería de Google no está disponible');
-    return;
-  }
-  window.google.accounts.id.prompt((notification) => {
-    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-      // Si el popup nativo de Google no está disponible, abrir OAuth manual
-      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + '/google-callback')}&response_type=token&scope=email%20profile`;
-      window.open(authUrl, '_blank', 'width=500,height=600');
-    }
-  });
-}
+function openAuthModal(tab){ document.getElementById('authOverlay').classList.add('open'); switchAuthTab(tab||'login'); setTimeout(()=>{ const el=document.getElementById(tab==='register'?'regFirstName':'loginEmail'); if(el)el.focus(); },100); }
+function closeAuthModal(){ document.getElementById('authOverlay').classList.remove('open'); ['loginError','registerError'].forEach(id=>{const el=document.getElementById(id);el.textContent='';el.style.display='none';}); }
+function handleAuthOverlayClick(e){ if(e.target===document.getElementById('authOverlay'))closeAuthModal(); }
+function switchAuthTab(tab){ document.getElementById('loginForm').style.display=tab==='login'?'block':'none'; document.getElementById('registerForm').style.display=tab==='register'?'block':'none'; document.getElementById('tabLogin').classList.toggle('active',tab==='login'); document.getElementById('tabRegister').classList.toggle('active',tab==='register'); }
 
-async function handleGoogleCredential(response) {
-  try {
-    const r = await fetch(API_URL + '/auth/google', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ credential: response.credential }),
-    });
-    const data = await r.json();
-    if (!r.ok) throw new Error(data.error || 'Error con Google');
-    authToken = data.token;
-    authUser  = data.user;
-    localStorage.setItem('plataco_token', authToken);
-    updateAuthUI();
-    closeAuthModal();
-    await loadFavoriteIds();
-    showToast('✓ Bienvenida, ' + (authUser.first_name || authUser.email.split('@')[0]));
-  } catch (err) {
-    showToast('Error al iniciar sesión con Google: ' + err.message);
-  }
+async function doLogin(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const pass=document.getElementById('loginPassword').value;
+  const errEl=document.getElementById('loginError'); const btn=document.getElementById('loginSubmit');
+  errEl.style.display='none';
+  if(!email||!pass){showAuthError(errEl,'Introduce email y contraseña');return;}
+  btn.disabled=true;btn.textContent='Entrando…';
+  try{
+    const r=await fetch(API_URL+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass})});
+    const data=await r.json(); if(!r.ok){showAuthError(errEl,data.error||'Error al iniciar sesión');return;}
+    authToken=data.token;authUser=data.user; localStorage.setItem('plataco_token',authToken); updateAuthUI();closeAuthModal();loadFavoriteIds();
+    showToast('¡Bienvenida, '+(authUser.first_name||authUser.email.split('@')[0])+'!');
+  }catch{showAuthError(errEl,'Error de conexión');}
+  finally{btn.disabled=false;btn.textContent='Entrar';}
 }
-
-// Inicializar Google cuando cargue la librería
-window.onload = () => { if (window.google) initGoogleSignIn(); };
-document.addEventListener('DOMContentLoaded', () => {
-  // La librería GSI puede cargar antes o después del DOM
-  const checkGoogle = setInterval(() => {
-    if (window.google) { initGoogleSignIn(); clearInterval(checkGoogle); }
-  }, 200);
-  setTimeout(() => clearInterval(checkGoogle), 5000);
-});
-function openAuthModal(tab) {
-  document.getElementById('authOverlay').classList.add('open');
-  switchAuthTab(tab || 'login');
-  setTimeout(() => {
-    const el = document.getElementById(tab === 'register' ? 'regFirstName' : 'loginEmail');
-    if (el) el.focus();
-  }, 100);
+async function doRegister(){
+  const first=document.getElementById('regFirstName').value.trim(); const last=document.getElementById('regLastName').value.trim();
+  const email=document.getElementById('regEmail').value.trim(); const pass=document.getElementById('regPassword').value;
+  const errEl=document.getElementById('registerError'); const btn=document.getElementById('registerSubmit');
+  errEl.style.display='none';
+  if(!email||!pass){showAuthError(errEl,'Email y contraseña son obligatorios');return;}
+  if(pass.length<8){showAuthError(errEl,'La contraseña debe tener al menos 8 caracteres');return;}
+  btn.disabled=true;btn.textContent='Creando cuenta…';
+  try{
+    const r=await fetch(API_URL+'/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass,first_name:first,last_name:last})});
+    const data=await r.json(); if(!r.ok){showAuthError(errEl,data.error||'Error al crear la cuenta');return;}
+    authToken=data.token;authUser=data.user; localStorage.setItem('plataco_token',authToken); updateAuthUI();closeAuthModal();
+    showToast('¡Cuenta creada! Bienvenida, '+(authUser.first_name||authUser.email.split('@')[0])+' ✦');
+  }catch{showAuthError(errEl,'Error de conexión');}
+  finally{btn.disabled=false;btn.textContent='Crear cuenta';}
 }
-function closeAuthModal() {
-  document.getElementById('authOverlay').classList.remove('open');
-  ['loginError','registerError'].forEach(id => {
-    const el = document.getElementById(id);
-    el.textContent = ''; el.style.display = 'none';
-  });
-}
-function handleAuthOverlayClick(e) {
-  if (e.target === document.getElementById('authOverlay')) closeAuthModal();
-}
-function switchAuthTab(tab) {
-  document.getElementById('loginForm').style.display    = tab === 'login'    ? 'block' : 'none';
-  document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
-  document.getElementById('tabLogin').classList.toggle('active',    tab === 'login');
-  document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
-}
-
-async function doLogin() {
-  const email = document.getElementById('loginEmail').value.trim();
-  const pass  = document.getElementById('loginPassword').value;
-  const errEl = document.getElementById('loginError');
-  const btn   = document.getElementById('loginSubmit');
-  errEl.style.display = 'none';
-  if (!email || !pass) { showAuthError(errEl, 'Introduce email y contraseña'); return; }
-  btn.disabled = true; btn.textContent = 'Entrando…';
-  try {
-    const r  = await fetch(API_URL + '/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email, password:pass}) });
-    const data = await r.json();
-    if (!r.ok) { showAuthError(errEl, data.error || 'Error al iniciar sesión'); return; }
-    authToken = data.token; authUser = data.user;
-    localStorage.setItem('plataco_token', authToken);
-    updateAuthUI(); closeAuthModal(); loadFavoriteIds();
-    showToast('¡Bienvenida, ' + (authUser.first_name || authUser.email.split('@')[0]) + '!');
-  } catch { showAuthError(errEl, 'Error de conexión'); }
-  finally { btn.disabled = false; btn.textContent = 'Entrar'; }
-}
-
-async function doRegister() {
-  const first = document.getElementById('regFirstName').value.trim();
-  const last  = document.getElementById('regLastName').value.trim();
-  const email = document.getElementById('regEmail').value.trim();
-  const pass  = document.getElementById('regPassword').value;
-  const errEl = document.getElementById('registerError');
-  const btn   = document.getElementById('registerSubmit');
-  errEl.style.display = 'none';
-  if (!email || !pass) { showAuthError(errEl, 'Email y contraseña son obligatorios'); return; }
-  if (pass.length < 8) { showAuthError(errEl, 'La contraseña debe tener al menos 8 caracteres'); return; }
-  btn.disabled = true; btn.textContent = 'Creando cuenta…';
-  try {
-    const r = await fetch(API_URL + '/auth/register', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email, password:pass, first_name:first, last_name:last}) });
-    const data = await r.json();
-    if (!r.ok) { showAuthError(errEl, data.error || 'Error al crear la cuenta'); return; }
-    authToken = data.token; authUser = data.user;
-    localStorage.setItem('plataco_token', authToken);
-    updateAuthUI(); closeAuthModal();
-    showToast('¡Cuenta creada! Bienvenida, ' + (authUser.first_name || authUser.email.split('@')[0]) + ' ✦');
-  } catch { showAuthError(errEl, 'Error de conexión'); }
-  finally { btn.disabled = false; btn.textContent = 'Crear cuenta'; }
-}
-
-function showAuthError(el, msg) {
-  el.textContent = msg; el.style.display = 'block';
-}
-
-// Enter key in auth forms
-document.addEventListener('keydown', e => {
-  if (e.key !== 'Enter') return;
-  if (document.getElementById('loginForm').style.display !== 'none' &&
-      document.getElementById('authOverlay').classList.contains('open')) doLogin();
-  if (document.getElementById('registerForm').style.display !== 'none' &&
-      document.getElementById('authOverlay').classList.contains('open')) doRegister();
+function showAuthError(el,msg){el.textContent=msg;el.style.display='block';}
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter')return;
+  if(document.getElementById('loginForm').style.display!=='none'&&document.getElementById('authOverlay').classList.contains('open'))doLogin();
+  if(document.getElementById('registerForm').style.display!=='none'&&document.getElementById('authOverlay').classList.contains('open'))doRegister();
 });
 
-// ── FAVORITES ──────────────────────────────────────────────
-async function loadFavoriteIds() {
-  if (!authToken) return;
-  try {
-    const r = await fetch(API_URL + '/auth/favorites/ids', { headers: getAuthHeaders() });
-    if (r.ok) { const ids = await r.json(); favoriteIds = new Set(ids); }
-  } catch {}
+// ── FAVORITES ─────────────────────────────────────────────
+async function loadFavoriteIds(){ if(!authToken)return; try{ const r=await fetch(API_URL+'/auth/favorites/ids',{headers:getAuthHeaders()}); if(r.ok){const ids=await r.json();favoriteIds=new Set(ids);} }catch{} }
+async function toggleFavorite(){
+  if(!authUser){openAuthModal('login');showToast('Inicia sesión para guardar favoritos');return;}
+  if(!currentProduct)return;
+  const pid=currentProduct.id; const isFav=favoriteIds.has(pid);
+  try{
+    const r=await fetch(API_URL+'/auth/favorites/'+pid,{method:isFav?'DELETE':'POST',headers:getAuthHeaders()});
+    if(r.ok){ if(isFav)favoriteIds.delete(pid); else favoriteIds.add(pid); updateWishlistBtn(); showToast(isFav?'Eliminado de favoritos':'♡ Añadido a favoritos'); }
+  }catch{showToast('Error al actualizar favoritos');}
+}
+function updateWishlistBtn(){
+  if(!currentProduct)return;
+  const btn=document.getElementById('modalWishlistBtn'); const text=document.getElementById('wishlistBtnText');
+  const isFav=favoriteIds.has(currentProduct.id);
+  if(btn)btn.classList.toggle('favorited',isFav);
+  if(text)text.textContent=isFav?'En favoritos':'Añadir a favoritos';
+  const heart=btn?.querySelector('.heart-icon'); if(heart)heart.textContent=isFav?'♥':'♡';
 }
 
-async function toggleFavorite() {
-  if (!authUser) { openAuthModal('login'); showToast('Inicia sesión para guardar favoritos'); return; }
-  if (!currentProduct) return;
-  const pid = currentProduct.id;
-  const isFav = favoriteIds.has(pid);
-  try {
-    const r = await fetch(API_URL + '/auth/favorites/' + pid, {
-      method: isFav ? 'DELETE' : 'POST',
-      headers: getAuthHeaders()
-    });
-    if (r.ok) {
-      if (isFav) { favoriteIds.delete(pid); } else { favoriteIds.add(pid); }
-      updateWishlistBtn();
-      showToast(isFav ? 'Eliminado de favoritos' : '♡ Añadido a favoritos');
-    }
-  } catch { showToast('Error al actualizar favoritos'); }
+// ── SUBCATEGORÍAS ─────────────────────────────────────────
+const SUBCATS = {
+  all: [
+    {id:'all', label:'Todo', cls:''},
+    {id:'novedades', label:'✦ Novedades', cls:'new'},
+    {id:'oro', label:'Oro 18k', cls:'gold'},
+    {id:'plata', label:'Plata 925', cls:'silver'},
+    {id:'finos', label:'Diseño fino', cls:''},
+  ],
+  anillos: [
+    {id:'all', label:'Todos los anillos', cls:''},
+    {id:'novedades', label:'✦ Novedades', cls:'new'},
+    {id:'solitario', label:'Solitario', cls:'gold'},
+    {id:'alianza', label:'Alianza', cls:'silver'},
+    {id:'sello', label:'Sello', cls:''},
+    {id:'apilable', label:'Apilable', cls:''},
+    {id:'fino', label:'Fino', cls:''},
+  ],
+  collares: [
+    {id:'all', label:'Todos los collares', cls:''},
+    {id:'novedades', label:'✦ Novedades', cls:'new'},
+    {id:'cadena', label:'Cadena', cls:'silver'},
+    {id:'colgante', label:'Colgante', cls:'gold'},
+    {id:'gargantilla', label:'Gargantilla', cls:''},
+    {id:'largo', label:'Largo', cls:''},
+  ],
+  pulseras: [
+    {id:'all', label:'Todas las pulseras', cls:''},
+    {id:'novedades', label:'✦ Novedades', cls:'new'},
+    {id:'dorada', label:'Dorada', cls:'gold'},
+    {id:'plateada', label:'Plateada', cls:'silver'},
+    {id:'rigida', label:'Rígida', cls:''},
+    {id:'cadena', label:'Cadena', cls:''},
+    {id:'fina', label:'Fina', cls:''},
+  ],
+  pendientes: [
+    {id:'all', label:'Todos los pendientes', cls:''},
+    {id:'novedades', label:'✦ Novedades', cls:'new'},
+    {id:'dorados', label:'Dorados', cls:'gold'},
+    {id:'plateados', label:'Plateados', cls:'silver'},
+    {id:'finos', label:'Finos', cls:''},
+    {id:'aro', label:'Aro', cls:''},
+    {id:'colgante', label:'Colgante', cls:''},
+    {id:'boton', label:'Botón', cls:''},
+  ],
+  broches: [
+    {id:'all', label:'Todos los broches', cls:''},
+    {id:'novedades', label:'✦ Novedades', cls:'new'},
+    {id:'dorados', label:'Dorados', cls:'gold'},
+    {id:'plateados', label:'Plateados', cls:'silver'},
+    {id:'vintage', label:'Vintage', cls:''},
+  ],
+};
+
+function renderSubcategoryBar(cat){
+  const bar=document.getElementById('subcategoryBar');
+  const cats=SUBCATS[cat]||SUBCATS['all'];
+  bar.innerHTML=`<span class="subcat-label">Filtrar por:</span>`+
+    cats.map(c=>`<button class="subcat-pill ${c.cls}${currentSubcat===c.id?' active':''}" onclick="applySubcat('${c.id}',this)">${c.label}</button>`).join('');
 }
 
-function updateWishlistBtn() {
-  if (!currentProduct) return;
-  const btn  = document.getElementById('modalWishlistBtn');
-  const text = document.getElementById('wishlistBtnText');
-  const isFav = favoriteIds.has(currentProduct.id);
-  if (btn) btn.classList.toggle('favorited', isFav);
-  if (text) text.textContent = isFav ? 'En favoritos' : 'Añadir a favoritos';
-  const heart = btn?.querySelector('.heart-icon');
-  if (heart) heart.textContent = isFav ? '♥' : '♡';
+function applySubcat(id, btn){
+  currentSubcat=id;
+  document.querySelectorAll('.subcat-pill').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProducts();
 }
 
 // ── PRICE / RENDER ─────────────────────────────────────────
 function convertPrice(eur){
-  const v = eur * rates[currency];
-  if(currency==='JPY') return Math.round(v).toLocaleString() + ' ¥';
-  return v.toFixed(2).replace('.',',') + ' ' + currSymbol;
+  const v=eur*rates[currency];
+  if(currency==='JPY')return Math.round(v).toLocaleString()+' ¥';
+  return v.toFixed(2).replace('.',',')+' '+currSymbol;
+}
+
+function getMaterialTag(material){
+  const m=(material||'').toLowerCase();
+  if(m.includes('oro')&&m.includes('18')){ return {cls:'tag-gold',dotCls:'tag-dot-gold',text:'Oro 18k'}; }
+  if(m.includes('oro')){ return {cls:'tag-gold',dotCls:'tag-dot-gold',text:'Oro'}; }
+  if(m.includes('rose')||m.includes('rosa')){ return {cls:'tag-rose',dotCls:'tag-dot-rose',text:'Oro rosa'}; }
+  return {cls:'tag-silver',dotCls:'tag-dot-silver',text:'Plata 925'};
 }
 
 function renderProducts(){
-  let list = [...products];
-  if(currentFilter !== 'all') list = list.filter(p=>p.category===currentFilter);
-  if(searchTerm) list = list.filter(p=>p.name.toLowerCase().includes(searchTerm.toLowerCase())||p.desc.toLowerCase().includes(searchTerm.toLowerCase()));
-  if(currentSort==='price-asc')  list.sort((a,b)=>a.price-b.price);
+  let list=[...products];
+  if(currentFilter!=='all') list=list.filter(p=>p.category===currentFilter);
+  if(searchTerm) list=list.filter(p=>p.name.toLowerCase().includes(searchTerm.toLowerCase())||p.desc.toLowerCase().includes(searchTerm.toLowerCase()));
+
+  // Apply subcategory filter (simplified: novedades = isNew, oro/dorados = name/material includes oro, plateados/plata = default)
+  if(currentSubcat==='novedades') list=list.filter(p=>p.isNew);
+  else if(currentSubcat==='oro'||currentSubcat==='dorados'||currentSubcat==='dorada') list=list.filter(p=>(p.material||'').toLowerCase().includes('oro'));
+  else if(currentSubcat==='plata'||currentSubcat==='plateados'||currentSubcat==='plateada') list=list.filter(p=>!(p.material||'').toLowerCase().includes('oro'));
+  else if(currentSubcat==='finos'||currentSubcat==='fino'||currentSubcat==='fina') list=list.filter(p=>p.price<80);
+
+  if(currentSort==='price-asc') list.sort((a,b)=>a.price-b.price);
   if(currentSort==='price-desc') list.sort((a,b)=>b.price-a.price);
-  if(currentSort==='new')        list = list.filter(p=>p.isNew).concat(list.filter(p=>!p.isNew));
-  const grid = document.getElementById('productGrid');
+  if(currentSort==='new') list=list.filter(p=>p.isNew).concat(list.filter(p=>!p.isNew));
+
   const catNames={all:'Toda la colección',anillos:'Anillos',collares:'Collares',pulseras:'Pulseras',pendientes:'Pendientes',broches:'Broches'};
-  document.getElementById('sectionCount').textContent = list.length + ' piezas';
-  document.getElementById('sectionHeader').querySelector('.section-title').textContent = catNames[currentFilter]||'Colección';
-  if(!list.length){grid.innerHTML='<p style="grid-column:1/-1;text-align:center;color:var(--accent);padding:3rem">No se encontraron piezas</p>';return;}
-  grid.innerHTML = list.map(p => {
-    const isFav = favoriteIds.has(p.id);
+  document.getElementById('sectionCount').textContent=list.length+' piezas';
+  document.getElementById('sectionTitleEl').textContent=catNames[currentFilter]||'Colección';
+
+  // Update subcategory bar
+  renderSubcategoryBar(currentFilter);
+
+  const grid=document.getElementById('productGrid');
+  if(!list.length){grid.innerHTML='<p class="no-results"><span class="no-results-title">Sin resultados</span><br>Prueba con otros filtros</p>';return;}
+
+  grid.innerHTML=list.map((p,i)=>{
+    const isFav=favoriteIds.has(p.id);
+    const tag=getMaterialTag(p.material);
+    const badgeHtml=p.badge?`<span class="badge ${p.badge==='New'?'new':p.badge==='Sale'?'sale':'bestseller'}">${p.badge}</span>`:'';
     return `
-    <div class="product-card" data-id="${p.id}">
-      ${p.badge?`<span class="badge ${p.badge==='New'?'badge-new':p.badge==='Sale'?'badge-sale':'badge-new'}">${p.badge}</span>`:''}
+    <div class="product-card" data-id="${p.id}" style="animation-delay:${i*0.06}s">
+      ${badgeHtml}
       <div class="card-img">
-        ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.name}" loading="lazy" onerror="this.style.display='none'">` : p.svg || ''}
+        ${p.imageUrl?`<img src="${p.imageUrl}" alt="${p.name}" loading="lazy" onerror="this.style.display='none'">`:p.svg||''}
         <div class="card-overlay"><button class="quick-view-btn">Ver detalle</button></div>
-        <button onclick="event.stopPropagation();quickToggleFav('${p.id}',this)" class="card-fav-btn" title="${isFav?'Quitar de favoritos':'Añadir a favoritos'}" style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.5);border:none;color:${isFav?'#e74c3c':'white'};font-size:1.1rem;cursor:pointer;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all 0.2s">${isFav?'♥':'♡'}</button>
+        <button onclick="event.stopPropagation();quickToggleFav('${p.id}',this)" title="${isFav?'Quitar de favoritos':'Añadir a favoritos'}" style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.5);border:none;color:${isFav?'#e74c3c':'white'};font-size:1.1rem;cursor:pointer;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all 0.2s">${isFav?'♥':'♡'}</button>
+        <div class="card-material-tag ${tag.cls}"><span class="tag-dot ${tag.dotCls}"></span>${tag.text}</div>
       </div>
       <div class="card-body">
         <p class="card-category">${p.category}</p>
         <h3 class="card-name">${p.name}</h3>
         <p class="card-material">${p.material}</p>
+      </div>
+      <div class="card-bottom">
         <p class="card-price">${convertPrice(p.price)}</p>
+        <button class="add-quick" onclick="event.stopPropagation();addToCart(products.find(x=>x.id==='${p.id}'),null,1)" title="Añadir al carrito">+</button>
       </div>
     </div>`;
   }).join('');
-  document.querySelectorAll('.product-card').forEach(card => {
-    card.addEventListener('click', () => openModal(card.dataset.id));
+
+  document.querySelectorAll('.product-card').forEach(card=>{
+    card.addEventListener('click',()=>openModal(card.dataset.id));
   });
 }
 
-async function quickToggleFav(pid, btn) {
-  if (!authUser) { openAuthModal('login'); showToast('Inicia sesión para guardar favoritos'); return; }
-  const isFav = favoriteIds.has(pid);
-  try {
-    const r = await fetch(API_URL + '/auth/favorites/' + pid, { method: isFav ? 'DELETE' : 'POST', headers: getAuthHeaders() });
-    if (r.ok) {
-      if (isFav) { favoriteIds.delete(pid); btn.textContent='♡'; btn.style.color='white'; }
-      else       { favoriteIds.add(pid);    btn.textContent='♥'; btn.style.color='#e74c3c'; }
-      showToast(isFav ? 'Eliminado de favoritos' : '♡ Añadido a favoritos');
-    }
-  } catch {}
+async function quickToggleFav(pid,btn){
+  if(!authUser){openAuthModal('login');showToast('Inicia sesión para guardar favoritos');return;}
+  const isFav=favoriteIds.has(pid);
+  try{
+    const r=await fetch(API_URL+'/auth/favorites/'+pid,{method:isFav?'DELETE':'POST',headers:getAuthHeaders()});
+    if(r.ok){ if(isFav){favoriteIds.delete(pid);btn.textContent='♡';btn.style.color='white';} else{favoriteIds.add(pid);btn.textContent='♥';btn.style.color='#e74c3c';} showToast(isFav?'Eliminado de favoritos':'♡ Añadido a favoritos'); }
+  }catch{}
 }
 
-// ── MODAL ──────────────────────────────────────────────────
+// ── MODAL ─────────────────────────────────────────────────
+let currentGalleryIdx=0;
 function openModal(id){
-  currentProduct = products.find(x=>x.id===id);
-  if(!currentProduct) return;
-  selectedSize = null; currentQty = 1;
-  document.getElementById('modalCat').textContent   = currentProduct.category;
-  document.getElementById('modalName').textContent  = currentProduct.name;
-  document.getElementById('modalMat').textContent   = currentProduct.material;
-  currentGalleryIdx = 0;
-  const galleryImgs = getGalleryImages(currentProduct);
-  document.getElementById('modalImg').innerHTML = `
+  currentProduct=products.find(x=>x.id===id);
+  if(!currentProduct)return;
+  selectedSize=null; currentQty=1;
+  document.getElementById('modalCat').textContent=currentProduct.category;
+  document.getElementById('modalName').textContent=currentProduct.name;
+  document.getElementById('modalMat').textContent=currentProduct.material;
+  currentGalleryIdx=0;
+  const galleryImgs=getGalleryImages(currentProduct);
+  document.getElementById('modalImg').innerHTML=`
     <button class="modal-close" onclick="closeModal()">✕</button>
     ${currentProduct.imageUrl
-      ? `<img id="modalMainImg" src="${galleryImgs[0]}" alt="${currentProduct.name}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;transition:opacity 0.3s">`
-      : `<div style="transform:scale(1.8)">${currentProduct.svg || ''}</div>`
+      ?`<img id="modalMainImg" src="${galleryImgs[0]}" alt="${currentProduct.name}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;transition:opacity 0.3s">`
+      :`<div style="transform:scale(1.8)">${currentProduct.svg||''}</div>`
     }
-    ${galleryImgs.length > 1 ? `
+    ${galleryImgs.length>1?`
     <div class="modal-gallery-nav">
       <button class="gallery-nav-btn" onclick="event.stopPropagation();openGalleryImg(Math.max(0,currentGalleryIdx-1))">‹</button>
       <button class="gallery-nav-btn" onclick="event.stopPropagation();openGalleryImg(Math.min(getGalleryImages(currentProduct).length-1,currentGalleryIdx+1))">›</button>
     </div>
     <div class="modal-thumbs">
       ${galleryImgs.map((u,i)=>`<img class="gallery-thumb${i===0?' active':''}" src="${u}" alt="" onclick="event.stopPropagation();openGalleryImg(${i})" loading="lazy">`).join('')}
-    </div>` : ''}
+    </div>`:''}
   `;
   updateModalPrice();
-  const sizesSection = document.getElementById('modalSizesSection');
-  const sizesDiv = document.getElementById('modalSizes');
-  if(currentProduct.sizes && currentProduct.sizes.length>0){
+  const sizesSection=document.getElementById('modalSizesSection');
+  const sizesDiv=document.getElementById('modalSizes');
+  if(currentProduct.sizes&&currentProduct.sizes.length>0){
     sizesSection.style.display='block';
-    sizesDiv.innerHTML = currentProduct.sizes.map(s=>`<button class="size-btn" onclick="selectSize('${s}',this)">${s}</button>`).join('');
-  } else { sizesSection.style.display='none'; }
-  document.getElementById('modalSpecs').innerHTML = Object.entries(currentProduct.specs||{}).map(([k,v])=>`<div class="spec-row"><span class="spec-label">${k}</span><span class="spec-value">${v}</span></div>`).join('');
+    sizesDiv.innerHTML=currentProduct.sizes.map(s=>`<button class="size-btn" onclick="selectSize('${s}',this)">${s}</button>`).join('');
+  }else{sizesSection.style.display='none';}
+  document.getElementById('modalDesc').textContent=currentProduct.desc||'';
+  document.getElementById('modalSpecs').innerHTML=Object.entries(currentProduct.specs||{}).map(([k,v])=>`<div class="spec-row"><span class="spec-label">${k}</span><span class="spec-value">${v}</span></div>`).join('');
   updateWishlistBtn();
   document.getElementById('modalOverlay').style.display='flex';
   document.body.style.overflow='hidden';
 }
-
-function closeModal(){
-  document.getElementById('modalOverlay').style.display='none';
-  document.body.style.overflow='';
-  currentProduct=null;
-}
-
+function closeModal(){ document.getElementById('modalOverlay').style.display='none'; document.body.style.overflow=''; currentProduct=null; }
 function handleModalClick(e){if(e.target===document.getElementById('modalOverlay'))closeModal();}
+function selectSize(size,btn){ selectedSize=size; document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('selected')); btn.classList.add('selected'); }
+function updateModalPrice(){ document.getElementById('modalPrice').textContent=convertPrice(currentProduct.price); document.getElementById('modalQty').textContent=currentQty; document.getElementById('modalSubtotal').textContent=convertPrice(currentProduct.price*currentQty); }
+function changeQty(delta){currentQty=Math.max(1,currentQty+delta);updateModalPrice();}
+function addFromModal(){ if(!currentProduct)return; if(currentProduct.sizes.length>0&&!selectedSize){showToast('Por favor selecciona una talla');return;} addToCart(currentProduct,selectedSize,currentQty); closeModal(); }
 
-function selectSize(size, btn){
-  selectedSize = size;
-  document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('selected'));
-  btn.classList.add('selected');
-}
-
-function updateModalPrice(){
-  document.getElementById('modalPrice').textContent    = convertPrice(currentProduct.price);
-  document.getElementById('modalQty').textContent      = currentQty;
-  document.getElementById('modalSubtotal').textContent = convertPrice(currentProduct.price * currentQty);
-}
-
-function changeQty(delta){ currentQty=Math.max(1,currentQty+delta); updateModalPrice(); }
-
-function addFromModal(){
-  if(!currentProduct) return;
-  if(currentProduct.sizes.length>0 && !selectedSize){ showToast('Por favor selecciona una talla'); return; }
-  addToCart(currentProduct, selectedSize, currentQty);
-  closeModal();
-}
-
-// ── CART ───────────────────────────────────────────────────
-function addToCart(product, size, qty){
-  const existing = cart.find(i=>i.id===product.id && i.size===size);
-  if(existing) existing.qty += qty;
-  else cart.push({ id:product.id, name:product.name, price:product.price, size, qty, svg:product.svg, imageUrl:product.imageUrl||null, variant_id: size ? product.variantMap?.[size]||null : null });
+// ── CART ──────────────────────────────────────────────────
+function addToCart(product,size,qty){
+  const existing=cart.find(i=>i.id===product.id&&i.size===size);
+  if(existing)existing.qty+=qty;
+  else cart.push({id:product.id,name:product.name,price:product.price,size,qty,svg:product.svg,imageUrl:product.imageUrl||null,variant_id:size?product.variantMap?.[size]||null:null});
   updateCartUI();
-  showToast(product.name + ' añadido al carrito');
+  showToast(product.name+' añadido al carrito');
 }
-
 function updateCartUI(){
-  const total = cart.reduce((s,i)=>s+i.price*i.qty,0);
-  document.getElementById('cartCount').textContent = cart.reduce((s,i)=>s+i.qty,0);
-  document.getElementById('cartTotal').textContent = convertPrice(total);
-  const itemsDiv = document.getElementById('cartItems');
-  if(cart.length===0){ itemsDiv.innerHTML='<div class="cart-empty"><div class="cart-empty-icon">◇</div><p>Tu carrito está vacío</p></div>'; return; }
-  itemsDiv.innerHTML = cart.map((item,idx)=>`
+  const total=cart.reduce((s,i)=>s+i.price*i.qty,0);
+  document.getElementById('cartCount').textContent=cart.reduce((s,i)=>s+i.qty,0);
+  document.getElementById('cartTotal').textContent=convertPrice(total);
+  const itemsDiv=document.getElementById('cartItems');
+  if(cart.length===0){itemsDiv.innerHTML='<div class="cart-empty"><div class="cart-empty-icon">◇</div><p>Tu carrito está vacío</p></div>';return;}
+  itemsDiv.innerHTML=cart.map((item,idx)=>`
     <div class="cart-item">
-      <div class="cart-item-img">${item.imageUrl?`<img src="${item.imageUrl}" alt="${item.name}" style="width:100%;height:100%;object-fit:cover;display:block">` : `<span style="font-size:1.4rem;opacity:0.4">✦</span>`}</div>
+      <div class="cart-item-img">${item.imageUrl?`<img src="${item.imageUrl}" alt="${item.name}" style="width:100%;height:100%;object-fit:cover;display:block">`:`<span style="font-size:1.4rem;opacity:0.4">✦</span>`}</div>
       <div class="cart-item-info">
         <p class="cart-item-name">${item.name}${item.size?` <span style="color:var(--accent);font-size:0.75rem">· ${item.size}</span>`:''}</p>
         <p class="cart-item-price">${convertPrice(item.price)}</p>
@@ -853,57 +1165,35 @@ function updateCartUI(){
           <button onclick="changeCartQty(${idx},-1)">−</button>
           <span>${item.qty}</span>
           <button onclick="changeCartQty(${idx},1)">+</button>
-          <button onclick="removeCartItem(${idx})" style="margin-left:0.5rem;color:#999">✕</button>
+          <button onclick="removeCartItem(${idx})" style="margin-left:0.4rem;color:#aaa;border:none">✕</button>
         </div>
       </div>
     </div>`).join('');
 }
-
-function changeCartQty(idx, delta){
-  cart[idx].qty = Math.max(1, cart[idx].qty + delta);
-  updateCartUI();
-}
-function removeCartItem(idx){ cart.splice(idx,1); updateCartUI(); }
-function toggleCart(){
-  document.getElementById('cartPanel').classList.toggle('open');
-  document.getElementById('cartBackdrop').classList.toggle('open');
-}
-function setCurrency(c,sym,btn){
-  currency=c; currSymbol=sym;
-  document.querySelectorAll('.currency-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderProducts(); updateCartUI();
-  if(currentProduct) updateModalPrice();
-}
+function changeCartQty(idx,delta){cart[idx].qty=Math.max(1,cart[idx].qty+delta);updateCartUI();}
+function removeCartItem(idx){cart.splice(idx,1);updateCartUI();}
+function toggleCart(){ document.getElementById('cartPanel').classList.toggle('open'); document.getElementById('cartBackdrop').classList.toggle('open'); }
+function setCurrency(c,sym,btn){ currency=c;currSymbol=sym; document.querySelectorAll('.currency-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderProducts();updateCartUI(); if(currentProduct)updateModalPrice(); }
 function filterCategory(cat,btn){
-  currentFilter=cat;
+  currentFilter=cat; currentSubcat='all';
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   renderProducts();
 }
-function applySort(sort,btn){
-  currentSort=sort;
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderProducts();
-}
-function handleSearch(){ searchTerm=document.getElementById('searchInput').value; renderProducts(); }
+function applySort(sort,btn){ currentSort=sort; document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderProducts(); }
+function handleSearch(){searchTerm=document.getElementById('searchInput').value;renderProducts();}
 
-function showToast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2500);
-}
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2800); }
 
 function checkout(){
-  if(cart.length===0){ showToast('Tu carrito está vacío'); return; }
-  const checkoutItems = cart.map(item=>({ product_id:item.id, product_name:item.name, variant_id:item.variant_id||null, variant_name:item.size||null, quantity:item.qty, unit_price_eur:item.price, emoji:'✦', imageUrl:item.imageUrl||null }));
-  localStorage.setItem('plataco_cart', JSON.stringify(checkoutItems));
-  if (authToken) localStorage.setItem('plataco_token', authToken);
+  if(cart.length===0){showToast('Tu carrito está vacío');return;}
+  const checkoutItems=cart.map(item=>({product_id:item.id,product_name:item.name,variant_id:item.variant_id||null,variant_name:item.size||null,quantity:item.qty,unit_price_eur:item.price,emoji:'✦',imageUrl:item.imageUrl||null}));
+  localStorage.setItem('plataco_cart',JSON.stringify(checkoutItems));
+  if(authToken)localStorage.setItem('plataco_token',authToken);
   window.location.href='checkout.html';
 }
 
-// ── IMAGES ─────────────────────────────────────────────────
+// ── IMAGES ───────────────────────────────────────────────
 const PRODUCT_IMAGES = {
   'anillo sello oval':     'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&q=80',
   'anillo medio dedo':     'https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=600&q=80',
@@ -915,102 +1205,219 @@ const PRODUCT_IMAGES = {
   'pendiente':             'https://images.unsplash.com/photo-1630018548696-e1e6e8a2ab31?w=600&q=80',
   'default':               'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80',
 };
-
-// Gallery images per category (3-4 extra shots)
 const GALLERY_IMAGES = {
-  anillos: [
-    'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=600&q=80',
-    'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&q=80',
-    'https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=600&q=80',
-    'https://images.unsplash.com/photo-1589674781759-c21c37956a44?w=600&q=80',
-  ],
-  collares: [
-    'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80',
-    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&q=80',
-    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&q=80',
-    'https://images.unsplash.com/photo-1630080890630-a0afae8d1248?w=600&q=80',
-  ],
-  pulseras: [
-    'https://images.unsplash.com/photo-1573408301185-9519f94ae14e?w=600&q=80',
-    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80',
-    'https://images.unsplash.com/photo-1588671616667-a9e65e0d4b56?w=600&q=80',
-    'https://images.unsplash.com/photo-1576003375022-2b0a3b5a6b36?w=600&q=80',
-  ],
-  pendientes: [
-    'https://images.unsplash.com/photo-1630018548696-e1e6e8a2ab31?w=600&q=80',
-    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80',
-    'https://images.unsplash.com/photo-1599459183200-59c7687a0c70?w=600&q=80',
-    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&q=80',
-  ],
-  default: [
-    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80',
-    'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80',
-    'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=600&q=80',
-  ],
+  anillos:['https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=600&q=80','https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&q=80','https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=600&q=80','https://images.unsplash.com/photo-1589674781759-c21c37956a44?w=600&q=80'],
+  collares:['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80','https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&q=80','https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&q=80','https://images.unsplash.com/photo-1630080890630-a0afae8d1248?w=600&q=80'],
+  pulseras:['https://images.unsplash.com/photo-1573408301185-9519f94ae14e?w=600&q=80','https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80','https://images.unsplash.com/photo-1588671616667-a9e65e0d4b56?w=600&q=80'],
+  pendientes:['https://images.unsplash.com/photo-1630018548696-e1e6e8a2ab31?w=600&q=80','https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80','https://images.unsplash.com/photo-1599459183200-59c7687a0c70?w=600&q=80'],
+  default:['https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80','https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80','https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=600&q=80'],
 };
-
-let currentGalleryIdx = 0;
-
-function getGalleryImages(product) {
-  const mainImg = product.imageUrl;
-  const cat = (product.category || '').toLowerCase();
-  let extras = GALLERY_IMAGES[cat] || GALLERY_IMAGES.default;
-  // Put mainImg first, add extras that differ from main
-  const all = [mainImg, ...extras.filter(u => u !== mainImg)].slice(0, 4);
-  return all;
+function getGalleryImages(product){
+  const mainImg=product.imageUrl; const cat=(product.category||'').toLowerCase();
+  let extras=GALLERY_IMAGES[cat]||GALLERY_IMAGES.default;
+  return[mainImg,...extras.filter(u=>u!==mainImg)].slice(0,4);
 }
-
-function openGalleryImg(idx) {
-  currentGalleryIdx = idx;
-  const imgs = getGalleryImages(currentProduct);
-  const mainEl = document.getElementById('modalMainImg');
-  if (mainEl) mainEl.src = imgs[idx];
-  document.querySelectorAll('.gallery-thumb').forEach((t, i) => {
-    t.classList.toggle('active', i === idx);
-  });
+function openGalleryImg(idx){
+  currentGalleryIdx=idx; const imgs=getGalleryImages(currentProduct);
+  const mainEl=document.getElementById('modalMainImg'); if(mainEl)mainEl.src=imgs[idx];
+  document.querySelectorAll('.gallery-thumb').forEach((t,i)=>t.classList.toggle('active',i===idx));
 }
 function getProductImage(p){
-  if(p.main_image_url) return p.main_image_url;
-  if(p.main_image_medium) return p.main_image_medium;
+  if(p.main_image_url)return p.main_image_url;
+  if(p.main_image_medium)return p.main_image_medium;
   const n=(p.name||'').toLowerCase();
-  for(const [k,u] of Object.entries(PRODUCT_IMAGES)){ if(k!=='default'&&n.includes(k)) return u; }
+  for(const[k,u]of Object.entries(PRODUCT_IMAGES)){if(k!=='default'&&n.includes(k))return u;}
   const c=(p.category_slug||'').toLowerCase();
-  if(c.includes('anillo'))    return PRODUCT_IMAGES['anillo'];
-  if(c.includes('collar'))    return PRODUCT_IMAGES['collar'];
-  if(c.includes('pulsera'))   return PRODUCT_IMAGES['pulsera'];
-  if(c.includes('pendiente')) return PRODUCT_IMAGES['pendiente'];
+  if(c.includes('anillo'))return PRODUCT_IMAGES['anillo'];
+  if(c.includes('collar'))return PRODUCT_IMAGES['collar'];
+  if(c.includes('pulsera'))return PRODUCT_IMAGES['pulsera'];
+  if(c.includes('pendiente'))return PRODUCT_IMAGES['pendiente'];
   return PRODUCT_IMAGES['default'];
 }
 function toProductCard(apiProduct){
   const variants=Array.isArray(apiProduct.variants)?apiProduct.variants:[];
   const sizes=variants.map(v=>v.name).filter(Boolean);
-  return {
-    id:apiProduct.id, name:apiProduct.name,
+  return{
+    id:apiProduct.id,name:apiProduct.name,
     category:apiProduct.category_slug||'sin-categoria',
     material:apiProduct.material||'Plata 925',
     price:Number(apiProduct.price_eur),
     desc:apiProduct.description||'Sin descripción',
-    sizes, badge:apiProduct.badge||null, isNew:apiProduct.badge==='New',
-    specs:{ Pureza:apiProduct.purity?`${apiProduct.purity}‰`:'925‰', Peso:apiProduct.weight_grams?`${apiProduct.weight_grams}g`:'N/D', Acabado:apiProduct.finish||'Estándar' },
+    sizes,badge:apiProduct.badge||null,isNew:apiProduct.badge==='New',
+    specs:{Pureza:apiProduct.purity?`${apiProduct.purity}‰`:'925‰',Peso:apiProduct.weight_grams?`${apiProduct.weight_grams}g`:'N/D',Acabado:apiProduct.finish||'Estándar'},
     variantMap:variants.reduce((acc,v)=>{acc[v.name]=v.id;return acc;},{}),
-    imageUrl:getProductImage(apiProduct), svg:null,
+    imageUrl:getProductImage(apiProduct),svg:null,
   };
 }
-
 async function loadProductsFromApi(){
-  try {
-    const r = await fetch(API_URL + '/products?limit=100');
-    if(!r.ok) throw new Error();
-    const data = await r.json();
-    products = (data.products||[]).map(toProductCard);
+  try{
+    const r=await fetch(API_URL+'/products?limit=100');
+    if(!r.ok)throw new Error();
+    const data=await r.json();
+    products=(data.products||[]).map(toProductCard);
     renderProducts();
-  } catch { showToast('No se pudo conectar con el servidor'); }
+  }catch{showToast('No se pudo conectar con el servidor');}
 }
 
-// ── INIT ───────────────────────────────────────────────────
+// ── CANVAS JEWEL 3D INTERACTIVO ────────────────────────────
+(function initJewelCanvas(){
+  const canvas=document.getElementById('jewelCanvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  let W=canvas.width, H=canvas.height;
+  let rotX=0.3, rotY=0, dragX=0, dragY=0;
+  let isDragging=false, lastMouseX=0, lastMouseY=0;
+  let autoRotate=true;
+
+  // Responsive canvas
+  function resizeCanvas(){
+    const parent=canvas.parentElement;
+    const pw=parent.offsetWidth;
+    if(pw<380){canvas.width=pw;canvas.height=pw*1.1;W=canvas.width;H=canvas.height;}
+    else{canvas.width=380;canvas.height=420;W=380;H=420;}
+  }
+  resizeCanvas();
+  window.addEventListener('resize',resizeCanvas);
+
+  // 3D gem vertices (octahedron-like diamond)
+  function project(x,y,z){
+    const fov=350;
+    const zOff=500;
+    const zz=z+zOff;
+    return{x:x*fov/zz+W/2, y:y*fov/zz+H/2, z:zz};
+  }
+
+  function rotatePoint(px,py,pz,rx,ry){
+    // Rotate around Y
+    let x=px*Math.cos(ry)-pz*Math.sin(ry);
+    let z=px*Math.sin(ry)+pz*Math.cos(ry);
+    let y=py;
+    // Rotate around X
+    let ny=y*Math.cos(rx)-z*Math.sin(rx);
+    let nz=y*Math.sin(rx)+z*Math.cos(rx);
+    return{x,y:ny,z:nz};
+  }
+
+  const size=80;
+  const top={x:0,y:-size*1.2,z:0};
+  const bot={x:0,y:size*0.9,z:0};
+  const mid=[
+    {x:size,y:0,z:0},
+    {x:0,y:0,z:size},
+    {x:-size,y:0,z:0},
+    {x:0,y:0,z:-size},
+    {x:size*0.7,y:0,z:size*0.7},
+    {x:-size*0.7,y:0,z:size*0.7},
+    {x:-size*0.7,y:0,z:-size*0.7},
+    {x:size*0.7,y:0,z:-size*0.7},
+  ];
+
+  const faces=[
+    // Top facets
+    {verts:[top,mid[0],mid[4]],top:true},
+    {verts:[top,mid[4],mid[1]],top:true},
+    {verts:[top,mid[1],mid[5]],top:true},
+    {verts:[top,mid[5],mid[2]],top:true},
+    {verts:[top,mid[2],mid[6]],top:true},
+    {verts:[top,mid[6],mid[3]],top:true},
+    {verts:[top,mid[3],mid[7]],top:true},
+    {verts:[top,mid[7],mid[0]],top:true},
+    // Bottom facets
+    {verts:[bot,mid[0],mid[4]],top:false},
+    {verts:[bot,mid[4],mid[1]],top:false},
+    {verts:[bot,mid[1],mid[5]],top:false},
+    {verts:[bot,mid[5],mid[2]],top:false},
+    {verts:[bot,mid[2],mid[6]],top:false},
+    {verts:[bot,mid[6],mid[3]],top:false},
+    {verts:[bot,mid[3],mid[7]],top:false},
+    {verts:[bot,mid[7],mid[0]],top:false},
+  ];
+
+  function drawFrame(){
+    ctx.clearRect(0,0,W,H);
+
+    // Background glow
+    const grd=ctx.createRadialGradient(W/2,H/2,10,W/2,H/2,Math.min(W,H)*0.5);
+    grd.addColorStop(0,'rgba(201,168,76,0.08)');
+    grd.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=grd; ctx.fillRect(0,0,W,H);
+
+    // Project and sort faces
+    const projected=faces.map(face=>{
+      const pts=face.verts.map(v=>{
+        const r=rotatePoint(v.x,v.y,v.z,rotX,rotY);
+        return{...project(r.x,r.y,r.z),rz:r.z};
+      });
+      const avgZ=pts.reduce((s,p)=>s+p.rz,0)/pts.length;
+      // Normal for visibility
+      const ax=pts[1].x-pts[0].x; const ay=pts[1].y-pts[0].y;
+      const bx=pts[2].x-pts[0].x; const by=pts[2].y-pts[0].y;
+      const nz=ax*by-ay*bx;
+      return{pts,avgZ,visible:nz>0,isTop:face.top};
+    }).filter(f=>f.visible).sort((a,b)=>b.avgZ-a.avgZ);
+
+    projected.forEach(({pts,isTop,avgZ})=>{
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x,pts[0].y);
+      pts.forEach(p=>ctx.lineTo(p.x,p.y));
+      ctx.closePath();
+
+      const bright=Math.min(1,(avgZ+300)/600);
+      if(isTop){
+        // Gold gradient for top
+        const grd2=ctx.createLinearGradient(pts[0].x,pts[0].y,pts[2].x,pts[2].y);
+        grd2.addColorStop(0,`rgba(255,240,180,${0.6+bright*0.3})`);
+        grd2.addColorStop(0.5,`rgba(201,168,76,${0.5+bright*0.3})`);
+        grd2.addColorStop(1,`rgba(122,92,30,${0.4+bright*0.2})`);
+        ctx.fillStyle=grd2;
+      }else{
+        const grd3=ctx.createLinearGradient(pts[0].x,pts[0].y,pts[2].x,pts[2].y);
+        grd3.addColorStop(0,`rgba(201,168,76,${0.3+bright*0.2})`);
+        grd3.addColorStop(1,`rgba(60,40,0,${0.4+bright*0.2})`);
+        ctx.fillStyle=grd3;
+      }
+      ctx.fill();
+      ctx.strokeStyle=`rgba(255,220,100,${0.15+bright*0.1})`;
+      ctx.lineWidth=0.5;
+      ctx.stroke();
+    });
+
+    // Center sparkle
+    ctx.beginPath();
+    ctx.arc(W/2,H/2,2,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,0.8)';
+    ctx.fill();
+
+    if(autoRotate) rotY+=0.008;
+    requestAnimationFrame(drawFrame);
+  }
+
+  // Mouse/touch drag
+  canvas.addEventListener('mousedown',e=>{isDragging=true;autoRotate=false;lastMouseX=e.clientX;lastMouseY=e.clientY;canvas.style.cursor='grabbing';});
+  window.addEventListener('mouseup',()=>{isDragging=false;canvas.style.cursor='grab';setTimeout(()=>{autoRotate=true;},2000);});
+  window.addEventListener('mousemove',e=>{
+    if(!isDragging)return;
+    const dx=e.clientX-lastMouseX; const dy=e.clientY-lastMouseY;
+    rotY+=dx*0.008; rotX+=dy*0.006;
+    lastMouseX=e.clientX; lastMouseY=e.clientY;
+  });
+  canvas.addEventListener('touchstart',e=>{isDragging=true;autoRotate=false;lastMouseX=e.touches[0].clientX;lastMouseY=e.touches[0].clientY;},{passive:true});
+  window.addEventListener('touchend',()=>{isDragging=false;setTimeout(()=>{autoRotate=true;},2000);});
+  window.addEventListener('touchmove',e=>{
+    if(!isDragging)return;
+    const dx=e.touches[0].clientX-lastMouseX; const dy=e.touches[0].clientY-lastMouseY;
+    rotY+=dx*0.008; rotX+=dy*0.006;
+    lastMouseX=e.touches[0].clientX; lastMouseY=e.touches[0].clientY;
+  },{passive:true});
+
+  drawFrame();
+})();
+
+// ── INIT ─────────────────────────────────────────────────
 initAuth();
 loadProductsFromApi();
 updateCartUI();
+renderSubcategoryBar('all');
 </script>
 </body>
 </html>
