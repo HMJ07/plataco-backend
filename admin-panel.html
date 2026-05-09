@@ -279,6 +279,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
       Pedidos
     </div>
+    <div class="nav-item" onclick="showPage('products')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/></svg>
+      Productos
+    </div>
   </div>
   <div class="sidebar-user">
     <strong id="sidebarUserName">—</strong>
@@ -361,8 +365,53 @@
       </div>
     </div>
 
+    <!-- PRODUCTOS PAGE -->
+    <div id="productsPage" class="page">
+      <div class="card">
+        <div class="card-header">
+          <h3>Catálogo de productos</h3>
+          <button class="btn btn-sm" onclick="openNewProductModal()" style="background:var(--accent);color:#fff">+ Nuevo producto</button>
+        </div>
+        <div class="filters">
+          <input class="filter-input" type="text" id="filterProductSearch" placeholder="Buscar por nombre…" oninput="filterProductsLocally()" />
+          <select class="filter-select" id="filterProductActive" onchange="loadProducts()">
+            <option value="">Todos</option>
+            <option value="true">Activos</option>
+            <option value="false">Inactivos</option>
+          </select>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Imagen</th>
+              <th>Nombre</th>
+              <th>Categoría</th>
+              <th>Precio</th>
+              <th>Stock</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="productsBody">
+            <tr class="loading-row"><td colspan="7">Cargando…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </div><!-- /content -->
 </div><!-- /main -->
+
+<!-- ═══ MODAL PRODUCTO ════════════════════════════════════ -->
+<div class="modal-overlay" id="productModal" onclick="closeProductModal(event)">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:640px;width:95%">
+    <div class="modal-header">
+      <h3 id="productModalTitle">Nuevo producto</h3>
+      <button class="modal-close" onclick="closeProductModal()">×</button>
+    </div>
+    <div class="modal-body" id="productModalBody" style="padding:24px"></div>
+  </div>
+</div>
 
 <!-- ═══ ORDER DETAIL MODAL ════════════════════════════════ -->
 <div class="modal-overlay" id="orderModal" onclick="closeModal(event)">
@@ -465,13 +514,14 @@ function showApp() {
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  const titles = { dashboard:'Dashboard', orders:'Pedidos' };
+  const titles = { dashboard:'Dashboard', orders:'Pedidos', products:'Productos' };
   document.getElementById(name + 'Page').classList.add('active');
   document.getElementById('pageTitle').textContent = titles[name] || name;
   document.querySelectorAll('.nav-item').forEach(n => {
     if (n.textContent.toLowerCase().trim().includes(name)) n.classList.add('active');
   });
   if (name === 'orders') loadOrders();
+  if (name === 'products') loadProducts();
 }
 
 function toast(msg, type='') {
@@ -791,6 +841,230 @@ async function updateOrderStatus(id) {
     loadDashboard();
   } catch(e) {
     toast('Error: ' + e.message, 'error');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// PRODUCTOS
+// ══════════════════════════════════════════════════════════════
+
+let allProducts = [];
+let allCategories = [];
+
+async function loadProducts() {
+  const tbody = document.getElementById('productsBody');
+  tbody.innerHTML = '<tr class="loading-row"><td colspan="7">Cargando…</td></tr>';
+  try {
+    const [prods, cats] = await Promise.all([
+      apiFetch('/api/admin/products'),
+      apiFetch('/api/products/categories/all').catch(() => ({ categories: [] }))
+    ]);
+    allProducts = prods.products || prods || [];
+    allCategories = cats.categories || cats || [];
+    renderProducts(allProducts);
+  } catch(e) {
+    tbody.innerHTML = `<tr class="loading-row"><td colspan="7" style="color:var(--danger)">Error: ${e.message}</td></tr>`;
+  }
+}
+
+function renderProducts(list) {
+  const tbody = document.getElementById('productsBody');
+  if (!list.length) {
+    tbody.innerHTML = '<tr class="loading-row"><td colspan="7">No hay productos</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(p => `
+    <tr>
+      <td>
+        ${p.main_image_thumb
+          ? `<img src="${p.main_image_thumb}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid var(--border)">`
+          : `<div style="width:48px;height:48px;border-radius:6px;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:1.2rem">📦</div>`}
+      </td>
+      <td>
+        <strong>${p.name}</strong>
+        <br><span style="font-size:0.75rem;color:var(--gray)">${p.slug}</span>
+        ${p.badge ? `<br><span class="chip" style="font-size:0.7rem;margin-top:2px">${p.badge}</span>` : ''}
+      </td>
+      <td style="font-size:0.85rem">${p.category_name || '—'}</td>
+      <td><strong>${fmtMoney(p.price_eur)}</strong></td>
+      <td>
+        <span style="font-weight:600;color:${p.stock === 0 ? 'var(--danger)' : p.stock <= 3 ? '#e6820e' : 'inherit'}">${p.stock}</span>
+      </td>
+      <td>
+        <span class="badge ${p.is_active ? 'paid' : 'cancelled'}">${p.is_active ? 'Activo' : 'Inactivo'}</span>
+        ${p.is_featured ? '<span class="badge" style="background:#7c3aed22;color:#7c3aed;margin-left:4px">Destacado</span>' : ''}
+      </td>
+      <td>
+        <button class="btn btn-outline btn-sm" onclick="openEditProductModal('${p.id}')">Editar</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function filterProductsLocally() {
+  const q = document.getElementById('filterProductSearch').value.toLowerCase();
+  renderProducts(allProducts.filter(p => p.name.toLowerCase().includes(q) || p.slug.toLowerCase().includes(q)));
+}
+
+function productFormHTML(p = {}) {
+  const catOptions = allCategories.map(c =>
+    `<option value="${c.id}" ${p.category_id === c.id ? 'selected' : ''}>${c.name}</option>`
+  ).join('');
+
+  return `
+    <div style="display:grid;gap:14px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <label style="font-size:0.78rem;font-weight:600;display:block;margin-bottom:4px">Nombre *</label>
+          <input id="pName" class="filter-input" style="width:100%;box-sizing:border-box" value="${p.name || ''}" placeholder="Ej: Anillo Solitario">
+        </div>
+        <div>
+          <label style="font-size:0.78rem;font-weight:600;display:block;margin-bottom:4px">Slug *</label>
+          <input id="pSlug" class="filter-input" style="width:100%;box-sizing:border-box" value="${p.slug || ''}" placeholder="anillo-solitario">
+        </div>
+      </div>
+      <div>
+        <label style="font-size:0.78rem;font-weight:600;display:block;margin-bottom:4px">Descripción</label>
+        <textarea id="pDesc" class="filter-input" style="width:100%;box-sizing:border-box;height:80px;resize:vertical" placeholder="Descripción del producto…">${p.description || ''}</textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div>
+          <label style="font-size:0.78rem;font-weight:600;display:block;margin-bottom:4px">Precio (€) *</label>
+          <input id="pPrice" type="number" step="0.01" class="filter-input" style="width:100%;box-sizing:border-box" value="${p.price_eur || ''}">
+        </div>
+        <div>
+          <label style="font-size:0.78rem;font-weight:600;display:block;margin-bottom:4px">Stock</label>
+          <input id="pStock" type="number" class="filter-input" style="width:100%;box-sizing:border-box" value="${p.stock ?? 0}">
+        </div>
+        <div>
+          <label style="font-size:0.78rem;font-weight:600;display:block;margin-bottom:4px">Categoría</label>
+          <select id="pCategory" class="filter-select" style="width:100%;box-sizing:border-box">
+            <option value="">Sin categoría</option>
+            ${catOptions}
+          </select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div>
+          <label style="font-size:0.78rem;font-weight:600;display:block;margin-bottom:4px">Material</label>
+          <input id="pMaterial" class="filter-input" style="width:100%;box-sizing:border-box" value="${p.material || ''}" placeholder="Plata 925 · Pulido">
+        </div>
+        <div>
+          <label style="font-size:0.78rem;font-weight:600;display:block;margin-bottom:4px">Pureza</label>
+          <input id="pPurity" class="filter-input" style="width:100%;box-sizing:border-box" value="${p.purity || '925'}" placeholder="925">
+        </div>
+        <div>
+          <label style="font-size:0.78rem;font-weight:600;display:block;margin-bottom:4px">Acabado</label>
+          <input id="pFinish" class="filter-input" style="width:100%;box-sizing:border-box" value="${p.finish || ''}" placeholder="Pulido espejo">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <label style="font-size:0.78rem;font-weight:600;display:block;margin-bottom:4px">Badge</label>
+          <select id="pBadge" class="filter-select" style="width:100%;box-sizing:border-box">
+            <option value="">Sin badge</option>
+            ${['Bestseller','New','Sale','Limited','Handmade'].map(b => `<option value="${b}" ${p.badge===b?'selected':''}>${b}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <label style="font-size:0.78rem;font-weight:600;display:block;margin-bottom:4px">Peso (g)</label>
+          <input id="pWeight" type="number" step="0.1" class="filter-input" style="width:100%;box-sizing:border-box" value="${p.weight_grams || ''}">
+        </div>
+      </div>
+      <div style="display:flex;gap:20px;align-items:center;padding:12px;background:var(--light);border-radius:8px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.85rem">
+          <input type="checkbox" id="pActive" ${p.is_active !== false ? 'checked' : ''}> Activo (visible en tienda)
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.85rem">
+          <input type="checkbox" id="pFeatured" ${p.is_featured ? 'checked' : ''}> Destacado
+        </label>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;padding-top:4px">
+        <button class="btn btn-outline btn-sm" onclick="closeProductModal()">Cancelar</button>
+        <button class="btn btn-sm" id="pSaveBtn" style="background:var(--accent);color:#fff" onclick="saveProduct('${p.id || ''}')">
+          ${p.id ? 'Guardar cambios' : 'Crear producto'}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+async function openNewProductModal() {
+  if (!allCategories.length) {
+    const cats = await apiFetch('/api/products/categories/all').catch(() => ({}));
+    allCategories = cats.categories || cats || [];
+  }
+  document.getElementById('productModalTitle').textContent = 'Nuevo producto';
+  document.getElementById('productModalBody').innerHTML = productFormHTML();
+  document.getElementById('productModal').classList.add('open');
+  document.getElementById('pName').addEventListener('input', function() {
+    const slug = document.getElementById('pSlug');
+    if (!slug._touched) {
+      slug.value = this.value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    }
+  });
+  document.getElementById('pSlug').addEventListener('input', function() { this._touched = true; });
+}
+
+async function openEditProductModal(id) {
+  const p = allProducts.find(x => x.id === id);
+  if (!p) return;
+  if (!allCategories.length) {
+    const cats = await apiFetch('/api/products/categories/all').catch(() => ({}));
+    allCategories = cats.categories || cats || [];
+  }
+  document.getElementById('productModalTitle').textContent = 'Editar producto';
+  document.getElementById('productModalBody').innerHTML = productFormHTML(p);
+  document.getElementById('productModal').classList.add('open');
+}
+
+async function saveProduct(id) {
+  const btn = document.getElementById('pSaveBtn');
+  btn.disabled = true;
+  btn.textContent = 'Guardando…';
+
+  const body = {
+    name:        document.getElementById('pName').value.trim(),
+    slug:        document.getElementById('pSlug').value.trim(),
+    description: document.getElementById('pDesc').value.trim(),
+    price_eur:   parseFloat(document.getElementById('pPrice').value),
+    stock:       parseInt(document.getElementById('pStock').value) || 0,
+    category_id: document.getElementById('pCategory').value || null,
+    material:    document.getElementById('pMaterial').value.trim(),
+    purity:      document.getElementById('pPurity').value.trim() || '925',
+    finish:      document.getElementById('pFinish').value.trim(),
+    badge:       document.getElementById('pBadge').value || null,
+    weight_grams:parseFloat(document.getElementById('pWeight').value) || null,
+    is_active:   document.getElementById('pActive').checked,
+    is_featured: document.getElementById('pFeatured').checked,
+  };
+
+  if (!body.name || !body.slug || isNaN(body.price_eur)) {
+    toast('Nombre, slug y precio son obligatorios', 'error');
+    btn.disabled = false;
+    btn.textContent = id ? 'Guardar cambios' : 'Crear producto';
+    return;
+  }
+
+  try {
+    const r = id
+      ? await apiFetch('/api/admin/products/' + id, 'PUT', body)
+      : await apiFetch('/api/admin/products', 'POST', body);
+
+    if (r.error) { toast(r.error, 'error'); return; }
+    toast(id ? 'Producto actualizado ✓' : 'Producto creado ✓', 'success');
+    closeProductModal();
+    loadProducts();
+  } catch(e) {
+    toast('Error: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function closeProductModal(e) {
+  if (!e || e.target === document.getElementById('productModal')) {
+    document.getElementById('productModal').classList.remove('open');
   }
 }
 
