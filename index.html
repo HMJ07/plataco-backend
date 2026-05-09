@@ -19,6 +19,143 @@ body{font-family:'Jost',sans-serif;background:var(--cream);color:var(--dark);min
 h1,h2,h3,.price{font-family:'Cormorant Garamond',serif}
 
 /* ══════════════════════════════════════
+   PROBADOR VIRTUAL IA
+══════════════════════════════════════ */
+.tryon-modal-btn{
+  width:100%;margin-top:0.6rem;padding:0.75rem;
+  background:none;border:1px solid #2a2a2a;color:#777;
+  cursor:pointer;font-family:'Jost',sans-serif;font-size:0.75rem;
+  letter-spacing:0.2em;text-transform:uppercase;
+  display:flex;align-items:center;justify-content:center;gap:0.6rem;
+  transition:all 0.25s;
+}
+.tryon-modal-btn:hover{border-color:var(--gold);color:var(--gold);}
+
+/* Overlay */
+.tryon-overlay{
+  display:none;position:fixed;inset:0;z-index:2000;
+  background:rgba(0,0,0,0.92);
+  align-items:center;justify-content:center;padding:1rem;
+  overflow-y:auto;
+}
+.tryon-overlay.open{display:flex;}
+
+/* Modal box */
+.tryon-modal{
+  background:#0d0d0d;border:1px solid #1e1e1e;
+  width:100%;max-width:620px;position:relative;
+  padding:2.5rem 2rem 2rem;
+  animation:gfFadeUp 0.4s ease both;
+}
+.tryon-close{
+  position:absolute;top:1rem;right:1.2rem;
+  background:none;border:none;color:#444;font-size:1.2rem;
+  cursor:pointer;transition:color 0.2s;line-height:1;
+}
+.tryon-close:hover{color:white;}
+
+/* Header */
+.tryon-header{text-align:center;margin-bottom:2rem;}
+.tryon-eyebrow{font-size:0.65rem;letter-spacing:0.45em;text-transform:uppercase;color:var(--gold);margin-bottom:0.6rem;}
+.tryon-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;color:white;margin-bottom:0.4rem;}
+.tryon-sub{color:#555;font-size:0.78rem;letter-spacing:0.05em;}
+
+/* Steps bar */
+.tryon-steps-bar{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:2rem;}
+.tryon-step-dot{width:24px;height:24px;border-radius:50%;border:1px solid #333;color:#555;font-size:0.65rem;display:flex;align-items:center;justify-content:center;font-family:'Jost',sans-serif;transition:all 0.35s;}
+.tryon-step-dot.active{border-color:var(--gold);color:var(--gold);box-shadow:0 0 10px rgba(201,168,76,0.25);}
+.tryon-step-dot.done{background:var(--gold);border-color:var(--gold);color:var(--dark);}
+.tryon-step-line{width:40px;height:1px;background:#222;transition:background 0.35s;}
+.tryon-step-line.done{background:var(--gold);}
+
+/* Panels */
+.tryon-panel{display:none;animation:gfFadeUp 0.35s ease both;}
+.tryon-panel.active{display:block;}
+
+/* Upload zone */
+.tryon-upload-zone{
+  border:1px dashed #2a2a2a;padding:2.5rem 1rem;text-align:center;
+  cursor:pointer;transition:border-color 0.25s,background 0.25s;
+  margin-bottom:1.2rem;
+}
+.tryon-upload-zone:hover{border-color:var(--gold);background:rgba(201,168,76,0.03);}
+.tryon-upload-icon{font-size:2rem;margin-bottom:0.8rem;}
+.tryon-upload-title{color:white;font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:300;margin-bottom:0.4rem;}
+.tryon-upload-hint{color:#555;font-size:0.78rem;letter-spacing:0.04em;line-height:1.7;}
+.tryon-tips{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;}
+.tryon-tip{color:#444;font-size:0.72rem;letter-spacing:0.1em;}
+.tryon-tip span{color:var(--gold);margin-right:0.3rem;}
+
+/* Canvas area */
+.tryon-canvas-wrap{
+  position:relative;width:100%;
+  background:#050505;border:1px solid #1a1a1a;
+  overflow:hidden;user-select:none;
+  min-height:280px;display:flex;align-items:center;justify-content:center;
+}
+#tryonCanvas{display:block;max-width:100%;max-height:360px;object-fit:contain;}
+.tryon-jewel-overlay{
+  position:absolute;cursor:move;
+  touch-action:none;
+}
+.tryon-jewel-overlay img{
+  display:block;pointer-events:none;
+  filter:drop-shadow(0 4px 12px rgba(0,0,0,0.6));
+}
+.tryon-jewel-handles{position:absolute;inset:0;pointer-events:none;}
+.tryon-handle{
+  position:absolute;width:22px;height:22px;border-radius:50%;
+  background:var(--gold);color:var(--dark);
+  font-size:0.7rem;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;pointer-events:all;user-select:none;
+  box-shadow:0 2px 8px rgba(0,0,0,0.5);font-weight:700;
+}
+.tryon-handle-resize{bottom:-8px;right:-8px;cursor:se-resize;font-size:0.65rem;}
+.tryon-handle-rotate{top:-8px;right:-8px;cursor:grab;}
+.tryon-canvas-hint{color:#444;font-size:0.7rem;letter-spacing:0.08em;text-align:center;margin:0.6rem 0 1rem;}
+
+/* Controls */
+.tryon-controls{display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:center;margin-bottom:1.2rem;}
+.tryon-ctrl-btn{
+  background:none;border:1px solid #252525;color:#555;
+  padding:0.35rem 0.8rem;cursor:pointer;
+  font-family:'Jost',sans-serif;font-size:0.68rem;letter-spacing:0.12em;
+  transition:all 0.2s;
+}
+.tryon-ctrl-btn:hover{border-color:#555;color:#aaa;}
+
+/* Nav */
+.tryon-nav{display:flex;gap:0.8rem;justify-content:center;margin-top:0.5rem;}
+.tryon-btn-back{background:none;border:1px solid #2a2a2a;color:#555;padding:0.65rem 1.6rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;transition:all 0.2s;}
+.tryon-btn-back:hover{border-color:#555;color:#999;}
+.tryon-btn-primary{background:var(--gold);color:var(--dark);border:none;padding:0.65rem 1.8rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;transition:opacity 0.2s;}
+.tryon-btn-primary:hover{opacity:0.85;}
+
+/* AI Loading */
+.tryon-ai-loading{display:flex;flex-direction:column;align-items:center;gap:1.2rem;padding:2.5rem 0;}
+.tryon-ai-ring{width:44px;height:44px;border:1px solid #222;border-top-color:var(--gold);border-radius:50%;animation:gfSpin 1.1s linear infinite;}
+.tryon-ai-loading-text{color:#555;font-size:0.75rem;letter-spacing:0.18em;text-transform:uppercase;}
+
+/* Result */
+.tryon-result-img-wrap{position:relative;margin-bottom:1.5rem;text-align:center;}
+#tryonResultCanvas{max-width:100%;border:1px solid #1a1a1a;}
+.tryon-result-badge{position:absolute;top:10px;left:10px;background:var(--gold);color:var(--dark);font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;padding:0.2rem 0.6rem;font-weight:600;}
+.tryon-ai-opinion{
+  border-left:1px solid var(--gold);padding:0.8rem 1.2rem;
+  color:#888;font-size:0.85rem;line-height:1.85;letter-spacing:0.02em;
+  font-style:italic;margin-bottom:1.5rem;
+}
+.tryon-result-actions{display:flex;gap:0.8rem;justify-content:center;margin-bottom:0.8rem;}
+.tryon-share-btn{display:block;margin:0 auto;background:none;border:none;color:#444;font-size:0.7rem;letter-spacing:0.15em;cursor:pointer;text-transform:uppercase;transition:color 0.2s;}
+.tryon-share-btn:hover{color:#888;}
+
+@media(max-width:500px){
+  .tryon-modal{padding:2rem 1.2rem 1.5rem;}
+  .tryon-controls{gap:0.4rem;}
+  .tryon-ctrl-btn{padding:0.3rem 0.6rem;font-size:0.62rem;}
+}
+
+/* ══════════════════════════════════════
    GIFT FINDER IA
 ══════════════════════════════════════ */
 #giftFinder{
@@ -1520,6 +1657,10 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
       <div id="modalSpecs" style="margin-bottom:1.5rem"></div>
       <button class="add-cart-btn" onclick="addFromModal()">Añadir al carrito</button>
       <button class="wishlist-btn" id="modalWishlistBtn" onclick="toggleFavorite()"><span class="heart-icon">♡</span> <span id="wishlistBtnText">Añadir a favoritos</span></button>
+      <button class="tryon-modal-btn" onclick="openTryOn(currentProduct)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Probarme esta joya con IA
+      </button>
       <!-- RESEÑAS -->
       <div class="reviews-section" id="reviewsSection">
         <div class="reviews-header">
@@ -2560,6 +2701,277 @@ function applySgSize() {
     }
   }
 }
+// ── PROBADOR VIRTUAL IA ─────────────────────────────────────
+let tryonProduct = null;
+let tryonPhotoFile = null;
+let tryonJewelState = { x:50, y:50, w:120, opacity:0.92, rotation:0 };
+let tryonDragging = false, tryonResizing = false, tryonRotating = false;
+let tryonDragStart = {x:0,y:0}, tryonResizeStart = {w:0,mx:0,my:0}, tryonRotateStart = {angle:0,mx:0,my:0};
+let tryonPhotoDataURL = null;
+
+function openTryOn(product){
+  if(!product) return;
+  tryonProduct = product;
+  document.getElementById('tryonProductName').textContent = product.name;
+  const jewImg = document.getElementById('tryonJewelImg');
+  jewImg.src = product.imageUrl || '';
+  jewImg.style.display = product.imageUrl ? 'block' : 'none';
+  // Reset state
+  tryonPhotoFile = null; tryonPhotoDataURL = null;
+  tryonJewelState = {x:50,y:50,w:120,opacity:0.92,rotation:0};
+  document.getElementById('tryonResult').style.display='none';
+  document.getElementById('tryonAiLoading').style.display='flex';
+  tryonGoTo(1);
+  document.getElementById('tryonOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeTryOn(){
+  document.getElementById('tryonOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function handleTryonOverlayClick(e){
+  if(e.target === document.getElementById('tryonOverlay')) closeTryOn();
+}
+
+function tryonGoTo(step){
+  [1,2,3].forEach(i=>{
+    document.getElementById('tryonPanel'+i).classList.remove('active');
+    const dot = document.getElementById('tryonDot'+i);
+    dot.classList.remove('active','done');
+    if(i < step) dot.classList.add('done');
+    else if(i === step) dot.classList.add('active');
+    const line = document.getElementById('tryonStepLine'+i);
+    if(line) line.classList.toggle('done', i < step);
+  });
+  document.getElementById('tryonPanel'+step).classList.add('active');
+  if(step === 2) tryonRenderCanvas();
+  if(step === 3) tryonAnalyzeWithAI();
+}
+
+function handleTryonDrop(e){
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if(file && file.type.startsWith('image/')) tryonLoadFile(file);
+}
+
+function handleTryonFile(e){
+  const file = e.target.files[0];
+  if(file) tryonLoadFile(file);
+}
+
+function tryonLoadFile(file){
+  tryonPhotoFile = file;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    tryonPhotoDataURL = ev.target.result;
+    tryonGoTo(2);
+  };
+  reader.readAsDataURL(file);
+}
+
+function tryonRenderCanvas(){
+  const canvas = document.getElementById('tryonCanvas');
+  const ctx = canvas.getContext('2d');
+  const wrap = document.getElementById('tryonCanvasWrap');
+  const img = new Image();
+  img.onload = () => {
+    const maxW = Math.min(wrap.clientWidth - 2, 580);
+    const scale = maxW / img.width;
+    canvas.width = img.width * scale;
+    canvas.height = img.height * scale;
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    // Position jewel overlay
+    tryonPositionJewel();
+  };
+  img.src = tryonPhotoDataURL;
+}
+
+function tryonPositionJewel(){
+  const canvas = document.getElementById('tryonCanvas');
+  const overlay = document.getElementById('tryonJewelOverlay');
+  const jewImg = document.getElementById('tryonJewelImg');
+  const s = tryonJewelState;
+  overlay.style.left = s.x + 'px';
+  overlay.style.top = s.y + 'px';
+  overlay.style.width = s.w + 'px';
+  jewImg.style.width = s.w + 'px';
+  jewImg.style.opacity = s.opacity;
+  overlay.style.transform = `rotate(${s.rotation}deg)`;
+}
+
+function tryonAdjust(type, delta){
+  if(type === 'size'){
+    tryonJewelState.w = Math.max(40, Math.min(300, tryonJewelState.w + delta));
+  } else if(type === 'opacity'){
+    tryonJewelState.opacity = Math.max(0.2, Math.min(1, tryonJewelState.opacity + delta));
+  }
+  tryonPositionJewel();
+}
+
+function tryonReset(){
+  const canvas = document.getElementById('tryonCanvas');
+  tryonJewelState = {x: canvas.width/2 - 60, y: canvas.height/2 - 60, w:120, opacity:0.92, rotation:0};
+  tryonPositionJewel();
+}
+
+// Drag / resize / rotate interactions
+document.addEventListener('DOMContentLoaded', ()=>{
+  const overlay = document.getElementById('tryonJewelOverlay');
+  const resizeHandle = document.getElementById('tryonResizeHandle');
+  const rotateHandle = document.getElementById('tryonRotateHandle');
+  if(!overlay) return;
+
+  function getCenter(el){
+    const r = el.getBoundingClientRect();
+    return {x: r.left + r.width/2, y: r.top + r.height/2};
+  }
+
+  overlay.addEventListener('pointerdown', e=>{
+    if(e.target === resizeHandle || e.target === rotateHandle) return;
+    tryonDragging = true;
+    tryonDragStart = {x: e.clientX - tryonJewelState.x, y: e.clientY - tryonJewelState.y};
+    overlay.setPointerCapture(e.pointerId);
+    e.stopPropagation();
+  });
+
+  resizeHandle.addEventListener('pointerdown', e=>{
+    tryonResizing = true;
+    tryonResizeStart = {w: tryonJewelState.w, mx: e.clientX, my: e.clientY};
+    resizeHandle.setPointerCapture(e.pointerId);
+    e.stopPropagation();
+  });
+
+  rotateHandle.addEventListener('pointerdown', e=>{
+    tryonRotating = true;
+    const center = getCenter(overlay);
+    tryonRotateStart = {
+      angle: tryonJewelState.rotation,
+      mx: e.clientX, my: e.clientY,
+      cx: center.x, cy: center.y
+    };
+    rotateHandle.setPointerCapture(e.pointerId);
+    e.stopPropagation();
+  });
+
+  document.addEventListener('pointermove', e=>{
+    if(tryonDragging){
+      tryonJewelState.x = e.clientX - tryonDragStart.x;
+      tryonJewelState.y = e.clientY - tryonDragStart.y;
+      tryonPositionJewel();
+    } else if(tryonResizing){
+      const dx = e.clientX - tryonResizeStart.mx;
+      const dy = e.clientY - tryonResizeStart.my;
+      tryonJewelState.w = Math.max(40, tryonResizeStart.w + Math.max(dx,dy));
+      tryonPositionJewel();
+    } else if(tryonRotating){
+      const dx = e.clientX - tryonRotateStart.cx;
+      const dy = e.clientY - tryonRotateStart.cy;
+      const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+      const startAngle = Math.atan2(tryonRotateStart.my - tryonRotateStart.cy, tryonRotateStart.mx - tryonRotateStart.cx) * 180 / Math.PI;
+      tryonJewelState.rotation = tryonRotateStart.angle + (angle - startAngle);
+      tryonPositionJewel();
+    }
+  });
+
+  document.addEventListener('pointerup', ()=>{
+    tryonDragging = false; tryonResizing = false; tryonRotating = false;
+  });
+});
+
+async function tryonAnalyzeWithAI(){
+  document.getElementById('tryonAiLoading').style.display='flex';
+  document.getElementById('tryonResult').style.display='none';
+
+  // Render composite image on result canvas
+  const srcCanvas = document.getElementById('tryonCanvas');
+  const resCanvas = document.getElementById('tryonResultCanvas');
+  resCanvas.width = srcCanvas.width;
+  resCanvas.height = srcCanvas.height;
+  const ctx = resCanvas.getContext('2d');
+  ctx.drawImage(srcCanvas, 0, 0);
+
+  // Draw jewel on result canvas
+  const jewelImg = document.getElementById('tryonJewelImg');
+  if(jewelImg.src && jewelImg.complete){
+    const canvasRect = srcCanvas.getBoundingClientRect();
+    const wrapRect = document.getElementById('tryonCanvasWrap').getBoundingClientRect();
+    const scaleX = srcCanvas.width / canvasRect.width;
+    const scaleY = srcCanvas.height / canvasRect.height;
+    const ox = (tryonJewelState.x - (canvasRect.left - wrapRect.left)) * scaleX;
+    const oy = (tryonJewelState.y - (canvasRect.top - wrapRect.top)) * scaleY;
+    const ow = tryonJewelState.w * scaleX;
+    const oh = ow * (jewelImg.naturalHeight / jewelImg.naturalWidth);
+    ctx.save();
+    ctx.globalAlpha = tryonJewelState.opacity;
+    const cx = ox + ow/2, cy = oy + oh/2;
+    ctx.translate(cx, cy);
+    ctx.rotate(tryonJewelState.rotation * Math.PI / 180);
+    ctx.drawImage(jewelImg, -ow/2, -oh/2, ow, oh);
+    ctx.restore();
+  }
+
+  const compositeDataURL = resCanvas.toDataURL('image/jpeg', 0.85);
+  const base64 = compositeDataURL.split(',')[1];
+  const p = tryonProduct;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{
+          role:'user',
+          content:[
+            {
+              type:'image',
+              source:{type:'base64', media_type:'image/jpeg', data: base64}
+            },
+            {
+              type:'text',
+              text:`Eres un estilista de joyería de lujo con mucho gusto. Estás analizando cómo le queda "${p.name}" (${p.material}) a esta persona según la imagen. 
+              
+La joya está superpuesta en la foto. Escribe un comentario personal, entusiasta y elegante de 3-4 frases en español que: 
+1) Describe cómo luce la joya en esa parte del cuerpo 
+2) Qué favorece de su estilo o piel 
+3) Una sugerencia de cómo combinarla o en qué ocasión llevarla
+
+Tono: como un estilista de boutique de lujo que conoce a la clienta. Cálido, sofisticado. Sin ser genérico.`
+            }
+          ]
+        }]
+      })
+    });
+    const data = await res.json();
+    const opinion = data.content?.map(c=>c.text||'').join('').trim()
+      || 'Esta joya realza tu estilo de forma elegante y natural.';
+    document.getElementById('tryonAiOpinion').innerHTML = `<strong style="color:var(--gold);font-style:normal;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;">✦ Opinión de tu estilista</strong><br><br>${opinion}`;
+  } catch(e) {
+    document.getElementById('tryonAiOpinion').innerHTML = `<strong style="color:var(--gold);font-style:normal;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;">✦ Vista previa lista</strong><br><br>La joya luce perfecta. Pulsa "Añadir al carrito" para hacerla tuya.`;
+  }
+
+  document.getElementById('tryonAiLoading').style.display='none';
+  document.getElementById('tryonResult').style.display='block';
+}
+
+function tryonAddToCart(){
+  if(!tryonProduct) return;
+  addToCart(tryonProduct, null, 1);
+  closeTryOn();
+}
+
+function tryonDownload(){
+  const canvas = document.getElementById('tryonResultCanvas');
+  const link = document.createElement('a');
+  link.download = `plataco-${tryonProduct?.name||'joya'}.jpg`;
+  link.href = canvas.toDataURL('image/jpeg', 0.9);
+  link.click();
+}
+// ── Fin Probador Virtual ─────────────────────────────────────
+
 // ── GIFT FINDER IA ──────────────────────────────────────────
 const gfAnswers = { who:'', style:[], occasion:'', metal:'', budget:80 };
 
@@ -2714,6 +3126,91 @@ function gfRestart(){
 
 // ── Fin guía de tallas ──────────────────────────────────────
 </script>
+
+<!-- PROBADOR VIRTUAL IA -->
+<div class="tryon-overlay" id="tryonOverlay" onclick="handleTryonOverlayClick(event)">
+  <div class="tryon-modal" id="tryonModal">
+    <button class="tryon-close" onclick="closeTryOn()">✕</button>
+
+    <!-- Header -->
+    <div class="tryon-header">
+      <div class="tryon-eyebrow">IA · Probador Virtual</div>
+      <h3 class="tryon-title" id="tryonProductName">Pruébate esta joya</h3>
+      <p class="tryon-sub">Sube una foto y nuestra IA superpondrá la joya sobre ti</p>
+    </div>
+
+    <!-- Pasos -->
+    <div class="tryon-steps-bar">
+      <div class="tryon-step-dot active" id="tryonDot1">1</div>
+      <div class="tryon-step-line" id="tryonStepLine1"></div>
+      <div class="tryon-step-dot" id="tryonDot2">2</div>
+      <div class="tryon-step-line" id="tryonStepLine2"></div>
+      <div class="tryon-step-dot" id="tryonDot3">3</div>
+    </div>
+
+    <!-- PASO 1: Upload -->
+    <div class="tryon-panel active" id="tryonPanel1">
+      <div class="tryon-upload-zone" id="tryonUploadZone" onclick="document.getElementById('tryonFileInput').click()" ondragover="event.preventDefault()" ondrop="handleTryonDrop(event)">
+        <input type="file" id="tryonFileInput" accept="image/*" capture="environment" style="display:none" onchange="handleTryonFile(event)">
+        <div class="tryon-upload-icon">📷</div>
+        <p class="tryon-upload-title">Sube tu foto</p>
+        <p class="tryon-upload-hint">Mano · Muñeca · Cuello · Oreja<br>Toca para hacer una foto o subir imagen</p>
+      </div>
+      <div class="tryon-tips">
+        <div class="tryon-tip"><span>✦</span> Buena iluminación</div>
+        <div class="tryon-tip"><span>✦</span> Fondo neutro</div>
+        <div class="tryon-tip"><span>✦</span> Zona bien visible</div>
+      </div>
+    </div>
+
+    <!-- PASO 2: Ajustar posición -->
+    <div class="tryon-panel" id="tryonPanel2">
+      <div class="tryon-canvas-wrap" id="tryonCanvasWrap">
+        <canvas id="tryonCanvas"></canvas>
+        <div class="tryon-jewel-overlay" id="tryonJewelOverlay">
+          <img id="tryonJewelImg" src="" alt="" draggable="false">
+          <div class="tryon-jewel-handles">
+            <div class="tryon-handle tryon-handle-resize" id="tryonResizeHandle" title="Redimensionar">⤡</div>
+            <div class="tryon-handle tryon-handle-rotate" id="tryonRotateHandle" title="Rotar">↻</div>
+          </div>
+        </div>
+      </div>
+      <p class="tryon-canvas-hint">Arrastra la joya · Esquina inferior para redimensionar · ↻ para rotar</p>
+      <div class="tryon-controls">
+        <button class="tryon-ctrl-btn" onclick="tryonAdjust('size',-10)">− Tamaño</button>
+        <button class="tryon-ctrl-btn" onclick="tryonAdjust('size',10)">+ Tamaño</button>
+        <button class="tryon-ctrl-btn" onclick="tryonAdjust('opacity',-0.1)">− Opacidad</button>
+        <button class="tryon-ctrl-btn" onclick="tryonAdjust('opacity',0.1)">+ Opacidad</button>
+        <button class="tryon-ctrl-btn" onclick="tryonReset()">↺ Reiniciar</button>
+      </div>
+      <div class="tryon-nav">
+        <button class="tryon-btn-back" onclick="tryonGoTo(1)">← Cambiar foto</button>
+        <button class="tryon-btn-primary" onclick="tryonGoTo(3)">✦ &nbsp;Analizar con IA</button>
+      </div>
+    </div>
+
+    <!-- PASO 3: Resultado IA -->
+    <div class="tryon-panel" id="tryonPanel3">
+      <div class="tryon-ai-loading" id="tryonAiLoading">
+        <div class="tryon-ai-ring"></div>
+        <p class="tryon-ai-loading-text">La IA está analizando cómo te queda…</p>
+      </div>
+      <div class="tryon-result" id="tryonResult" style="display:none">
+        <div class="tryon-result-img-wrap">
+          <canvas id="tryonResultCanvas"></canvas>
+          <div class="tryon-result-badge">✦ Vista previa</div>
+        </div>
+        <div class="tryon-ai-opinion" id="tryonAiOpinion"></div>
+        <div class="tryon-result-actions">
+          <button class="tryon-btn-back" onclick="tryonGoTo(2)">← Reajustar</button>
+          <button class="tryon-btn-primary" onclick="tryonAddToCart()">Añadir al carrito</button>
+        </div>
+        <button class="tryon-share-btn" onclick="tryonDownload()">⬇ Guardar imagen</button>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 </body>
 </html>
