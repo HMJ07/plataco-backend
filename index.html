@@ -880,7 +880,15 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
       <div class="reviews-section" id="reviewsSection">
         <div class="reviews-header">
           <span class="reviews-title">Valoraciones</span>
-          <button class="review-toggle-btn" id="reviewFormToggle" onclick="toggleReviewForm()" style="display:none">Escribir reseña</button>
+          <div style="display:flex;align-items:center;gap:0.5rem">
+            <select id="reviewSortFront" onchange="loadReviews(currentProduct&&currentProduct.slug)" style="font-family:'Jost',sans-serif;font-size:0.72rem;border:1px solid var(--border);background:white;padding:0.2rem 0.4rem;color:var(--dark)">
+              <option value="recent">Recientes</option>
+              <option value="rating_desc">Mejor puntuación</option>
+              <option value="rating_asc">Peor puntuación</option>
+              <option value="oldest">Antiguas</option>
+            </select>
+            <button class="review-toggle-btn" id="reviewFormToggle" onclick="toggleReviewForm()" style="display:none">Escribir reseña</button>
+          </div>
         </div>
         <div class="reviews-summary" id="reviewsSummary" style="display:none">
           <span class="stars-avg" id="reviewsAvg"></span>
@@ -1318,7 +1326,8 @@ async function loadReviews(slug){
   document.getElementById('reviewBodyInput').value='';
 
   try {
-    const r = await fetch(`${API_URL}/reviews/${slug}?limit=5`);
+    const sort = document.getElementById('reviewSortFront')?.value || 'recent';
+    const r = await fetch(`${API_URL}/reviews/${slug}?limit=10&sort=${sort}`);
     const data = await r.json();
     const total = parseInt(data.summary?.total || 0);
     const avg = parseFloat(data.summary?.avg_rating || 0);
