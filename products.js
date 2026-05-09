@@ -38,6 +38,14 @@ router.get('/', async (req, res) => {
         p.id, p.name, p.slug, p.description, p.material,
         p.price_eur, p.stock, p.badge, p.is_featured,
         p.weight_grams, p.purity, p.finish,
+        p.review_count, p.rating_avg,
+        CASE
+          WHEN p.stock = 0        THEN 'sin_stock'
+          WHEN p.stock <= 3       THEN 'pocas_unidades'
+          WHEN p.stock <= 10      THEN 'stock_bajo'
+          ELSE                         'disponible'
+        END AS stock_label,
+        (p.stock > 0 AND p.stock <= 10) AS show_stock_count,
         c.name AS category_name, c.slug AS category_slug,
         (SELECT url FROM product_images WHERE product_id=p.id ORDER BY position ASC LIMIT 1) AS image_url,
         (SELECT json_agg(json_build_object('id',pv.id,'name',pv.name,'stock',pv.stock,'price_extra',pv.price_extra) ORDER BY pv.sort_order)
@@ -93,6 +101,14 @@ router.get('/:slug', async (req, res) => {
     const result = await query(`
       SELECT
         p.*,
+        p.review_count, p.rating_avg,
+        CASE
+          WHEN p.stock = 0        THEN 'sin_stock'
+          WHEN p.stock <= 3       THEN 'pocas_unidades'
+          WHEN p.stock <= 10      THEN 'stock_bajo'
+          ELSE                         'disponible'
+        END AS stock_label,
+        (p.stock > 0 AND p.stock <= 10) AS show_stock_count,
         c.name AS category_name, c.slug AS category_slug,
         json_agg(DISTINCT jsonb_build_object('id',pi.id,'url',pi.url,'alt_text',pi.alt_text,'position',pi.position)) FILTER (WHERE pi.id IS NOT NULL) AS images,
         json_agg(DISTINCT jsonb_build_object('id',pv.id,'name',pv.name,'stock',pv.stock,'price_extra',pv.price_extra)) FILTER (WHERE pv.id IS NOT NULL) AS variants

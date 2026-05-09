@@ -20,7 +20,7 @@ const EXCHANGE_RATES = { EUR: 1, USD: 1.08, GBP: 0.86, JPY: 163.2, CAD: 1.47, AU
 // Devuelve un client_secret que Stripe.js usa para confirmar el pago.
 router.post('/create-intent', async (req, res) => {
   try {
-    const { items, currency = 'EUR', shipping_address } = req.body;
+    const { items, currency = 'EUR', shipping_address, coupon_code } = req.body;
 
     if (!items || items.length === 0) {
       return res.status(400).json({ error: 'El carrito está vacío' });
@@ -59,7 +59,36 @@ router.post('/create-intent', async (req, res) => {
 
     // Calcular envío
     const shipping_eur = total_eur >= 80 ? 0 : 6.95;
+    const subtotal_before_discount = total_eur;
     total_eur += shipping_eur;
+
+    // ── Aplicar cupón de descuento ────────────────────────
+    let discount_eur = 0;
+    let appliedCoupon = null;
+
+    if (coupon_code) {
+      const couponRes = await query(
+        `SELECT * FROM coupons
+         WHERE code = UPPER($1)
+           AND is_active = TRUE
+           AND (valid_from IS NULL OR valid_from <= NOW())
+           AND (valid_until IS NULL OR valid_until >= NOW())`,
+        [coupon_code]
+      );
+      const coupon = couponRes.rows[0];
+
+      if (coupon && (coupon.max_uses === null || coupon.uses_count < coupon.max_uses)) {
+        if (subtotal_before_discount >= parseFloat(coupon.min_order_eur)) {
+          if (coupon.discount_type === 'percent') {
+            discount_eur = +(subtotal_before_discount * (parseFloat(coupon.discount_value) / 100)).toFixed(2);
+          } else {
+            discount_eur = +Math.min(parseFloat(coupon.discount_value), subtotal_before_discount).toFixed(2);
+          }
+          total_eur = +(total_eur - discount_eur).toFixed(2);
+          appliedCoupon = { id: coupon.id, code: coupon.code, discount_eur };
+        }
+      }
+    }
 
     // Convertir a la divisa del cliente
     const rate = EXCHANGE_RATES[currency] || 1;
@@ -84,6 +113,9 @@ router.post('/create-intent', async (req, res) => {
         items_compact: JSON.stringify(compactItems),
         total_eur:     total_eur.toFixed(2),
         shipping_eur:  shipping_eur.toFixed(2),
+        discount_eur:  discount_eur.toFixed(2),
+        coupon_id:     appliedCoupon?.id || '',
+        coupon_code:   appliedCoupon?.code || '',
         currency:      currency,
         exchange_rate: rate.toString(),
       },
@@ -94,6 +126,8 @@ router.post('/create-intent', async (req, res) => {
       payment_intent_id: paymentIntent.id,
       total_eur,
       shipping_eur,
+      discount_eur,
+      coupon: appliedCoupon,
       total_customer_currency: (total_customer / 100).toFixed(2),
       currency,
       validated_items: validatedItems,
@@ -173,7 +207,10 @@ router.post('/confirm-order', (req, res, next) => {
     }
     const total_eur = parseFloat(meta.total_eur);
     const shipping_eur = parseFloat(meta.shipping_eur);
-    const subtotal_eur = total_eur - shipping_eur;
+    const discount_eur = parseFloat(meta.discount_eur || '0');
+    const subtotal_eur = total_eur - shipping_eur + discount_eur;
+    const coupon_id   = meta.coupon_id   || null;
+    const coupon_code = meta.coupon_code || null;
     const user_id = req.user?.id || null;
 
     // Crear pedido y pago en una transacción
@@ -182,15 +219,17 @@ router.post('/confirm-order', (req, res, next) => {
       const orderResult = await client.query(`
         INSERT INTO orders (
           user_id, guest_email, status,
-          subtotal_eur, shipping_eur, total_eur,
+          subtotal_eur, shipping_eur, discount_eur, total_eur,
+          coupon_id, coupon_code,
           currency, total_customer_currency, exchange_rate,
           ship_first_name, ship_last_name, ship_address1, ship_address2,
           ship_city, ship_state, ship_postal_code, ship_country, ship_phone
-        ) VALUES ($1,$2,'paid',$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+        ) VALUES ($1,$2,'paid',$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
         RETURNING *
       `, [
         user_id, guest_email || null,
-        subtotal_eur, shipping_eur, total_eur,
+        subtotal_eur, shipping_eur, discount_eur, total_eur,
+        coupon_id, coupon_code,
         meta.currency, parseFloat(meta.total_eur) * parseFloat(meta.exchange_rate), parseFloat(meta.exchange_rate),
         shipping_address.first_name, shipping_address.last_name,
         shipping_address.address1, shipping_address.address2 || null,
@@ -223,6 +262,19 @@ router.post('/confirm-order', (req, res, next) => {
         INSERT INTO payments (order_id, stripe_payment_intent_id, stripe_charge_id, amount_eur, currency, status, payment_method)
         VALUES ($1,$2,$3,$4,$5,'succeeded',$6)
       `, [order.id, payment_intent_id, charge || null, total_eur, meta.currency, 'card']);
+
+      // 4. Registrar uso de cupón y actualizar contador
+      if (coupon_id && discount_eur > 0) {
+        await client.query(
+          `INSERT INTO coupon_uses (coupon_id, order_id, user_id, discount_eur)
+           VALUES ($1, $2, $3, $4)`,
+          [coupon_id, order.id, user_id, discount_eur]
+        );
+        await client.query(
+          'UPDATE coupons SET uses_count = uses_count + 1 WHERE id = $1',
+          [coupon_id]
+        );
+      }
 
       return order;
     });

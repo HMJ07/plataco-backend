@@ -334,4 +334,147 @@ router.put('/orders/:id/status', async (req, res) => {
   }
 });
 
+// ============================================================
+// ADMIN — Gestión de reseñas
+// ============================================================
+
+// GET /api/admin/reviews — Listar todas las reseñas pendientes o todas
+router.get('/reviews', async (req, res) => {
+  try {
+    const { approved } = req.query; // 'true' | 'false' | undefined (todas)
+    const conditions = [];
+    const params = [];
+    if (approved !== undefined) {
+      params.push(approved === 'true');
+      conditions.push(`r.is_approved = $${params.length}`);
+    }
+    const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+
+    const result = await query(`
+      SELECT r.*, p.name AS product_name, p.slug AS product_slug,
+             u.email AS user_email, u.first_name, u.last_name
+      FROM product_reviews r
+      JOIN products p ON p.id = r.product_id
+      LEFT JOIN users u ON u.id = r.user_id
+      ${where}
+      ORDER BY r.created_at DESC
+    `, params);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PUT /api/admin/reviews/:id — Aprobar / rechazar reseña
+router.put('/reviews/:id', async (req, res) => {
+  try {
+    const { is_approved } = req.body;
+    const result = await query(
+      'UPDATE product_reviews SET is_approved=$1 WHERE id=$2 RETURNING *',
+      [is_approved, req.params.id]
+    );
+    if (!result.rows[0]) return res.status(404).json({ error: 'Reseña no encontrada' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/admin/reviews/:id
+router.delete('/reviews/:id', async (req, res) => {
+  try {
+    await query('DELETE FROM product_reviews WHERE id=$1', [req.params.id]);
+    res.json({ message: 'Reseña eliminada' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ============================================================
+// ADMIN — Gestión de cupones
+// ============================================================
+
+// GET /api/admin/coupons
+router.get('/coupons', async (req, res) => {
+  try {
+    const result = await query(`
+      SELECT c.*,
+        (SELECT COUNT(*) FROM coupon_uses WHERE coupon_id = c.id) AS actual_uses
+      FROM coupons c
+      ORDER BY c.created_at DESC
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/admin/coupons
+router.post('/coupons', async (req, res) => {
+  try {
+    const {
+      code, description, discount_type, discount_value,
+      min_order_eur, max_uses, max_uses_per_user, valid_from, valid_until,
+    } = req.body;
+
+    if (!['percent','fixed'].includes(discount_type)) {
+      return res.status(400).json({ error: 'discount_type debe ser "percent" o "fixed"' });
+    }
+
+    const result = await query(`
+      INSERT INTO coupons
+        (code, description, discount_type, discount_value, min_order_eur,
+         max_uses, max_uses_per_user, valid_from, valid_until)
+      VALUES (UPPER($1),$2,$3,$4,$5,$6,$7,$8,$9)
+      RETURNING *
+    `, [
+      code, description || null, discount_type, discount_value,
+      min_order_eur || 0, max_uses || null, max_uses_per_user || 1,
+      valid_from || null, valid_until || null,
+    ]);
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    if (err.code === '23505') return res.status(409).json({ error: 'Ya existe un cupón con ese código' });
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PUT /api/admin/coupons/:id
+router.put('/coupons/:id', async (req, res) => {
+  try {
+    const {
+      description, discount_type, discount_value,
+      min_order_eur, max_uses, max_uses_per_user,
+      valid_from, valid_until, is_active,
+    } = req.body;
+
+    const result = await query(`
+      UPDATE coupons SET
+        description=$1, discount_type=$2, discount_value=$3,
+        min_order_eur=$4, max_uses=$5, max_uses_per_user=$6,
+        valid_from=$7, valid_until=$8, is_active=$9
+      WHERE id=$10 RETURNING *
+    `, [
+      description || null, discount_type, discount_value,
+      min_order_eur || 0, max_uses || null, max_uses_per_user || 1,
+      valid_from || null, valid_until || null, is_active !== false,
+      req.params.id,
+    ]);
+    if (!result.rows[0]) return res.status(404).json({ error: 'Cupón no encontrado' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/admin/coupons/:id
+router.delete('/coupons/:id', async (req, res) => {
+  try {
+    await query('DELETE FROM coupons WHERE id=$1', [req.params.id]);
+    res.json({ message: 'Cupón eliminado' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;

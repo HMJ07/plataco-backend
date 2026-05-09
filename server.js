@@ -20,6 +20,8 @@ import adminRoutes    from './admin.js';
 import webhookRoutes  from './webhooks.js';
 import favoritesRoutes  from './favorites.js';
 import googleAuthRoutes from './google_auth.js';
+import reviewRoutes   from './reviews.js';
+import couponRoutes   from './coupons.js';
 
 dotenv.config();
 
@@ -58,6 +60,8 @@ app.use('/api/orders',        orderRoutes);
 app.use('/api/payments',      paymentRoutes);
 app.use('/api/admin',         adminRoutes);
 app.use('/api/webhooks',      webhookRoutes);
+app.use('/api/reviews',       reviewRoutes);
+app.use('/api/coupons',       couponRoutes);
 
 // ── Health check ───────────────────────────────────────────
 app.get('/api/health', (req, res) => {
