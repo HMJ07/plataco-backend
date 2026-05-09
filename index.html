@@ -566,7 +566,54 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
 
 <header>
   <div class="header-top">
-    <div class="logo">PLATA<span>&amp;</span>CO</div>
+    <a href="#" style="text-decoration:none;display:flex;align-items:center;gap:0.75rem">
+      <svg width="38" height="38" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+        <defs>
+          <radialGradient id="logoGemGrad" cx="38%" cy="32%" r="70%">
+            <stop offset="0%" stop-color="#fff8dc"/>
+            <stop offset="25%" stop-color="#f0d060"/>
+            <stop offset="60%" stop-color="#C9A84C"/>
+            <stop offset="100%" stop-color="#6b4c10"/>
+          </radialGradient>
+          <radialGradient id="logoGemShine" cx="55%" cy="55%" r="50%">
+            <stop offset="0%" stop-color="rgba(255,255,255,0.55)"/>
+            <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+          </radialGradient>
+          <filter id="logoGlow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="1.8" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <!-- Outer ring -->
+        <circle cx="19" cy="19" r="17.5" fill="none" stroke="#C9A84C" stroke-width="0.8" opacity="0.5"/>
+        <!-- Inner subtle ring -->
+        <circle cx="19" cy="19" r="14" fill="none" stroke="#C9A84C" stroke-width="0.4" opacity="0.25"/>
+        <!-- Diamond gem — precise faceted shape -->
+        <polygon points="19,5 30,17 19,33 8,17" fill="url(#logoGemGrad)" filter="url(#logoGlow)"/>
+        <!-- Top-left facet (lighter) -->
+        <polygon points="19,5 8,17 19,17" fill="rgba(255,248,200,0.28)"/>
+        <!-- Top-right facet -->
+        <polygon points="19,5 30,17 19,17" fill="rgba(255,220,100,0.18)"/>
+        <!-- Bottom-left facet -->
+        <polygon points="8,17 19,17 19,33" fill="rgba(80,50,0,0.22)"/>
+        <!-- Bottom-right facet -->
+        <polygon points="30,17 19,17 19,33" fill="rgba(150,100,20,0.20)"/>
+        <!-- Girdle highlight line -->
+        <line x1="8" y1="17" x2="30" y2="17" stroke="rgba(255,240,160,0.45)" stroke-width="0.6"/>
+        <!-- Shine overlay -->
+        <polygon points="19,5 30,17 19,33 8,17" fill="url(#logoGemShine)"/>
+        <!-- Table highlight -->
+        <ellipse cx="15.5" cy="11.5" rx="3.5" ry="2" fill="rgba(255,255,255,0.55)" transform="rotate(-18,15.5,11.5)"/>
+        <!-- Tiny center sparkle -->
+        <circle cx="19" cy="17" r="0.9" fill="rgba(255,255,255,0.85)"/>
+        <!-- Corner sparkles -->
+        <g fill="white" opacity="0.75">
+          <polygon points="4,8 4.8,5.5 5.6,8 8,8.8 5.6,9.6 4.8,12 4,9.6 1.5,8.8"/>
+          <polygon points="33,27 33.6,25 34.2,27 36,27.6 34.2,28.2 33.6,30 33,28.2 31,27.6"/>
+        </g>
+      </svg>
+      <span class="logo" style="display:block">PLATA<span>&amp;</span>CO</span>
+    </a>
     <div class="search-bar" style="flex:1;max-width:400px;margin:0 3rem">
       <span class="search-icon">⌕</span>
       <input class="search-input" type="text" id="searchInput" placeholder="Buscar joyas..." oninput="handleSearch()">
@@ -1195,21 +1242,41 @@ function checkout(){
 
 // ── IMAGES ───────────────────────────────────────────────
 const PRODUCT_IMAGES = {
-  'anillo sello oval':     'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&q=80',
-  'anillo medio dedo':     'https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=600&q=80',
-  'anillo':                'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=600&q=80',
-  'collar cadena anchor':  'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&q=80',
-  'collar luna creciente': 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&q=80',
-  'collar':                'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80',
-  'pulsera':               'https://images.unsplash.com/photo-1573408301185-9519f94ae14e?w=600&q=80',
-  'pendiente':             'https://images.unsplash.com/photo-1630018548696-e1e6e8a2ab31?w=600&q=80',
-  'default':               'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80',
+  // Rings
+  'anillo sello oval':       'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&q=80',
+  'anillo medio dedo':       'https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=600&q=80',
+  'anillo infinito':         'https://images.unsplash.com/photo-1589674781759-c21c37956a44?w=600&q=80',
+  'anillo apilable':         'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80',
+  'anillo':                  'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=600&q=80',
+  // Necklaces
+  'collar cadena anchor':    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&q=80',
+  'collar luna creciente':   'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&q=80',
+  'collar gargantilla':      'https://images.unsplash.com/photo-1630080890630-a0afae8d1248?w=600&q=80',
+  'collar corazon':          'https://images.unsplash.com/photo-1596944924591-2a09b5c1c9f4?w=600&q=80',
+  'collar':                  'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80',
+  // Bracelets
+  'pulsera esclava':         'https://images.unsplash.com/photo-1588671616667-a9e65e0d4b56?w=600&q=80',
+  'pulsera cadena':          'https://images.unsplash.com/photo-1573408301185-9519f94ae14e?w=600&q=80',
+  'pulsera charm':           'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80',
+  'pulsera tejida':          'https://images.unsplash.com/photo-1543295087-e51e8e6d7c9f?w=600&q=80',
+  'pulsera':                 'https://images.unsplash.com/photo-1573408301185-9519f94ae14e?w=600&q=80',
+  // Earrings
+  'pendientes aro':          'https://images.unsplash.com/photo-1630018548696-e1e6e8a2ab31?w=600&q=80',
+  'pendientes lagrima':      'https://images.unsplash.com/photo-1599459183200-59c7687a0c70?w=600&q=80',
+  'pendientes ear cuff':     'https://images.unsplash.com/photo-1617038220319-276d3cfab638?w=600&q=80',
+  'pendiente':               'https://images.unsplash.com/photo-1630018548696-e1e6e8a2ab31?w=600&q=80',
+  // Brooches / Clips
+  'broche':                  'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&q=80',
+  'clip':                    'https://images.unsplash.com/photo-1617038220319-276d3cfab638?w=600&q=80',
+  // Default
+  'default':                 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80',
 };
 const GALLERY_IMAGES = {
   anillos:['https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=600&q=80','https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&q=80','https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=600&q=80','https://images.unsplash.com/photo-1589674781759-c21c37956a44?w=600&q=80'],
   collares:['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80','https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&q=80','https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&q=80','https://images.unsplash.com/photo-1630080890630-a0afae8d1248?w=600&q=80'],
-  pulseras:['https://images.unsplash.com/photo-1573408301185-9519f94ae14e?w=600&q=80','https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80','https://images.unsplash.com/photo-1588671616667-a9e65e0d4b56?w=600&q=80'],
-  pendientes:['https://images.unsplash.com/photo-1630018548696-e1e6e8a2ab31?w=600&q=80','https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80','https://images.unsplash.com/photo-1599459183200-59c7687a0c70?w=600&q=80'],
+  pulseras:['https://images.unsplash.com/photo-1573408301185-9519f94ae14e?w=600&q=80','https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80','https://images.unsplash.com/photo-1588671616667-a9e65e0d4b56?w=600&q=80','https://images.unsplash.com/photo-1543295087-e51e8e6d7c9f?w=600&q=80'],
+  pendientes:['https://images.unsplash.com/photo-1630018548696-e1e6e8a2ab31?w=600&q=80','https://images.unsplash.com/photo-1599459183200-59c7687a0c70?w=600&q=80','https://images.unsplash.com/photo-1617038220319-276d3cfab638?w=600&q=80','https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80'],
+  broches:['https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&q=80','https://images.unsplash.com/photo-1617038220319-276d3cfab638?w=600&q=80','https://images.unsplash.com/photo-1599459183200-59c7687a0c70?w=600&q=80','https://images.unsplash.com/photo-1630018548696-e1e6e8a2ab31?w=600&q=80'],
   default:['https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80','https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80','https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=600&q=80'],
 };
 function getGalleryImages(product){
@@ -1228,6 +1295,7 @@ function getProductImage(p){
   const n=(p.name||'').toLowerCase();
   for(const[k,u]of Object.entries(PRODUCT_IMAGES)){if(k!=='default'&&n.includes(k))return u;}
   const c=(p.category_slug||'').toLowerCase();
+  if(c.includes('broche'))return PRODUCT_IMAGES['broche'];
   if(c.includes('anillo'))return PRODUCT_IMAGES['anillo'];
   if(c.includes('collar'))return PRODUCT_IMAGES['collar'];
   if(c.includes('pulsera'))return PRODUCT_IMAGES['pulsera'];
@@ -1298,97 +1366,196 @@ async function loadProductsFromApi(){
     return{x,y:ny,z:nz};
   }
 
-  const size=80;
-  const top={x:0,y:-size*1.2,z:0};
-  const bot={x:0,y:size*0.9,z:0};
-  const mid=[
-    {x:size,y:0,z:0},
-    {x:0,y:0,z:size},
-    {x:-size,y:0,z:0},
-    {x:0,y:0,z:-size},
-    {x:size*0.7,y:0,z:size*0.7},
-    {x:-size*0.7,y:0,z:size*0.7},
-    {x:-size*0.7,y:0,z:-size*0.7},
-    {x:size*0.7,y:0,z:-size*0.7},
-  ];
+  // ─── REALISTIC BRILLIANT-CUT DIAMOND ──────────────────────
+  // Crown (top half) + Pavilion (bottom half) with girdle
+  const R = 90; // outer radius at girdle
+  const N = 16; // number of girdle vertices
+  const crownH  = -R * 0.55; // apex of crown (table center up)
+  const tableR  = R * 0.52;  // table (flat top) radius
+  const tableY  = -R * 0.22; // table height
+  const girY    = R * 0.04;  // girdle y
+  const pavH    = R * 0.72;  // culet (bottom point)
 
-  const faces=[
-    // Top facets
-    {verts:[top,mid[0],mid[4]],top:true},
-    {verts:[top,mid[4],mid[1]],top:true},
-    {verts:[top,mid[1],mid[5]],top:true},
-    {verts:[top,mid[5],mid[2]],top:true},
-    {verts:[top,mid[2],mid[6]],top:true},
-    {verts:[top,mid[6],mid[3]],top:true},
-    {verts:[top,mid[3],mid[7]],top:true},
-    {verts:[top,mid[7],mid[0]],top:true},
-    // Bottom facets
-    {verts:[bot,mid[0],mid[4]],top:false},
-    {verts:[bot,mid[4],mid[1]],top:false},
-    {verts:[bot,mid[1],mid[5]],top:false},
-    {verts:[bot,mid[5],mid[2]],top:false},
-    {verts:[bot,mid[2],mid[6]],top:false},
-    {verts:[bot,mid[6],mid[3]],top:false},
-    {verts:[bot,mid[3],mid[7]],top:false},
-    {verts:[bot,mid[7],mid[0]],top:false},
-  ];
+  // Generate girdle ring vertices (upper + lower edge of girdle)
+  function girdleVerts(yOff=0){
+    return Array.from({length:N},(_,i)=>{
+      const a=(i/N)*Math.PI*2;
+      return {x:Math.cos(a)*R, y:girY+yOff, z:Math.sin(a)*R};
+    });
+  }
+  const gUp = girdleVerts(-4);
+  const gDn = girdleVerts( 4);
+
+  // Table vertices
+  function tableVerts(){
+    return Array.from({length:N},(_,i)=>{
+      const a=((i+0.5)/N)*Math.PI*2;
+      return {x:Math.cos(a)*tableR, y:tableY, z:Math.sin(a)*tableR};
+    });
+  }
+  const tVerts = tableVerts();
+
+  const apex    = {x:0, y:crownH, z:0};  // crown tip (not used as star apex)
+  const culet   = {x:0, y:pavH,   z:0};
+
+  // Build faces: [verts, faceType]
+  // faceType: 'table'|'crown'|'girdle'|'pavilion'
+  const faces=[];
+
+  // TABLE (flat top polygon — N-gon)
+  faces.push({verts:[...tVerts], type:'table'});
+
+  // STAR FACETS: table edge → girdle up (N triangles crown top)
+  for(let i=0;i<N;i++){
+    const j=(i+1)%N;
+    faces.push({verts:[tVerts[i],gUp[i],gUp[j]], type:'crown-upper'});
+    faces.push({verts:[tVerts[i],tVerts[j],gUp[j]], type:'crown-upper'});
+  }
+
+  // KITE FACETS: girdle upper → apex-like star (crown lower)
+  // We simulate with larger girdle-to-table triangles
+  for(let i=0;i<N;i++){
+    const j=(i+1)%N;
+    faces.push({verts:[gUp[i],gUp[j],gDn[j],gDn[i]], type:'girdle'});
+  }
+
+  // PAVILION MAIN: girdle down → culet
+  for(let i=0;i<N;i++){
+    const j=(i+1)%N;
+    faces.push({verts:[culet,gDn[j],gDn[i]], type:'pavilion'});
+  }
+
+  // Light direction (fixed world space)
+  const LIGHT={x:-0.5,y:-1,z:0.6};
+  function normLight(){const l=Math.sqrt(LIGHT.x**2+LIGHT.y**2+LIGHT.z**2);return{x:LIGHT.x/l,y:LIGHT.y/l,z:LIGHT.z/l};}
+  const LN=normLight();
+
+  function faceNormal(pts3d){
+    const ax=pts3d[1].x-pts3d[0].x, ay=pts3d[1].y-pts3d[0].y, az=pts3d[1].z-pts3d[0].z;
+    const bx=pts3d[2].x-pts3d[0].x, by=pts3d[2].y-pts3d[0].y, bz=pts3d[2].z-pts3d[0].z;
+    const nx=ay*bz-az*by, ny=az*bx-ax*bz, nz=ax*by-ay*bx;
+    const l=Math.sqrt(nx*nx+ny*ny+nz*nz)||1;
+    return{x:nx/l,y:ny/l,z:nz/l};
+  }
+  function dot3(a,b){return a.x*b.x+a.y*b.y+a.z*b.z;}
+
+  let sparkleT=0;
 
   function drawFrame(){
     ctx.clearRect(0,0,W,H);
 
-    // Background glow
-    const grd=ctx.createRadialGradient(W/2,H/2,10,W/2,H/2,Math.min(W,H)*0.5);
-    grd.addColorStop(0,'rgba(201,168,76,0.08)');
-    grd.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=grd; ctx.fillRect(0,0,W,H);
+    // Ambient glow bg
+    const bgGrd=ctx.createRadialGradient(W/2,H*0.48,8,W/2,H*0.48,Math.min(W,H)*0.52);
+    bgGrd.addColorStop(0,'rgba(201,168,76,0.11)');
+    bgGrd.addColorStop(0.5,'rgba(180,140,40,0.04)');
+    bgGrd.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=bgGrd; ctx.fillRect(0,0,W,H);
 
-    // Project and sort faces
+    // Drop shadow
+    const shadowGrd=ctx.createRadialGradient(W/2,H*0.82,2,W/2,H*0.82,60);
+    shadowGrd.addColorStop(0,'rgba(0,0,0,0.35)');
+    shadowGrd.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=shadowGrd; ctx.fillRect(0,0,W,H);
+
+    // Project + sort all faces
     const projected=faces.map(face=>{
-      const pts=face.verts.map(v=>{
-        const r=rotatePoint(v.x,v.y,v.z,rotX,rotY);
-        return{...project(r.x,r.y,r.z),rz:r.z};
-      });
-      const avgZ=pts.reduce((s,p)=>s+p.rz,0)/pts.length;
-      // Normal for visibility
-      const ax=pts[1].x-pts[0].x; const ay=pts[1].y-pts[0].y;
-      const bx=pts[2].x-pts[0].x; const by=pts[2].y-pts[0].y;
-      const nz=ax*by-ay*bx;
-      return{pts,avgZ,visible:nz>0,isTop:face.top};
-    }).filter(f=>f.visible).sort((a,b)=>b.avgZ-a.avgZ);
+      const pts3d=face.verts.map(v=>rotatePoint(v.x,v.y,v.z,rotX,rotY));
+      const pts2d=pts3d.map(v=>({...project(v.x,v.y,v.z)}));
+      const avgZ=pts3d.reduce((s,v)=>s+v.z,0)/pts3d.length;
+      const n=faceNormal(pts3d);
+      const nz2d=(pts2d[1].x-pts2d[0].x)*(pts2d[2].y-pts2d[0].y)-(pts2d[1].y-pts2d[0].y)*(pts2d[2].x-pts2d[0].x);
+      const visible = face.type==='table' || face.type==='girdle' ? true : (face.type.startsWith('crown') ? nz2d<0 : nz2d>0);
+      const diffuse=Math.max(0,dot3(n,{x:-LN.x,y:-LN.y,z:-LN.z}));
+      return{pts:pts2d,pts3d,avgZ,visible,type:face.type,diffuse,normal:n};
+    }).filter(f=>f.visible).sort((a,b)=>a.avgZ-b.avgZ);
 
-    projected.forEach(({pts,isTop,avgZ})=>{
+    projected.forEach(({pts,diffuse,type,avgZ,normal})=>{
       ctx.beginPath();
       ctx.moveTo(pts[0].x,pts[0].y);
-      pts.forEach(p=>ctx.lineTo(p.x,p.y));
+      for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i].x,pts[i].y);
       ctx.closePath();
 
-      const bright=Math.min(1,(avgZ+300)/600);
-      if(isTop){
-        // Gold gradient for top
-        const grd2=ctx.createLinearGradient(pts[0].x,pts[0].y,pts[2].x,pts[2].y);
-        grd2.addColorStop(0,`rgba(255,240,180,${0.6+bright*0.3})`);
-        grd2.addColorStop(0.5,`rgba(201,168,76,${0.5+bright*0.3})`);
-        grd2.addColorStop(1,`rgba(122,92,30,${0.4+bright*0.2})`);
-        ctx.fillStyle=grd2;
-      }else{
-        const grd3=ctx.createLinearGradient(pts[0].x,pts[0].y,pts[2].x,pts[2].y);
-        grd3.addColorStop(0,`rgba(201,168,76,${0.3+bright*0.2})`);
-        grd3.addColorStop(1,`rgba(60,40,0,${0.4+bright*0.2})`);
-        ctx.fillStyle=grd3;
+      const d=diffuse;
+      const spec=Math.pow(Math.max(0,d),18); // specular highlight
+
+      let fillColor;
+      if(type==='table'){
+        // Table: semi-transparent pale gold with reflection tint
+        const r=Math.round(230+20*d); const g=Math.round(200+30*d); const b=Math.round(120+20*d);
+        fillColor=`rgba(${r},${g},${b},0.78)`;
+      } else if(type==='crown-upper'){
+        // Crown facets: bright gold with specular
+        const base=[220+35*d, 170+40*d, 60+30*d];
+        const sr=Math.min(255,base[0]+spec*200);
+        const sg=Math.min(255,base[1]+spec*200);
+        const sb=Math.min(255,base[2]+spec*160);
+        fillColor=`rgba(${Math.round(sr)},${Math.round(sg)},${Math.round(sb)},${0.82+d*0.15})`;
+      } else if(type==='girdle'){
+        fillColor=`rgba(${Math.round(180+20*d)},${Math.round(140+20*d)},${Math.round(40+10*d)},0.6)`;
+      } else {
+        // Pavilion: deeper, with flashes
+        const flash=Math.random()<0.002?0.6:0; // occasional fire flash
+        const base=[160+60*d+flash*80, 110+60*d+flash*40, 20+40*d];
+        fillColor=`rgba(${Math.round(Math.min(255,base[0]))},${Math.round(Math.min(255,base[1]))},${Math.round(Math.min(255,base[2]))},${0.75+d*0.2})`;
       }
+      ctx.fillStyle=fillColor;
       ctx.fill();
-      ctx.strokeStyle=`rgba(255,220,100,${0.15+bright*0.1})`;
-      ctx.lineWidth=0.5;
+
+      // Facet edges — thin gold lines
+      const edgeAlpha = type==='girdle'?0.08:0.12+d*0.12;
+      ctx.strokeStyle=`rgba(255,220,120,${edgeAlpha})`;
+      ctx.lineWidth=type==='table'?0.8:0.5;
       ctx.stroke();
+
+      // Specular hot spots on crown/table
+      if(spec>0.3 && (type==='crown-upper'||type==='table')){
+        ctx.beginPath();
+        const cx=pts.reduce((s,p)=>s+p.x,0)/pts.length;
+        const cy=pts.reduce((s,p)=>s+p.y,0)/pts.length;
+        const r=ctx.createRadialGradient(cx,cy,0,cx,cy,12);
+        r.addColorStop(0,`rgba(255,255,240,${spec*0.7})`);
+        r.addColorStop(1,'rgba(255,255,200,0)');
+        ctx.fillStyle=r;
+        ctx.arc(cx,cy,14,0,Math.PI*2);
+        ctx.fill();
+      }
     });
 
-    // Center sparkle
-    ctx.beginPath();
-    ctx.arc(W/2,H/2,2,0,Math.PI*2);
-    ctx.fillStyle='rgba(255,255,255,0.8)';
-    ctx.fill();
+    // Animated sparkle stars
+    sparkleT+=0.03;
+    const sparkles=[
+      {x:W*0.18,y:H*0.22,phase:0},
+      {x:W*0.82,y:H*0.32,phase:1.8},
+      {x:W*0.12,y:H*0.68,phase:3.5},
+      {x:W*0.88,y:H*0.72,phase:2.2},
+    ];
+    sparkles.forEach(({x,y,phase})=>{
+      const a=Math.abs(Math.sin(sparkleT+phase));
+      if(a<0.2)return;
+      const s=6*a;
+      ctx.save();ctx.translate(x,y);ctx.globalAlpha=a*0.9;
+      ctx.strokeStyle='rgba(255,240,160,0.95)';ctx.lineWidth=1.2;
+      // 4-pointed star
+      for(let i=0;i<4;i++){
+        ctx.beginPath();
+        ctx.moveTo(0,0);
+        const ang=i*Math.PI/2;
+        ctx.lineTo(Math.cos(ang)*s*1.8,Math.sin(ang)*s*1.8);
+        ctx.stroke();
+      }
+      ctx.restore();
+    });
 
-    if(autoRotate) rotY+=0.008;
+    // Culet reflection (bottom glint)
+    const culetP=project(0,pavH,0);
+    if(culetP){
+      const cg=ctx.createRadialGradient(culetP.x,culetP.y,0,culetP.x,culetP.y,6);
+      cg.addColorStop(0,'rgba(255,255,255,0.8)');
+      cg.addColorStop(1,'rgba(255,255,255,0)');
+      ctx.fillStyle=cg;ctx.beginPath();ctx.arc(culetP.x,culetP.y,8,0,Math.PI*2);ctx.fill();
+    }
+
+    if(autoRotate) rotY+=0.007;
     requestAnimationFrame(drawFrame);
   }
 
