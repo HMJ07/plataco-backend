@@ -39,7 +39,7 @@ router.get('/', async (req, res) => {
         p.price_eur, p.stock, p.badge, p.is_featured,
         p.weight_grams, p.purity, p.finish,
         c.name AS category_name, c.slug AS category_slug,
-        (SELECT url FROM product_images WHERE product_id=p.id AND is_primary=TRUE LIMIT 1) AS image_url,
+        (SELECT url FROM product_images WHERE product_id=p.id ORDER BY position ASC LIMIT 1) AS image_url,
         (SELECT json_agg(json_build_object('id',pv.id,'name',pv.name,'stock',pv.stock,'price_extra',pv.price_extra) ORDER BY pv.sort_order)
          FROM product_variants pv WHERE pv.product_id=p.id) AS variants,
         p.created_at
@@ -94,8 +94,8 @@ router.get('/:slug', async (req, res) => {
       SELECT
         p.*,
         c.name AS category_name, c.slug AS category_slug,
-        json_agg(DISTINCT jsonb_build_object('id',pi.id,'url',pi.url,'alt',pi.alt,'sort_order',pi.sort_order,'is_primary',pi.is_primary)) AS images,
-        json_agg(DISTINCT jsonb_build_object('id',pv.id,'name',pv.name,'stock',pv.stock,'price_extra',pv.price_extra)) AS variants
+        json_agg(DISTINCT jsonb_build_object('id',pi.id,'url',pi.url,'alt_text',pi.alt_text,'position',pi.position)) FILTER (WHERE pi.id IS NOT NULL) AS images,
+        json_agg(DISTINCT jsonb_build_object('id',pv.id,'name',pv.name,'stock',pv.stock,'price_extra',pv.price_extra)) FILTER (WHERE pv.id IS NOT NULL) AS variants
       FROM products p
       LEFT JOIN categories c ON c.id = p.category_id
       LEFT JOIN product_images pi ON pi.product_id = p.id
