@@ -8,6 +8,19 @@
 <script type="module">
   import { removeBackground } from 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/background-removal.js';
   window.removeBackground = removeBackground;
+  // ── Warm-up: precarga el modelo de IA en caché nada más cargar la página ──
+  // Así cuando el usuario abre el probador, el modelo ya está listo y no tarda.
+  (async () => {
+    try {
+      // Imagen 1x1 px transparente en PNG para forzar la descarga del modelo
+      const r = await fetch('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
+      const blob = await r.blob();
+      await removeBackground(blob, {
+        publicPath: 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/',
+        debug: false,
+      });
+    } catch(e) { /* silencioso — solo warm-up */ }
+  })();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -3152,7 +3165,37 @@ async function tryonAnalyzeWithAI(){
     ctx.restore();
   }
 
-  const compositeDataURL = resCanvas.toDataURL('image/jpeg', 0.85);
+  // ── Recortar zona de la joya para mostrar solo la joya, no toda la foto ──
+  const jewelImg2 = document.getElementById('tryonJewelImg');
+  const canvasRect2 = srcCanvas.getBoundingClientRect();
+  const wrapRect2 = document.getElementById('tryonCanvasWrap').getBoundingClientRect();
+  const scaleX2 = srcCanvas.width / canvasRect2.width;
+  const scaleY2 = srcCanvas.height / canvasRect2.height;
+  const jx = (tryonJewelState.x - (canvasRect2.left - wrapRect2.left)) * scaleX2;
+  const jy = (tryonJewelState.y - (canvasRect2.top - wrapRect2.top)) * scaleY2;
+  const jw = tryonJewelState.w * scaleX2;
+  const jh = jw * ((jewelImg2.naturalHeight || jw) / (jewelImg2.naturalWidth || jw));
+
+  // Zona de recorte: centrada en la joya, padding del 80% extra para dar contexto corporal
+  const padX = jw * 1.8;
+  const padY = jh * 1.8;
+  const cropX = Math.max(0, jx - padX);
+  const cropY = Math.max(0, jy - padY);
+  const cropW = Math.min(resCanvas.width - cropX, jw + padX * 2);
+  const cropH = Math.min(resCanvas.height - cropY, jh + padY * 2);
+
+  // Dibujar recorte en un canvas auxiliar
+  const cropCanvas = document.createElement('canvas');
+  cropCanvas.width = cropW;
+  cropCanvas.height = cropH;
+  cropCanvas.getContext('2d').drawImage(resCanvas, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+
+  // Mostrar el recorte en el canvas de resultado (en vez de la foto completa)
+  resCanvas.width = cropW;
+  resCanvas.height = cropH;
+  resCanvas.getContext('2d').drawImage(cropCanvas, 0, 0);
+
+  const compositeDataURL = cropCanvas.toDataURL('image/jpeg', 0.85);
   const base64 = compositeDataURL.split(',')[1];
   const p = tryonProduct;
 
