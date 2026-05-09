@@ -403,13 +403,8 @@
       </div>
     </div>
 
-  </div><!-- /content -->
-</div><!-- /main -->
-
-<!-- ═══ MODAL PRODUCTO ════════════════════════════════════ -->
-
-  <!-- RESEÑAS -->
-  <div id="reviewsPage" class="page">
+    <!-- RESEÑAS -->
+    <div id="reviewsPage" class="page">
     <div class="topbar" style="display:flex;align-items:center;justify-content:space-between">
       <h2>Reseñas</h2>
       <div style="display:flex;gap:8px;align-items:center">
@@ -444,6 +439,9 @@
       </div>
     </div>
   </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
 
 <div class="modal-overlay" id="productModal" onclick="closeProductModal(event)">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:640px;width:95%">
@@ -1110,7 +1108,7 @@ function closeProductModal(e) {
     document.getElementById('productModal').classList.remove('open');
   }
 }
-
+</script>
 
 <!-- REVIEW EDIT MODAL -->
 <div class="modal-overlay" id="reviewModal" onclick="closeReviewModal(event)" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center">
@@ -1139,7 +1137,7 @@ function closeProductModal(e) {
 </div>
 
 <script>
-// ── Reviews JS ───────────────────────────────────────────
+// ── Reviews JS ──────────────────────────────────────────
 let editReviewRating = 0;
 
 function initEditStarPicker() {
