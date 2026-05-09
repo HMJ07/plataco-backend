@@ -19,6 +19,89 @@ body{font-family:'Jost',sans-serif;background:var(--cream);color:var(--dark);min
 h1,h2,h3,.price{font-family:'Cormorant Garamond',serif}
 
 /* ══════════════════════════════════════
+   GIFT FINDER IA
+══════════════════════════════════════ */
+#giftFinder{
+  background:var(--dark);
+  padding:5rem 2rem;
+  position:relative;
+  overflow:hidden;
+}
+#giftFinder::before{
+  content:'';
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 50% at 20% 50%, rgba(201,168,76,0.08) 0%, transparent 70%),
+             radial-gradient(ellipse 40% 60% at 80% 30%, rgba(201,168,76,0.05) 0%, transparent 60%);
+  pointer-events:none;
+}
+.gf-inner{max-width:900px;margin:0 auto;position:relative;z-index:1;}
+.gf-header{text-align:center;margin-bottom:3.5rem;}
+.gf-eyebrow{font-size:0.68rem;letter-spacing:0.5em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;display:flex;align-items:center;justify-content:center;gap:0.8rem;}
+.gf-eyebrow::before,.gf-eyebrow::after{content:'';height:1px;width:40px;background:linear-gradient(to right,transparent,var(--gold));}
+.gf-eyebrow::after{transform:scaleX(-1);}
+.gf-title{font-family:'Cormorant Garamond',serif;font-size:2.8rem;font-weight:300;color:white;line-height:1.15;margin-bottom:1rem;}
+.gf-title em{font-style:italic;background:linear-gradient(135deg,var(--gold-light),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.gf-subtitle{color:#666;font-size:0.88rem;letter-spacing:0.06em;line-height:1.8;}
+.gf-progress{display:flex;align-items:center;gap:0;margin-bottom:3rem;justify-content:center;}
+.gf-progress-step{width:28px;height:28px;border-radius:50%;border:1px solid #333;color:#555;font-size:0.7rem;display:flex;align-items:center;justify-content:center;font-family:'Jost',sans-serif;transition:all 0.4s;}
+.gf-progress-step.active{border-color:var(--gold);color:var(--gold);box-shadow:0 0 12px rgba(201,168,76,0.3);}
+.gf-progress-step.done{background:var(--gold);border-color:var(--gold);color:var(--dark);}
+.gf-progress-line{width:40px;height:1px;background:#222;transition:background 0.4s;}
+.gf-progress-line.done{background:var(--gold);}
+.gf-step{display:none;animation:gfFadeUp 0.45s ease both;}
+.gf-step.active{display:block;}
+@keyframes gfFadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.gf-step-q{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;color:white;text-align:center;margin-bottom:0.5rem;}
+.gf-step-hint{text-align:center;color:#555;font-size:0.78rem;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:2rem;}
+.gf-options{display:flex;flex-wrap:wrap;gap:0.9rem;justify-content:center;}
+.gf-opt{background:none;border:1px solid #2a2a2a;color:#888;padding:0.9rem 1.4rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.8rem;letter-spacing:0.12em;text-transform:uppercase;transition:all 0.25s;display:flex;flex-direction:column;align-items:center;gap:0.4rem;min-width:120px;}
+.gf-opt:hover{border-color:#555;color:#ccc;}
+.gf-opt.selected{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,0.05);}
+.gf-opt-icon{font-size:1.4rem;line-height:1;}
+.gf-opt-label{font-size:0.72rem;letter-spacing:0.15em;}
+.gf-budget-wrap{display:flex;flex-direction:column;align-items:center;gap:1.5rem;padding:0 1rem;}
+.gf-budget-display{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;color:var(--gold);}
+.gf-budget-display span{font-size:1.2rem;vertical-align:super;margin-right:0.2rem;}
+.gf-slider{-webkit-appearance:none;appearance:none;width:100%;max-width:400px;height:1px;outline:none;background:linear-gradient(to right,var(--gold) 50%,#2a2a2a 50%);}
+.gf-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--gold);cursor:pointer;box-shadow:0 0 10px rgba(201,168,76,0.5);}
+.gf-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--gold);cursor:pointer;border:none;}
+.gf-budget-labels{display:flex;justify-content:space-between;width:100%;max-width:400px;color:#444;font-size:0.7rem;letter-spacing:0.1em;}
+.gf-nav{display:flex;justify-content:center;gap:1rem;margin-top:2.5rem;}
+.gf-btn-back{background:none;border:1px solid #333;color:#555;padding:0.7rem 2rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.75rem;letter-spacing:0.25em;text-transform:uppercase;transition:all 0.2s;}
+.gf-btn-back:hover{border-color:#555;color:#999;}
+.gf-btn-next{background:var(--gold);color:var(--dark);border:none;padding:0.7rem 2.5rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.75rem;letter-spacing:0.25em;text-transform:uppercase;transition:all 0.2s;opacity:0.35;pointer-events:none;}
+.gf-btn-next.ready{opacity:1;pointer-events:auto;}
+.gf-loading{display:none;flex-direction:column;align-items:center;gap:1.5rem;padding:3rem 0;}
+.gf-loading.active{display:flex;}
+.gf-loading-ring{width:50px;height:50px;border:1px solid #2a2a2a;border-top-color:var(--gold);border-radius:50%;animation:gfSpin 1.2s linear infinite;}
+@keyframes gfSpin{to{transform:rotate(360deg)}}
+.gf-loading-text{color:#555;font-size:0.78rem;letter-spacing:0.2em;text-transform:uppercase;}
+.gf-results{display:none;}
+.gf-results.active{display:block;animation:gfFadeUp 0.5s ease both;}
+.gf-results-title{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:white;text-align:center;margin-bottom:0.5rem;}
+.gf-results-sub{color:#555;font-size:0.78rem;letter-spacing:0.1em;text-align:center;margin-bottom:2rem;}
+.gf-ai-message{border-left:1px solid var(--gold);padding:1rem 1.5rem;margin:0 auto 2.5rem;max-width:600px;color:#888;font-size:0.88rem;line-height:1.9;letter-spacing:0.02em;font-style:italic;}
+.gf-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.5rem;margin-bottom:2rem;}
+.gf-card{background:#111;border:1px solid #1e1e1e;cursor:pointer;transition:all 0.3s;position:relative;overflow:hidden;}
+.gf-card:hover{border-color:var(--gold);transform:translateY(-4px);}
+.gf-card-match{position:absolute;top:10px;left:10px;background:var(--gold);color:var(--dark);font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;padding:0.2rem 0.5rem;font-weight:600;}
+.gf-card-img{height:160px;background:#0d0d0d;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.gf-card-img img{width:100%;height:100%;object-fit:cover;}
+.gf-card-body{padding:1rem;}
+.gf-card-name{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:300;color:white;margin-bottom:0.2rem;}
+.gf-card-mat{font-size:0.7rem;letter-spacing:0.1em;color:#555;text-transform:uppercase;margin-bottom:0.6rem;}
+.gf-card-reason{font-size:0.75rem;color:#888;line-height:1.6;margin-bottom:0.8rem;font-style:italic;}
+.gf-card-price{color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.1rem;}
+.gf-restart{display:block;margin:1.5rem auto 0;background:none;border:1px solid #2a2a2a;color:#555;padding:0.6rem 2rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.72rem;letter-spacing:0.25em;text-transform:uppercase;transition:all 0.2s;}
+.gf-restart:hover{border-color:#555;color:#999;}
+@media(max-width:600px){
+  .gf-title{font-size:2rem;}
+  .gf-options{gap:0.6rem;}
+  .gf-opt{min-width:100px;padding:0.75rem 1rem;}
+  .gf-cards{grid-template-columns:1fr 1fr;}
+}
+
+/* ══════════════════════════════════════
    ANIMATIONS
 ══════════════════════════════════════ */
 @keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
@@ -1213,6 +1296,132 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
   </div>
 </div>
 
+<!-- GIFT FINDER IA -->
+<section id="giftFinder">
+  <div class="gf-inner">
+
+    <!-- Header -->
+    <div class="gf-header">
+      <div class="gf-eyebrow">Inteligencia Artificial · Regalos</div>
+      <h2 class="gf-title">Encuentra el regalo<br><em>perfecto</em></h2>
+      <p class="gf-subtitle">Dinos un poco sobre esa persona especial.<br>Nuestra IA elegirá las joyas que la harán brillar.</p>
+    </div>
+
+    <!-- Progress -->
+    <div class="gf-progress" id="gfProgress">
+      <div class="gf-progress-step active" id="gfDot1">1</div>
+      <div class="gf-progress-line" id="gfLine1"></div>
+      <div class="gf-progress-step" id="gfDot2">2</div>
+      <div class="gf-progress-line" id="gfLine2"></div>
+      <div class="gf-progress-step" id="gfDot3">3</div>
+      <div class="gf-progress-line" id="gfLine3"></div>
+      <div class="gf-progress-step" id="gfDot4">4</div>
+      <div class="gf-progress-line" id="gfLine4"></div>
+      <div class="gf-progress-step" id="gfDot5">5</div>
+    </div>
+
+    <!-- STEP 1: ¿Para quién? -->
+    <div class="gf-step active" id="gfStep1">
+      <p class="gf-step-q">¿Para quién es el regalo?</p>
+      <p class="gf-step-hint">Elige una opción</p>
+      <div class="gf-options">
+        <button class="gf-opt" onclick="gfSelect(this,'who','pareja')"><span class="gf-opt-icon">💑</span><span class="gf-opt-label">Mi pareja</span></button>
+        <button class="gf-opt" onclick="gfSelect(this,'who','madre')"><span class="gf-opt-icon">🌸</span><span class="gf-opt-label">Mi madre</span></button>
+        <button class="gf-opt" onclick="gfSelect(this,'who','amiga')"><span class="gf-opt-icon">✨</span><span class="gf-opt-label">Mi mejor amiga</span></button>
+        <button class="gf-opt" onclick="gfSelect(this,'who','hermana')"><span class="gf-opt-icon">👯</span><span class="gf-opt-label">Mi hermana</span></button>
+        <button class="gf-opt" onclick="gfSelect(this,'who','yo')"><span class="gf-opt-icon">💎</span><span class="gf-opt-label">Para mí</span></button>
+        <button class="gf-opt" onclick="gfSelect(this,'who','otro')"><span class="gf-opt-icon">🎁</span><span class="gf-opt-label">Otra persona</span></button>
+      </div>
+      <div class="gf-nav">
+        <button class="gf-btn-next" id="gfNext1" onclick="gfGoTo(2)">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Personalidad -->
+    <div class="gf-step" id="gfStep2">
+      <p class="gf-step-q">¿Cómo describirías su estilo?</p>
+      <p class="gf-step-hint">Puedes elegir varias</p>
+      <div class="gf-options">
+        <button class="gf-opt" onclick="gfToggle(this,'style','elegante')"><span class="gf-opt-icon">🖤</span><span class="gf-opt-label">Elegante</span></button>
+        <button class="gf-opt" onclick="gfToggle(this,'style','minimalista')"><span class="gf-opt-icon">◯</span><span class="gf-opt-label">Minimalista</span></button>
+        <button class="gf-opt" onclick="gfToggle(this,'style','bohemia')"><span class="gf-opt-icon">🌿</span><span class="gf-opt-label">Bohemia</span></button>
+        <button class="gf-opt" onclick="gfToggle(this,'style','atrevida')"><span class="gf-opt-icon">🔥</span><span class="gf-opt-label">Atrevida</span></button>
+        <button class="gf-opt" onclick="gfToggle(this,'style','romantica')"><span class="gf-opt-icon">🌹</span><span class="gf-opt-label">Romántica</span></button>
+        <button class="gf-opt" onclick="gfToggle(this,'style','clasica')"><span class="gf-opt-icon">👑</span><span class="gf-opt-label">Clásica</span></button>
+      </div>
+      <div class="gf-nav">
+        <button class="gf-btn-back" onclick="gfGoTo(1)">← Atrás</button>
+        <button class="gf-btn-next" id="gfNext2" onclick="gfGoTo(3)">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Ocasión -->
+    <div class="gf-step" id="gfStep3">
+      <p class="gf-step-q">¿Cuál es la ocasión?</p>
+      <p class="gf-step-hint">Elige una opción</p>
+      <div class="gf-options">
+        <button class="gf-opt" onclick="gfSelect(this,'occasion','cumpleanos')"><span class="gf-opt-icon">🎂</span><span class="gf-opt-label">Cumpleaños</span></button>
+        <button class="gf-opt" onclick="gfSelect(this,'occasion','aniversario')"><span class="gf-opt-icon">💍</span><span class="gf-opt-label">Aniversario</span></button>
+        <button class="gf-opt" onclick="gfSelect(this,'occasion','navidad')"><span class="gf-opt-icon">🎄</span><span class="gf-opt-label">Navidad</span></button>
+        <button class="gf-opt" onclick="gfSelect(this,'occasion','diaMadre')"><span class="gf-opt-icon">💐</span><span class="gf-opt-label">Día de la Madre</span></button>
+        <button class="gf-opt" onclick="gfSelect(this,'occasion','capricho')"><span class="gf-opt-icon">⚡</span><span class="gf-opt-label">Sin motivo especial</span></button>
+        <button class="gf-opt" onclick="gfSelect(this,'occasion','pedida')"><span class="gf-opt-icon">💌</span><span class="gf-opt-label">Pedida / Compromiso</span></button>
+      </div>
+      <div class="gf-nav">
+        <button class="gf-btn-back" onclick="gfGoTo(2)">← Atrás</button>
+        <button class="gf-btn-next" id="gfNext3" onclick="gfGoTo(4)">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Metal favorito -->
+    <div class="gf-step" id="gfStep4">
+      <p class="gf-step-q">¿Qué metal la hace brillar?</p>
+      <p class="gf-step-hint">Si tienes dudas, elige tu instinto</p>
+      <div class="gf-options">
+        <button class="gf-opt" onclick="gfSelect(this,'metal','plata')"><span class="gf-opt-icon" style="color:#C0C0C0">◈</span><span class="gf-opt-label">Plata 925</span></button>
+        <button class="gf-opt" onclick="gfSelect(this,'metal','oro')"><span class="gf-opt-icon" style="color:#C9A84C">◈</span><span class="gf-opt-label">Oro 18k</span></button>
+        <button class="gf-opt" onclick="gfSelect(this,'metal','oro-rosa')"><span class="gf-opt-icon" style="color:#b76e79">◈</span><span class="gf-opt-label">Oro rosa</span></button>
+        <button class="gf-opt" onclick="gfSelect(this,'metal','indiferente')"><span class="gf-opt-icon">✦</span><span class="gf-opt-label">Da igual</span></button>
+      </div>
+      <div class="gf-nav">
+        <button class="gf-btn-back" onclick="gfGoTo(3)">← Atrás</button>
+        <button class="gf-btn-next" id="gfNext4" onclick="gfGoTo(5)">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- STEP 5: Presupuesto -->
+    <div class="gf-step" id="gfStep5">
+      <p class="gf-step-q">¿Cuánto quieres invertir?</p>
+      <p class="gf-step-hint">Mueve el deslizador</p>
+      <div class="gf-budget-wrap">
+        <div class="gf-budget-display"><span>€</span><span id="gfBudgetVal">80</span></div>
+        <input type="range" class="gf-slider" id="gfBudgetSlider" min="20" max="300" value="80" step="5" oninput="gfUpdateBudget(this)">
+        <div class="gf-budget-labels"><span>20 €</span><span>300 €</span></div>
+      </div>
+      <div class="gf-nav">
+        <button class="gf-btn-back" onclick="gfGoTo(4)">← Atrás</button>
+        <button class="gf-btn-next ready" onclick="gfGetRecommendations()">✦ &nbsp;Ver mis joyas</button>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="gf-loading" id="gfLoading">
+      <div class="gf-loading-ring"></div>
+      <p class="gf-loading-text">Analizando el perfil · Buscando joyas perfectas…</p>
+    </div>
+
+    <!-- Results -->
+    <div class="gf-results" id="gfResults">
+      <p class="gf-results-title">Tu selección <em>personalizada</em></p>
+      <p class="gf-results-sub" id="gfResultsSub">Basado en tus respuestas</p>
+      <div class="gf-ai-message" id="gfAiMsg"></div>
+      <div class="gf-cards" id="gfCards"></div>
+      <button class="gf-restart" onclick="gfRestart()">↺ &nbsp;Volver a empezar</button>
+    </div>
+
+  </div>
+</section>
+
 <!-- VIDEO / JOYA INTERACTIVA -->
 <div class="video-strip" id="videoStrip">
   <div class="video-strip-video">
@@ -2351,6 +2560,158 @@ function applySgSize() {
     }
   }
 }
+// ── GIFT FINDER IA ──────────────────────────────────────────
+const gfAnswers = { who:'', style:[], occasion:'', metal:'', budget:80 };
+
+function gfSelect(btn, key, val){
+  const parent = btn.closest('.gf-options');
+  parent.querySelectorAll('.gf-opt').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  gfAnswers[key] = val;
+  const nextId = 'gfNext' + btn.closest('.gf-step').id.replace('gfStep','');
+  const nextBtn = document.getElementById(nextId);
+  if(nextBtn) nextBtn.classList.add('ready');
+}
+
+function gfToggle(btn, key, val){
+  btn.classList.toggle('selected');
+  if(btn.classList.contains('selected')){
+    if(!gfAnswers[key].includes(val)) gfAnswers[key].push(val);
+  } else {
+    gfAnswers[key] = gfAnswers[key].filter(v => v !== val);
+  }
+  const stepNum = btn.closest('.gf-step').id.replace('gfStep','');
+  const nextBtn = document.getElementById('gfNext' + stepNum);
+  if(nextBtn) nextBtn.classList.toggle('ready', gfAnswers[key].length > 0);
+}
+
+function gfGoTo(step){
+  document.querySelectorAll('.gf-step').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('gfStep' + step);
+  if(el) el.classList.add('active');
+  for(let i = 1; i <= 5; i++){
+    const dot = document.getElementById('gfDot' + i);
+    const line = document.getElementById('gfLine' + i);
+    if(dot){
+      dot.classList.remove('active','done');
+      if(i < step) dot.classList.add('done');
+      else if(i === step) dot.classList.add('active');
+    }
+    if(line){
+      line.classList.toggle('done', i < step);
+    }
+  }
+}
+
+function gfUpdateBudget(slider){
+  const val = parseInt(slider.value);
+  gfAnswers.budget = val;
+  document.getElementById('gfBudgetVal').textContent = val;
+  const pct = ((val - 20) / (300 - 20)) * 100;
+  slider.style.background = `linear-gradient(to right, var(--gold) ${pct}%, #2a2a2a ${pct}%)`;
+}
+
+async function gfGetRecommendations(){
+  // Hide steps and progress, show loading
+  document.querySelectorAll('.gf-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('gfProgress').style.display = 'none';
+  document.getElementById('gfLoading').classList.add('active');
+
+  const budget = gfAnswers.budget;
+  const filtered = products.filter(p => p.price <= budget * 1.2);
+
+  // Build a prompt for the Anthropic API
+  const styleText = gfAnswers.style.length ? gfAnswers.style.join(', ') : 'sin preferencia de estilo';
+  const catalog = filtered.slice(0, 30).map(p =>
+    `ID:${p.id} | ${p.name} | ${p.category} | ${p.material} | ${p.price}€ | ${p.desc || ''}`
+  ).join('\n');
+
+  const prompt = `Eres un experto en joyería de lujo. Un cliente busca un regalo con este perfil:
+- Destinatario: ${gfAnswers.who}
+- Estilo: ${styleText}
+- Ocasión: ${gfAnswers.occasion}
+- Metal preferido: ${gfAnswers.metal}
+- Presupuesto: hasta ${budget}€
+
+Catálogo disponible:
+${catalog}
+
+Responde SOLO con JSON válido, sin texto extra, sin backticks:
+{
+  "message": "Mensaje cálido y personal de 2 frases en español explicando por qué estas joyas son perfectas para este regalo (máx 120 chars)",
+  "picks": [
+    {"id": "ID_del_producto", "reason": "Razón específica de 10-15 palabras en español"},
+    {"id": "ID_del_producto", "reason": "Razón específica de 10-15 palabras en español"},
+    {"id": "ID_del_producto", "reason": "Razón específica de 10-15 palabras en español"}
+  ]
+}
+Elige exactamente 3 productos. Prioriza los que mejor encajan con el perfil. Solo IDs que existan en el catálogo.`;
+
+  let picks = [];
+  let message = '';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const raw = data.content?.map(c => c.text || '').join('').trim();
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+    message = parsed.message || '';
+    picks = parsed.picks || [];
+  } catch(e) {
+    // Fallback: pick top 3 by price proximity
+    picks = filtered.slice(0, 3).map(p => ({ id: p.id, reason: 'Una pieza artesanal perfecta para este regalo especial.' }));
+    message = 'Hemos seleccionado las joyas que mejor encajan con tu búsqueda.';
+  }
+
+  // Render results
+  document.getElementById('gfLoading').classList.remove('active');
+  document.getElementById('gfResults').classList.add('active');
+  document.getElementById('gfAiMsg').textContent = message;
+  document.getElementById('gfResultsSub').textContent =
+    `Para ${gfAnswers.who} · ${styleText} · hasta ${budget}€`;
+
+  const matchLabels = ['Mejor opción', 'Gran elección', 'También te gustará'];
+  const cards = picks.map((pick, i) => {
+    const p = products.find(x => x.id === pick.id);
+    if(!p) return '';
+    const tag = getMaterialTag(p.material);
+    return `<div class="gf-card" onclick="openModal('${p.id}')">
+      <div class="gf-card-match">${matchLabels[i] || '✦'}</div>
+      <div class="gf-card-img">${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.name}">` : (p.svg || '')}</div>
+      <div class="gf-card-body">
+        <p class="gf-card-name">${p.name}</p>
+        <p class="gf-card-mat">${p.material}</p>
+        <p class="gf-card-reason">"${pick.reason}"</p>
+        <p class="gf-card-price">${convertPrice(p.price)}</p>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('gfCards').innerHTML = cards;
+}
+
+function gfRestart(){
+  gfAnswers.who = ''; gfAnswers.style = []; gfAnswers.occasion = ''; gfAnswers.metal = ''; gfAnswers.budget = 80;
+  document.getElementById('gfResults').classList.remove('active');
+  document.getElementById('gfLoading').classList.remove('active');
+  document.getElementById('gfProgress').style.display = 'flex';
+  document.querySelectorAll('.gf-opt').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.gf-btn-next').forEach(b => b.classList.remove('ready'));
+  document.getElementById('gfBudgetVal').textContent = '80';
+  document.getElementById('gfBudgetSlider').value = 80;
+  document.getElementById('gfBudgetSlider').style.background = 'linear-gradient(to right, var(--gold) 20%, #2a2a2a 20%)';
+  gfGoTo(1);
+}
+// ── Fin Gift Finder ─────────────────────────────────────────
+
 // ── Fin guía de tallas ──────────────────────────────────────
 </script>
 
