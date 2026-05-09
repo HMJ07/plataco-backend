@@ -1530,7 +1530,7 @@ function toProductCard(apiProduct){
   const variants=Array.isArray(apiProduct.variants)?apiProduct.variants:[];
   const sizes=variants.map(v=>v.name).filter(Boolean);
   return{
-    id:apiProduct.id,name:apiProduct.name,
+    id:apiProduct.id,name:apiProduct.name,slug:apiProduct.slug,
     category:apiProduct.category_slug||'sin-categoria',
     material:apiProduct.material||'Plata 925',
     price:Number(apiProduct.price_eur),
