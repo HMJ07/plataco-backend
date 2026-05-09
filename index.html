@@ -141,9 +141,9 @@ nav{display:flex;gap:0;border-top:1px solid #111}
   display:inline-block;
 }
 .hero-jewel{
-  width:140px;height:140px;position:relative;
+  width:220px;height:200px;position:relative;
   animation:float 5s ease-in-out infinite;
-  filter:drop-shadow(0 20px 40px rgba(201,168,76,0.4));
+  filter:drop-shadow(0 24px 48px rgba(201,168,76,0.45));
 }
 .hero-jewel-ring{
   position:absolute;inset:-20px;border-radius:50%;
@@ -462,7 +462,7 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
 ══════════════════════════════════════ */
 @media(max-width:900px){
   .hero-title{font-size:3rem}
-  .hero-jewel{width:110px;height:110px}
+  .hero-jewel{width:170px;height:155px}
   .product-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.5rem}
   .modal{grid-template-columns:1fr}
   .modal-img{min-height:280px}
@@ -490,7 +490,7 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
   .hero{padding:2.5rem 1.2rem 3rem}
   .hero-title{font-size:2.4rem}
   .hero-desc{font-size:0.83rem}
-  .hero-jewel{width:90px;height:90px}
+  .hero-jewel{width:140px;height:128px}
 
   /* Main */
   main{padding:2rem 1rem}
@@ -566,54 +566,7 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
 
 <header>
   <div class="header-top">
-    <a href="#" style="text-decoration:none;display:flex;align-items:center;gap:0.75rem">
-      <svg width="38" height="38" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
-        <defs>
-          <radialGradient id="logoGemGrad" cx="38%" cy="32%" r="70%">
-            <stop offset="0%" stop-color="#fff8dc"/>
-            <stop offset="25%" stop-color="#f0d060"/>
-            <stop offset="60%" stop-color="#C9A84C"/>
-            <stop offset="100%" stop-color="#6b4c10"/>
-          </radialGradient>
-          <radialGradient id="logoGemShine" cx="55%" cy="55%" r="50%">
-            <stop offset="0%" stop-color="rgba(255,255,255,0.55)"/>
-            <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
-          </radialGradient>
-          <filter id="logoGlow" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="1.8" result="blur"/>
-            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-        </defs>
-        <!-- Outer ring -->
-        <circle cx="19" cy="19" r="17.5" fill="none" stroke="#C9A84C" stroke-width="0.8" opacity="0.5"/>
-        <!-- Inner subtle ring -->
-        <circle cx="19" cy="19" r="14" fill="none" stroke="#C9A84C" stroke-width="0.4" opacity="0.25"/>
-        <!-- Diamond gem — precise faceted shape -->
-        <polygon points="19,5 30,17 19,33 8,17" fill="url(#logoGemGrad)" filter="url(#logoGlow)"/>
-        <!-- Top-left facet (lighter) -->
-        <polygon points="19,5 8,17 19,17" fill="rgba(255,248,200,0.28)"/>
-        <!-- Top-right facet -->
-        <polygon points="19,5 30,17 19,17" fill="rgba(255,220,100,0.18)"/>
-        <!-- Bottom-left facet -->
-        <polygon points="8,17 19,17 19,33" fill="rgba(80,50,0,0.22)"/>
-        <!-- Bottom-right facet -->
-        <polygon points="30,17 19,17 19,33" fill="rgba(150,100,20,0.20)"/>
-        <!-- Girdle highlight line -->
-        <line x1="8" y1="17" x2="30" y2="17" stroke="rgba(255,240,160,0.45)" stroke-width="0.6"/>
-        <!-- Shine overlay -->
-        <polygon points="19,5 30,17 19,33 8,17" fill="url(#logoGemShine)"/>
-        <!-- Table highlight -->
-        <ellipse cx="15.5" cy="11.5" rx="3.5" ry="2" fill="rgba(255,255,255,0.55)" transform="rotate(-18,15.5,11.5)"/>
-        <!-- Tiny center sparkle -->
-        <circle cx="19" cy="17" r="0.9" fill="rgba(255,255,255,0.85)"/>
-        <!-- Corner sparkles -->
-        <g fill="white" opacity="0.75">
-          <polygon points="4,8 4.8,5.5 5.6,8 8,8.8 5.6,9.6 4.8,12 4,9.6 1.5,8.8"/>
-          <polygon points="33,27 33.6,25 34.2,27 36,27.6 34.2,28.2 33.6,30 33,28.2 31,27.6"/>
-        </g>
-      </svg>
-      <span class="logo" style="display:block">PLATA<span>&amp;</span>CO</span>
-    </a>
+    <div class="logo">PLATA<span>&amp;</span>CO</div>
     <div class="search-bar" style="flex:1;max-width:400px;margin:0 3rem">
       <span class="search-icon">⌕</span>
       <input class="search-input" type="text" id="searchInput" placeholder="Buscar joyas..." oninput="handleSearch()">
@@ -650,42 +603,128 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
 <div class="hero">
   <div class="hero-glow"></div>
   <div class="hero-jewel-wrap fade-in">
-    <div class="hero-jewel-ring"></div>
-    <div class="hero-jewel-ring2"></div>
-    <svg class="hero-jewel" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+    <svg class="hero-jewel" viewBox="0 0 280 260" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">
       <defs>
-        <radialGradient id="gemGrad" cx="40%" cy="35%" r="65%">
-          <stop offset="0%" stop-color="#fff9e6"/>
-          <stop offset="30%" stop-color="#e8c97a"/>
-          <stop offset="70%" stop-color="#C9A84C"/>
-          <stop offset="100%" stop-color="#7a5c1e"/>
-        </radialGradient>
-        <radialGradient id="gemGrad2" cx="60%" cy="60%" r="50%">
-          <stop offset="0%" stop-color="rgba(255,255,255,0.6)"/>
+        <!-- Main diamond gradient -->
+        <linearGradient id="hgDiamond" x1="20%" y1="0%" x2="80%" y2="100%">
+          <stop offset="0%"   stop-color="#fff8d0"/>
+          <stop offset="18%"  stop-color="#f5d060"/>
+          <stop offset="45%"  stop-color="#C9A84C"/>
+          <stop offset="75%"  stop-color="#a07820"/>
+          <stop offset="100%" stop-color="#6b4c10"/>
+        </linearGradient>
+        <!-- Top-left facet lighter -->
+        <linearGradient id="hgFacetTL" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%"   stop-color="#fff5b0" stop-opacity="0.55"/>
+          <stop offset="100%" stop-color="#e8c040" stop-opacity="0.1"/>
+        </linearGradient>
+        <!-- Top-right facet -->
+        <linearGradient id="hgFacetTR" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%"   stop-color="#fde080" stop-opacity="0.4"/>
+          <stop offset="100%" stop-color="#c9a030" stop-opacity="0.05"/>
+        </linearGradient>
+        <!-- Bottom gradient -->
+        <linearGradient id="hgFacetBot" x1="50%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%"   stop-color="#b07820" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#3a2500" stop-opacity="0.7"/>
+        </linearGradient>
+        <!-- Ring gradient -->
+        <linearGradient id="hgRing" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%"   stop-color="#fff0a0"/>
+          <stop offset="30%"  stop-color="#e8c040"/>
+          <stop offset="60%"  stop-color="#C9A84C"/>
+          <stop offset="100%" stop-color="#7a5010"/>
+        </linearGradient>
+        <!-- Shine on diamond -->
+        <radialGradient id="hgShine" cx="35%" cy="28%" r="50%">
+          <stop offset="0%"   stop-color="rgba(255,255,255,0.65)"/>
           <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
         </radialGradient>
-        <filter id="glow">
-          <feGaussianBlur stdDeviation="3" result="blur"/>
+        <!-- Glow filter -->
+        <filter id="hgGlow" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="5" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="hgGlowSoft" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="2.5" result="blur"/>
           <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
       </defs>
-      <!-- Ring base -->
-      <circle cx="70" cy="70" r="65" fill="none" stroke="url(#gemGrad)" stroke-width="6" opacity="0.6"/>
-      <!-- Gem shape - diamond -->
-      <polygon points="70,18 105,60 70,108 35,60" fill="url(#gemGrad)" filter="url(#glow)"/>
-      <!-- Facets -->
-      <polygon points="70,18 105,60 70,60" fill="rgba(255,255,200,0.25)"/>
-      <polygon points="70,18 35,60 70,60" fill="rgba(0,0,0,0.15)"/>
-      <polygon points="70,60 105,60 70,108" fill="rgba(201,168,76,0.5)"/>
-      <polygon points="70,60 35,60 70,108" fill="rgba(201,168,76,0.3)"/>
-      <!-- Highlight -->
-      <ellipse cx="58" cy="38" rx="10" ry="6" fill="rgba(255,255,255,0.5)" transform="rotate(-20,58,38)"/>
-      <!-- Sparkles -->
-      <g fill="white" opacity="0.8">
-        <polygon points="18,30 20,24 22,30 28,32 22,34 20,40 18,34 12,32" style="animation:glimmer 2.5s ease-in-out infinite"/>
-        <polygon points="115,85 117,80 119,85 124,87 119,89 117,94 115,89 110,87" style="animation:glimmer 2.5s ease-in-out infinite 1s"/>
-        <polygon points="25,98 26,94 27,98 31,99 27,100 26,104 25,100 21,99" style="animation:glimmer 2.5s ease-in-out 0.5s infinite"/>
+
+      <!-- ── RINGS / CROWN (two sweeping elliptic arcs like reference) ── -->
+      <!-- Left ring arc -->
+      <path d="M 60,155 C 20,120 15,60 90,38 C 115,30 140,28 140,28 C 140,28 115,32 95,45 C 45,72 48,128 80,158 Z"
+            fill="url(#hgRing)" opacity="0.88" filter="url(#hgGlowSoft)"/>
+      <!-- Right ring arc (mirror) -->
+      <path d="M 220,155 C 260,120 265,60 190,38 C 165,30 140,28 140,28 C 140,28 165,32 185,45 C 235,72 232,128 200,158 Z"
+            fill="url(#hgRing)" opacity="0.88" filter="url(#hgGlowSoft)"/>
+
+      <!-- Ring inner shadow/depth -->
+      <path d="M 75,152 C 42,120 40,70 100,50 C 118,44 140,42 140,42 C 140,42 122,46 108,55 C 62,80 62,130 88,156 Z"
+            fill="rgba(0,0,0,0.28)"/>
+      <path d="M 205,152 C 238,120 240,70 180,50 C 162,44 140,42 140,42 C 140,42 158,46 172,55 C 218,80 218,130 192,156 Z"
+            fill="rgba(0,0,0,0.28)"/>
+
+      <!-- Ring highlight edges -->
+      <path d="M 60,155 C 20,120 15,60 90,38 C 115,30 140,28 140,28"
+            fill="none" stroke="rgba(255,245,180,0.7)" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M 220,155 C 260,120 265,60 190,38 C 165,30 140,28 140,28"
+            fill="none" stroke="rgba(255,245,180,0.7)" stroke-width="1.8" stroke-linecap="round"/>
+
+      <!-- ── DIAMOND (main gem) ── -->
+      <!-- Full diamond shape -->
+      <polygon points="140,30 222,115 140,210 58,115"
+               fill="url(#hgDiamond)" filter="url(#hgGlow)"/>
+
+      <!-- Crown top-left -->
+      <polygon points="140,30 58,115 140,115"
+               fill="url(#hgFacetTL)"/>
+      <!-- Crown top-right -->
+      <polygon points="140,30 222,115 140,115"
+               fill="url(#hgFacetTR)"/>
+      <!-- Pavilion bottom-left -->
+      <polygon points="58,115 140,115 140,210"
+               fill="rgba(60,35,0,0.32)"/>
+      <!-- Pavilion bottom-right -->
+      <polygon points="222,115 140,115 140,210"
+               fill="rgba(80,50,0,0.18)"/>
+
+      <!-- Girdle dividing line -->
+      <line x1="58" y1="115" x2="222" y2="115"
+            stroke="rgba(255,235,140,0.55)" stroke-width="1.2"/>
+
+      <!-- Shine / reflection overlay -->
+      <polygon points="140,30 222,115 140,210 58,115"
+               fill="url(#hgShine)"/>
+
+      <!-- Table facet highlight (top inner polygon) -->
+      <polygon points="140,52 196,105 140,105 84,105"
+               fill="rgba(255,245,180,0.22)"/>
+      <line x1="84" y1="105" x2="196" y2="105"
+            stroke="rgba(255,240,160,0.3)" stroke-width="0.8"/>
+
+      <!-- Small highlight on upper-left -->
+      <ellipse cx="108" cy="72" rx="18" ry="10"
+               fill="rgba(255,255,255,0.45)" transform="rotate(-30,108,72)"/>
+
+      <!-- ── SPARKLES ── -->
+      <g fill="white">
+        <!-- Top-left sparkle -->
+        <polygon points="42,52 44,44 46,52 54,54 46,56 44,64 42,56 34,54"
+                 opacity="0.9" style="animation:glimmer 2.5s ease-in-out infinite"/>
+        <!-- Right sparkle -->
+        <polygon points="238,88 240,82 242,88 248,90 242,92 240,98 238,92 232,90"
+                 opacity="0.85" style="animation:glimmer 2.5s ease-in-out 0.9s infinite"/>
+        <!-- Bottom-left small -->
+        <polygon points="55,175 56.2,171 57.4,175 61,176 57.4,177 56.2,181 55,177 51,176"
+                 opacity="0.7" style="animation:glimmer 2.5s ease-in-out 1.7s infinite"/>
+        <!-- Top tiny -->
+        <polygon points="168,22 169,19 170,22 173,23 170,24 169,27 168,24 165,23"
+                 opacity="0.8" style="animation:glimmer 2s ease-in-out 0.4s infinite"/>
       </g>
+
+      <!-- Center culet glint -->
+      <circle cx="140" cy="208" r="3.5" fill="rgba(255,255,200,0.7)" filter="url(#hgGlowSoft)"/>
     </svg>
   </div>
   <p class="hero-subtitle">Colección 2025</p>
@@ -1324,8 +1363,49 @@ async function loadProductsFromApi(){
     const data=await r.json();
     products=(data.products||[]).map(toProductCard);
     renderProducts();
-  }catch{showToast('No se pudo conectar con el servidor');}
+  }catch{
+    // Fallback con productos de demostración extendidos
+    products=DEMO_PRODUCTS;
+    renderProducts();
+    showToast('Mostrando catálogo de demostración');
+  }
 }
+
+const DEMO_PRODUCTS=[
+  // ── ANILLOS ──
+  {id:'r1',name:'Anillo Infinito',category:'anillos',material:'Plata 925',price:89,desc:'Símbolo eterno en plata 925 pulida a espejo.',sizes:['XS','S','M','L','XL'],badge:'Bestseller',isNew:false,specs:{Pureza:'925‰',Peso:'3.2g',Acabado:'Pulido'},imageUrl:'https://images.unsplash.com/photo-1589674781759-c21c37956a44?w=600&q=80',svg:null},
+  {id:'r2',name:'Anillo Sello Oval',category:'anillos',material:'Plata 925',price:119,desc:'Sello oval grabable, diseño clásico atemporal.',sizes:['S','M','L','XL'],badge:null,isNew:false,specs:{Pureza:'925‰',Peso:'5.8g',Acabado:'Mate'},imageUrl:'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&q=80',svg:null},
+  {id:'r3',name:'Anillo Apilable Texturizado',category:'anillos',material:'Plata 925',price:65,desc:'Fino y texturizado, ideal para combinar.',sizes:['XS','S','M','L','XL'],badge:'New',isNew:true,specs:{Pureza:'925‰',Peso:'2.1g',Acabado:'Texturizado'},imageUrl:'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=600&q=80',svg:null},
+  {id:'r4',name:'Anillo Medio Dedo Open',category:'anillos',material:'Plata 925',price:79,desc:'Diseño abierto que abraza dos falanges.',sizes:['S','M','L'],badge:null,isNew:false,specs:{Pureza:'925‰',Peso:'3.5g',Acabado:'Pulido'},imageUrl:'https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=600&q=80',svg:null},
+  {id:'r5',name:'Anillo Banda Oro 18k',category:'anillos',material:'Oro 18k',price:245,desc:'Banda lisa en oro amarillo 18k, acabado satinado.',sizes:['XS','S','M','L','XL'],badge:null,isNew:false,specs:{Pureza:'750‰',Peso:'4.2g',Acabado:'Satinado'},imageUrl:'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80',svg:null},
+  {id:'r6',name:'Anillo Eternity Circonitas',category:'anillos',material:'Plata 925 bañada en oro',price:155,desc:'Circonitas blancas todo alrededor, efecto eternidad.',sizes:['XS','S','M','L'],badge:'New',isNew:true,specs:{Pureza:'925‰',Peso:'4.8g',Acabado:'Rodiado'},imageUrl:'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80',svg:null},
+
+  // ── COLLARES ──
+  {id:'c1',name:'Collar Cadena Anchor',category:'collares',material:'Plata 925',price:98,desc:'Cadena tipo ancla de 45cm, eslabón plano.',sizes:['40cm','45cm','50cm'],badge:null,isNew:false,specs:{Pureza:'925‰',Peso:'8.5g',Acabado:'Pulido'},imageUrl:'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&q=80',svg:null},
+  {id:'c2',name:'Collar Luna Creciente',category:'collares',material:'Plata 925',price:82,desc:'Colgante de luna con cadena delicada de 42cm.',sizes:['42cm','45cm'],badge:'Bestseller',isNew:false,specs:{Pureza:'925‰',Peso:'4.2g',Acabado:'Pulido'},imageUrl:'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&q=80',svg:null},
+  {id:'c3',name:'Gargantilla Clásica',category:'collares',material:'Plata 925',price:72,desc:'Choker rígido ajustable, elegante y minimalista.',sizes:['35cm','38cm'],badge:null,isNew:false,specs:{Pureza:'925‰',Peso:'6.0g',Acabado:'Mate'},imageUrl:'https://images.unsplash.com/photo-1630080890630-a0afae8d1248?w=600&q=80',svg:null},
+  {id:'c4',name:'Collar Corazón Calado',category:'collares',material:'Plata 925',price:88,desc:'Corazón calado con detalles geométricos internos.',sizes:['40cm','45cm','50cm'],badge:null,isNew:false,specs:{Pureza:'925‰',Peso:'3.8g',Acabado:'Pulido'},imageUrl:'https://images.unsplash.com/photo-1596944924591-2a09b5c1c9f4?w=600&q=80',svg:null},
+  {id:'c5',name:'Collar Perla Cultivada',category:'collares',material:'Plata 925 con perla',price:135,desc:'Perla cultivada de agua dulce en delicada cadena de plata.',sizes:['40cm','45cm'],badge:'New',isNew:true,specs:{Pureza:'925‰',Peso:'4.5g',Acabado:'Pulido'},imageUrl:'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80',svg:null},
+  {id:'c6',name:'Collar Lazo Satinado',category:'collares',material:'Plata 925',price:109,desc:'Colgante en forma de lazo con acabado satinado premium.',sizes:['42cm','45cm','50cm'],badge:null,isNew:false,specs:{Pureza:'925‰',Peso:'5.2g',Acabado:'Satinado'},imageUrl:'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&q=80',svg:null},
+
+  // ── PULSERAS ──
+  {id:'b1',name:'Pulsera Esclava Grabada',category:'pulseras',material:'Plata 925',price:95,desc:'Esclava rígida grabable, cierre de presión.',sizes:['16cm','17cm','18cm','19cm'],badge:null,isNew:false,specs:{Pureza:'925‰',Peso:'12g',Acabado:'Pulido'},imageUrl:'https://images.unsplash.com/photo-1588671616667-a9e65e0d4b56?w=600&q=80',svg:null},
+  {id:'b2',name:'Pulsera Cadena Fígaro',category:'pulseras',material:'Plata 925',price:78,desc:'Cadena fígaro 3+1, cierre mosquetón.',sizes:['17cm','18cm','19cm','20cm'],badge:null,isNew:false,specs:{Pureza:'925‰',Peso:'7.5g',Acabado:'Pulido'},imageUrl:'https://images.unsplash.com/photo-1573408301185-9519f94ae14e?w=600&q=80',svg:null},
+  {id:'b3',name:'Pulsera Charm Corazón',category:'pulseras',material:'Plata 925',price:88,desc:'Cadena con charm corazón intercambiable.',sizes:['17cm','18cm','19cm'],badge:'Bestseller',isNew:false,specs:{Pureza:'925‰',Peso:'6.2g',Acabado:'Pulido'},imageUrl:'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80',svg:null},
+  {id:'b4',name:'Pulsera Tejida Macramé Plata',category:'pulseras',material:'Plata 925 con hilo',price:55,desc:'Combinación de hilo trenzado y cuentas de plata.',sizes:['Ajustable'],badge:null,isNew:false,specs:{Pureza:'925‰',Peso:'3.8g',Acabado:'Natural'},imageUrl:'https://images.unsplash.com/photo-1543295087-e51e8e6d7c9f?w=600&q=80',svg:null},
+  {id:'b5',name:'Pulsera Tenis Circonitas',category:'pulseras',material:'Plata 925 rodiada',price:178,desc:'Línea continua de circonitas blancas, corte brillante.',sizes:['17cm','18cm','19cm'],badge:'New',isNew:true,specs:{Pureza:'925‰',Peso:'9.5g',Acabado:'Rodiado'},imageUrl:'https://images.unsplash.com/photo-1588671616667-a9e65e0d4b56?w=600&q=80',svg:null},
+
+  // ── PENDIENTES ──
+  {id:'e1',name:'Pendientes Aro Liso',category:'pendientes',material:'Plata 925',price:58,desc:'Aros perfectos 25mm, acabado espejo.',sizes:['Par'],badge:null,isNew:false,specs:{Pureza:'925‰',Peso:'4.5g',Acabado:'Pulido'},imageUrl:'https://images.unsplash.com/photo-1630018548696-e1e6e8a2ab31?w=600&q=80',svg:null},
+  {id:'e2',name:'Pendientes Lágrima Calada',category:'pendientes',material:'Plata 925',price:75,desc:'Lágrima con diseño geométrico calado, muy ligeros.',sizes:['Par'],badge:null,isNew:false,specs:{Pureza:'925‰',Peso:'3.2g',Acabado:'Mate'},imageUrl:'https://images.unsplash.com/photo-1599459183200-59c7687a0c70?w=600&q=80',svg:null},
+  {id:'e3',name:'Ear Cuff Serpiente',category:'pendientes',material:'Plata 925',price:48,desc:'Ear cuff sin agujero con motivo de serpiente articulado.',sizes:['Par','Unidad'],badge:'New',isNew:true,specs:{Pureza:'925‰',Peso:'2.1g',Acabado:'Oxidado'},imageUrl:'https://images.unsplash.com/photo-1617038220319-276d3cfab638?w=600&q=80',svg:null},
+  {id:'e4',name:'Pendientes Perla Botón',category:'pendientes',material:'Plata 925 con perla',price:68,desc:'Perla cultivada 7mm sobre base de plata.',sizes:['Par'],badge:null,isNew:false,specs:{Pureza:'925‰',Peso:'3.5g',Acabado:'Pulido'},imageUrl:'https://images.unsplash.com/photo-1630018548696-e1e6e8a2ab31?w=600&q=80',svg:null},
+  {id:'e5',name:'Pendientes Estrella Pavé',category:'pendientes',material:'Plata 925 rodiada',price:92,desc:'Estrella cuajada de micro-circonitas blancas.',sizes:['Par'],badge:'Bestseller',isNew:false,specs:{Pureza:'925‰',Peso:'4.2g',Acabado:'Rodiado'},imageUrl:'https://images.unsplash.com/photo-1599459183200-59c7687a0c70?w=600&q=80',svg:null},
+
+  // ── BROCHES ──
+  {id:'br1',name:'Broche Flor Art Déco',category:'broches',material:'Plata 925',price:115,desc:'Broche floral con influencia Art Déco, pieza de colección.',sizes:['Unidad'],badge:null,isNew:false,specs:{Pureza:'925‰',Peso:'8.5g',Acabado:'Mate'},imageUrl:'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&q=80',svg:null},
+  {id:'br2',name:'Broche Mariposa Esmaltada',category:'broches',material:'Plata 925 con esmalte',price:88,desc:'Mariposa con alas esmaltadas en colores naturales.',sizes:['Unidad'],badge:'New',isNew:true,specs:{Pureza:'925‰',Peso:'6.2g',Acabado:'Esmalte'},imageUrl:'https://images.unsplash.com/photo-1617038220319-276d3cfab638?w=600&q=80',svg:null},
+];
 
 // ── CANVAS JEWEL 3D INTERACTIVO ────────────────────────────
 (function initJewelCanvas(){
