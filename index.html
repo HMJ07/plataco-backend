@@ -185,7 +185,7 @@ nav{display:flex;gap:0;border-top:1px solid #111}
   position:relative;overflow:hidden;
   background:var(--dark);
   display:grid;grid-template-columns:1fr 1fr;
-  min-height:420px;
+  min-height:480px;
 }
 .video-strip-video{
   position:relative;overflow:hidden;
@@ -196,10 +196,49 @@ nav{display:flex;gap:0;border-top:1px solid #111}
 }
 /* Fallback animado si no hay vídeo */
 .video-jewel-demo{
-  width:100%;height:100%;min-height:420px;
-  background:linear-gradient(135deg,#0d0d0d,#1a1a1a);
+  width:100%;height:100%;min-height:480px;
+  background:#0a0a0a;
   display:flex;align-items:center;justify-content:center;
   position:relative;overflow:hidden;
+}
+.video-jewel-demo video{
+  position:absolute;inset:0;
+  width:100%;height:100%;object-fit:cover;
+  filter:brightness(0.7) saturate(1.1);
+  transform:scale(1.04);
+  transition:transform 8s ease;
+}
+.video-jewel-demo:hover video{
+  transform:scale(1.08);
+}
+.jewel-video-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(
+    135deg,
+    rgba(10,10,10,0.35) 0%,
+    rgba(0,0,0,0.1) 40%,
+    rgba(201,168,76,0.08) 100%
+  );
+  pointer-events:none;
+}
+.jewel-video-badge{
+  position:absolute;
+  bottom:2rem;left:2rem;
+  display:flex;align-items:center;gap:0.7rem;
+  background:rgba(0,0,0,0.55);
+  border:1px solid rgba(201,168,76,0.3);
+  backdrop-filter:blur(8px);
+  padding:0.7rem 1.2rem;
+}
+.jewel-video-badge span{
+  color:var(--gold);font-size:0.9rem;
+  animation:glimmer 2.5s ease-in-out infinite;
+}
+.jewel-video-badge p{
+  color:rgba(255,255,255,0.75);
+  font-family:'Jost',sans-serif;
+  font-size:0.68rem;letter-spacing:0.3em;
+  text-transform:uppercase;margin:0;
 }
 .jewel-3d-wrap{
   position:relative;width:220px;height:220px;
@@ -1178,8 +1217,15 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
 <div class="video-strip" id="videoStrip">
   <div class="video-strip-video">
     <div class="video-jewel-demo" id="jewelDemo">
-      <!-- Joya 3D interactiva con canvas -->
-      <canvas id="jewelCanvas" width="380" height="420" style="cursor:grab;max-width:100%"></canvas>
+      <!-- Vídeo atmosférico de joyería -->
+      <video id="jewelVideo" autoplay muted loop playsinline>
+        <source src="https://videos.pexels.com/video-files/7000-7999/7622506/7622506-hd_1080_1920_30fps.mp4" type="video/mp4">
+      </video>
+      <div class="jewel-video-overlay"></div>
+      <div class="jewel-video-badge">
+        <span>✦</span>
+        <p>Plata 925 &amp; Oro 18k</p>
+      </div>
     </div>
   </div>
   <div class="video-strip-content">
@@ -1187,7 +1233,7 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
     <h2 class="video-strip-title">Cada joya,<br><em>una obra única</em></h2>
     <p class="video-strip-text">
       Nuestros artesanos trabajan cada pieza con la misma dedicación de siempre. Desde la selección de la plata 925 más pura hasta el pulido final, cada detalle importa.<br><br>
-      Arrastra la joya para explorarla desde todos los ángulos.
+      Cada pieza pasa por más de 12 horas de trabajo artesanal antes de llegar a tus manos.
     </p>
     <button class="video-strip-btn" onclick="document.querySelector('main').scrollIntoView({behavior:'smooth'})">
       <span>Ver colección</span>
@@ -2069,258 +2115,7 @@ const DEMO_PRODUCTS=[
   {id:'br2',name:'Broche Mariposa Esmaltada',category:'broches',material:'Plata 925 con esmalte',price:88,desc:'Mariposa con alas esmaltadas en colores naturales.',sizes:['Unidad'],badge:'New',isNew:true,specs:{Pureza:'925‰',Peso:'6.2g',Acabado:'Esmalte'},imageUrl:'https://images.unsplash.com/photo-1617038220319-276d3cfab638?w=600&q=80',svg:null},
 ];
 
-// ── CANVAS JEWEL 3D INTERACTIVO ────────────────────────────
-(function initJewelCanvas(){
-  const canvas=document.getElementById('jewelCanvas');
-  if(!canvas)return;
-  const ctx=canvas.getContext('2d');
-  let W=canvas.width, H=canvas.height;
-  let rotX=0.3, rotY=0, dragX=0, dragY=0;
-  let isDragging=false, lastMouseX=0, lastMouseY=0;
-  let autoRotate=true;
 
-  // Responsive canvas
-  function resizeCanvas(){
-    const parent=canvas.parentElement;
-    const pw=parent.offsetWidth;
-    if(pw<380){canvas.width=pw;canvas.height=pw*1.1;W=canvas.width;H=canvas.height;}
-    else{canvas.width=380;canvas.height=420;W=380;H=420;}
-  }
-  resizeCanvas();
-  window.addEventListener('resize',resizeCanvas);
-
-  // 3D gem vertices (octahedron-like diamond)
-  function project(x,y,z){
-    const fov=350;
-    const zOff=500;
-    const zz=z+zOff;
-    return{x:x*fov/zz+W/2, y:y*fov/zz+H/2, z:zz};
-  }
-
-  function rotatePoint(px,py,pz,rx,ry){
-    // Rotate around Y
-    let x=px*Math.cos(ry)-pz*Math.sin(ry);
-    let z=px*Math.sin(ry)+pz*Math.cos(ry);
-    let y=py;
-    // Rotate around X
-    let ny=y*Math.cos(rx)-z*Math.sin(rx);
-    let nz=y*Math.sin(rx)+z*Math.cos(rx);
-    return{x,y:ny,z:nz};
-  }
-
-  // ─── REALISTIC BRILLIANT-CUT DIAMOND ──────────────────────
-  // Crown (top half) + Pavilion (bottom half) with girdle
-  const R = 90; // outer radius at girdle
-  const N = 16; // number of girdle vertices
-  const crownH  = -R * 0.55; // apex of crown (table center up)
-  const tableR  = R * 0.52;  // table (flat top) radius
-  const tableY  = -R * 0.22; // table height
-  const girY    = R * 0.04;  // girdle y
-  const pavH    = R * 0.72;  // culet (bottom point)
-
-  // Generate girdle ring vertices (upper + lower edge of girdle)
-  function girdleVerts(yOff=0){
-    return Array.from({length:N},(_,i)=>{
-      const a=(i/N)*Math.PI*2;
-      return {x:Math.cos(a)*R, y:girY+yOff, z:Math.sin(a)*R};
-    });
-  }
-  const gUp = girdleVerts(-4);
-  const gDn = girdleVerts( 4);
-
-  // Table vertices
-  function tableVerts(){
-    return Array.from({length:N},(_,i)=>{
-      const a=((i+0.5)/N)*Math.PI*2;
-      return {x:Math.cos(a)*tableR, y:tableY, z:Math.sin(a)*tableR};
-    });
-  }
-  const tVerts = tableVerts();
-
-  const apex    = {x:0, y:crownH, z:0};  // crown tip (not used as star apex)
-  const culet   = {x:0, y:pavH,   z:0};
-
-  // Build faces: [verts, faceType]
-  // faceType: 'table'|'crown'|'girdle'|'pavilion'
-  const faces=[];
-
-  // TABLE (flat top polygon — N-gon)
-  faces.push({verts:[...tVerts], type:'table'});
-
-  // STAR FACETS: table edge → girdle up (N triangles crown top)
-  for(let i=0;i<N;i++){
-    const j=(i+1)%N;
-    faces.push({verts:[tVerts[i],gUp[i],gUp[j]], type:'crown-upper'});
-    faces.push({verts:[tVerts[i],tVerts[j],gUp[j]], type:'crown-upper'});
-  }
-
-  // KITE FACETS: girdle upper → apex-like star (crown lower)
-  // We simulate with larger girdle-to-table triangles
-  for(let i=0;i<N;i++){
-    const j=(i+1)%N;
-    faces.push({verts:[gUp[i],gUp[j],gDn[j],gDn[i]], type:'girdle'});
-  }
-
-  // PAVILION MAIN: girdle down → culet
-  for(let i=0;i<N;i++){
-    const j=(i+1)%N;
-    faces.push({verts:[culet,gDn[j],gDn[i]], type:'pavilion'});
-  }
-
-  // Light direction (fixed world space)
-  const LIGHT={x:-0.5,y:-1,z:0.6};
-  function normLight(){const l=Math.sqrt(LIGHT.x**2+LIGHT.y**2+LIGHT.z**2);return{x:LIGHT.x/l,y:LIGHT.y/l,z:LIGHT.z/l};}
-  const LN=normLight();
-
-  function faceNormal(pts3d){
-    const ax=pts3d[1].x-pts3d[0].x, ay=pts3d[1].y-pts3d[0].y, az=pts3d[1].z-pts3d[0].z;
-    const bx=pts3d[2].x-pts3d[0].x, by=pts3d[2].y-pts3d[0].y, bz=pts3d[2].z-pts3d[0].z;
-    const nx=ay*bz-az*by, ny=az*bx-ax*bz, nz=ax*by-ay*bx;
-    const l=Math.sqrt(nx*nx+ny*ny+nz*nz)||1;
-    return{x:nx/l,y:ny/l,z:nz/l};
-  }
-  function dot3(a,b){return a.x*b.x+a.y*b.y+a.z*b.z;}
-
-  let sparkleT=0;
-
-  function drawFrame(){
-    ctx.clearRect(0,0,W,H);
-
-    // Ambient glow bg
-    const bgGrd=ctx.createRadialGradient(W/2,H*0.48,8,W/2,H*0.48,Math.min(W,H)*0.52);
-    bgGrd.addColorStop(0,'rgba(201,168,76,0.11)');
-    bgGrd.addColorStop(0.5,'rgba(180,140,40,0.04)');
-    bgGrd.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=bgGrd; ctx.fillRect(0,0,W,H);
-
-    // Drop shadow
-    const shadowGrd=ctx.createRadialGradient(W/2,H*0.82,2,W/2,H*0.82,60);
-    shadowGrd.addColorStop(0,'rgba(0,0,0,0.35)');
-    shadowGrd.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=shadowGrd; ctx.fillRect(0,0,W,H);
-
-    // Project + sort all faces
-    const projected=faces.map(face=>{
-      const pts3d=face.verts.map(v=>rotatePoint(v.x,v.y,v.z,rotX,rotY));
-      const pts2d=pts3d.map(v=>({...project(v.x,v.y,v.z)}));
-      const avgZ=pts3d.reduce((s,v)=>s+v.z,0)/pts3d.length;
-      const n=faceNormal(pts3d);
-      const nz2d=(pts2d[1].x-pts2d[0].x)*(pts2d[2].y-pts2d[0].y)-(pts2d[1].y-pts2d[0].y)*(pts2d[2].x-pts2d[0].x);
-      const visible = face.type==='table' || face.type==='girdle' ? true : (face.type.startsWith('crown') ? nz2d<0 : nz2d>0);
-      const diffuse=Math.max(0,dot3(n,{x:-LN.x,y:-LN.y,z:-LN.z}));
-      return{pts:pts2d,pts3d,avgZ,visible,type:face.type,diffuse,normal:n};
-    }).filter(f=>f.visible).sort((a,b)=>a.avgZ-b.avgZ);
-
-    projected.forEach(({pts,diffuse,type,avgZ,normal})=>{
-      ctx.beginPath();
-      ctx.moveTo(pts[0].x,pts[0].y);
-      for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i].x,pts[i].y);
-      ctx.closePath();
-
-      const d=diffuse;
-      const spec=Math.pow(Math.max(0,d),18); // specular highlight
-
-      let fillColor;
-      if(type==='table'){
-        // Table: semi-transparent pale gold with reflection tint
-        const r=Math.round(230+20*d); const g=Math.round(200+30*d); const b=Math.round(120+20*d);
-        fillColor=`rgba(${r},${g},${b},0.78)`;
-      } else if(type==='crown-upper'){
-        // Crown facets: bright gold with specular
-        const base=[220+35*d, 170+40*d, 60+30*d];
-        const sr=Math.min(255,base[0]+spec*200);
-        const sg=Math.min(255,base[1]+spec*200);
-        const sb=Math.min(255,base[2]+spec*160);
-        fillColor=`rgba(${Math.round(sr)},${Math.round(sg)},${Math.round(sb)},${0.82+d*0.15})`;
-      } else if(type==='girdle'){
-        fillColor=`rgba(${Math.round(180+20*d)},${Math.round(140+20*d)},${Math.round(40+10*d)},0.6)`;
-      } else {
-        // Pavilion: deeper, with flashes
-        const flash=Math.random()<0.002?0.6:0; // occasional fire flash
-        const base=[160+60*d+flash*80, 110+60*d+flash*40, 20+40*d];
-        fillColor=`rgba(${Math.round(Math.min(255,base[0]))},${Math.round(Math.min(255,base[1]))},${Math.round(Math.min(255,base[2]))},${0.75+d*0.2})`;
-      }
-      ctx.fillStyle=fillColor;
-      ctx.fill();
-
-      // Facet edges — thin gold lines
-      const edgeAlpha = type==='girdle'?0.08:0.12+d*0.12;
-      ctx.strokeStyle=`rgba(255,220,120,${edgeAlpha})`;
-      ctx.lineWidth=type==='table'?0.8:0.5;
-      ctx.stroke();
-
-      // Specular hot spots on crown/table
-      if(spec>0.3 && (type==='crown-upper'||type==='table')){
-        ctx.beginPath();
-        const cx=pts.reduce((s,p)=>s+p.x,0)/pts.length;
-        const cy=pts.reduce((s,p)=>s+p.y,0)/pts.length;
-        const r=ctx.createRadialGradient(cx,cy,0,cx,cy,12);
-        r.addColorStop(0,`rgba(255,255,240,${spec*0.7})`);
-        r.addColorStop(1,'rgba(255,255,200,0)');
-        ctx.fillStyle=r;
-        ctx.arc(cx,cy,14,0,Math.PI*2);
-        ctx.fill();
-      }
-    });
-
-    // Animated sparkle stars
-    sparkleT+=0.03;
-    const sparkles=[
-      {x:W*0.18,y:H*0.22,phase:0},
-      {x:W*0.82,y:H*0.32,phase:1.8},
-      {x:W*0.12,y:H*0.68,phase:3.5},
-      {x:W*0.88,y:H*0.72,phase:2.2},
-    ];
-    sparkles.forEach(({x,y,phase})=>{
-      const a=Math.abs(Math.sin(sparkleT+phase));
-      if(a<0.2)return;
-      const s=6*a;
-      ctx.save();ctx.translate(x,y);ctx.globalAlpha=a*0.9;
-      ctx.strokeStyle='rgba(255,240,160,0.95)';ctx.lineWidth=1.2;
-      // 4-pointed star
-      for(let i=0;i<4;i++){
-        ctx.beginPath();
-        ctx.moveTo(0,0);
-        const ang=i*Math.PI/2;
-        ctx.lineTo(Math.cos(ang)*s*1.8,Math.sin(ang)*s*1.8);
-        ctx.stroke();
-      }
-      ctx.restore();
-    });
-
-    // Culet reflection (bottom glint)
-    const culetP=project(0,pavH,0);
-    if(culetP){
-      const cg=ctx.createRadialGradient(culetP.x,culetP.y,0,culetP.x,culetP.y,6);
-      cg.addColorStop(0,'rgba(255,255,255,0.8)');
-      cg.addColorStop(1,'rgba(255,255,255,0)');
-      ctx.fillStyle=cg;ctx.beginPath();ctx.arc(culetP.x,culetP.y,8,0,Math.PI*2);ctx.fill();
-    }
-
-    if(autoRotate) rotY+=0.007;
-    requestAnimationFrame(drawFrame);
-  }
-
-  // Mouse/touch drag
-  canvas.addEventListener('mousedown',e=>{isDragging=true;autoRotate=false;lastMouseX=e.clientX;lastMouseY=e.clientY;canvas.style.cursor='grabbing';});
-  window.addEventListener('mouseup',()=>{isDragging=false;canvas.style.cursor='grab';setTimeout(()=>{autoRotate=true;},2000);});
-  window.addEventListener('mousemove',e=>{
-    if(!isDragging)return;
-    const dx=e.clientX-lastMouseX; const dy=e.clientY-lastMouseY;
-    rotY+=dx*0.008; rotX+=dy*0.006;
-    lastMouseX=e.clientX; lastMouseY=e.clientY;
-  });
-  canvas.addEventListener('touchstart',e=>{isDragging=true;autoRotate=false;lastMouseX=e.touches[0].clientX;lastMouseY=e.touches[0].clientY;},{passive:true});
-  window.addEventListener('touchend',()=>{isDragging=false;setTimeout(()=>{autoRotate=true;},2000);});
-  window.addEventListener('touchmove',e=>{
-    if(!isDragging)return;
-    const dx=e.touches[0].clientX-lastMouseX; const dy=e.touches[0].clientY-lastMouseY;
-    rotY+=dx*0.008; rotX+=dy*0.006;
-    lastMouseX=e.touches[0].clientX; lastMouseY=e.touches[0].clientY;
-  },{passive:true});
-
-  drawFrame();
-})();
 
 // ── INIT ─────────────────────────────────────────────────
 initAuth();
