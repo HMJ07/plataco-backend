@@ -4,7 +4,6 @@
 // ============================================================
 import { Router } from 'express';
 import { query } from './db.js';
-import { requireAuth } from './middleware_auth.js';
 
 const router = Router();
 
@@ -17,16 +16,37 @@ router.post('/validate', async (req, res) => {
 
     if (!code) return res.status(400).json({ error: 'Código de cupón requerido' });
 
+    // Búsqueda insensible a mayúsculas/minúsculas en ambos lados
     const couponRes = await query(
       `SELECT * FROM coupons
-       WHERE code = UPPER($1)
+       WHERE UPPER(code) = UPPER($1)
          AND is_active = TRUE
          AND (valid_from IS NULL OR valid_from <= NOW())
          AND (valid_until IS NULL OR valid_until >= NOW())`,
-      [code]
+      [code.trim()]
     );
 
     if (!couponRes.rows[0]) {
+      // Log de debug: buscar el cupón sin filtros para diagnosticar
+      try {
+        const dbg = await query(
+          `SELECT code, is_active, valid_from, valid_until, max_uses, uses_count
+           FROM coupons WHERE UPPER(code) = UPPER($1)`,
+          [code.trim()]
+        );
+        if (dbg.rows[0]) {
+          const c = dbg.rows[0];
+          console.warn('[coupons/validate] Cupón encontrado pero bloqueado:', c);
+          if (!c.is_active)
+            return res.status(404).json({ error: 'Cupón inactivo' });
+          if (c.valid_until && new Date(c.valid_until) < new Date())
+            return res.status(404).json({ error: 'Cupón caducado' });
+          if (c.valid_from && new Date(c.valid_from) > new Date())
+            return res.status(404).json({ error: 'Cupón aún no activo' });
+        } else {
+          console.warn('[coupons/validate] Cupón no encontrado en BD:', code.trim());
+        }
+      } catch (_) {}
       return res.status(404).json({ error: 'Cupón inválido o caducado' });
     }
 
@@ -39,14 +59,15 @@ router.post('/validate', async (req, res) => {
 
     // Verificar pedido mínimo
     const total = parseFloat(cart_total_eur) || 0;
-    if (total < parseFloat(coupon.min_order_eur)) {
+    const minOrder = parseFloat(coupon.min_order_eur) || 0;
+    if (total < minOrder) {
       return res.status(400).json({
-        error: `Pedido mínimo de ${coupon.min_order_eur} € para este cupón`,
+        error: `Pedido mínimo de ${minOrder.toFixed(2)} € para este cupón`,
         min_order_eur: coupon.min_order_eur,
       });
     }
 
-    // Verificar usos por usuario (si está autenticado)
+    // Verificar usos por usuario (solo si está autenticado)
     let userUses = 0;
     if (req.headers.authorization) {
       try {
@@ -63,7 +84,9 @@ router.post('/validate', async (req, res) => {
       }
     }
 
-    if (coupon.max_uses_per_user !== null && userUses >= coupon.max_uses_per_user) {
+    // max_uses_per_user: solo aplicar si el usuario está autenticado (userUses > 0 lo acredita)
+    // Si no está autenticado, no bloqueamos (se controla en la finalización del pedido)
+    if (coupon.max_uses_per_user !== null && userUses > 0 && userUses >= coupon.max_uses_per_user) {
       return res.status(400).json({ error: 'Ya has utilizado este cupón' });
     }
 
@@ -86,6 +109,7 @@ router.post('/validate', async (req, res) => {
       new_total_eur:  +(total - discount_eur).toFixed(2),
     });
   } catch (err) {
+    console.error('[coupons/validate] Error:', err);
     res.status(500).json({ error: err.message });
   }
 });

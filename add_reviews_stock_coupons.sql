@@ -95,6 +95,15 @@ CREATE TABLE IF NOT EXISTS coupon_uses (
 CREATE INDEX IF NOT EXISTS idx_coupon_uses_coupon ON coupon_uses(coupon_id);
 CREATE INDEX IF NOT EXISTS idx_coupon_uses_user   ON coupon_uses(user_id);
 
+-- Columnas en coupons (se añaden solo si no existen — por si la tabla fue creada con una versión anterior)
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS min_order_eur     NUMERIC(10,2) DEFAULT 0;
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS max_uses          INTEGER;
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS max_uses_per_user INTEGER DEFAULT 1;
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS uses_count        INTEGER DEFAULT 0;
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS valid_from        TIMESTAMPTZ;
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS valid_until       TIMESTAMPTZ;
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS is_active         BOOLEAN DEFAULT TRUE;
+
 -- Columnas en orders (se añaden solo si no existen)
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS coupon_id    UUID REFERENCES coupons(id);
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS discount_eur NUMERIC(10,2) DEFAULT 0;
