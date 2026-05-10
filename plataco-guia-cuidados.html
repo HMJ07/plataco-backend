@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Guía del Cuidado — PLATACO</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Josefin+Sans:wght@200;300;400&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --silver:    #C8C8C8;
+      --silver-lt: #E8E8E8;
+      --silver-dk: #8A8A8A;
+      --gold-acc:  #C9A96E;
+      --ink:       #1A1A1A;
+      --ink-50:    rgba(26,26,26,0.5);
+      --cream:     #F7F4EF;
+      --cream-dk:  #EDE9E1;
+      --white:     #FFFFFF;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Josefin Sans', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      overflow-x: hidden;
+    }
+
+    /* ── HERO ──────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      background: var(--ink);
+      padding: 4rem 2rem;
+    }
+
+    .hero-bg {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 30% 50%, rgba(200,200,200,0.06) 0%, transparent 60%),
+                  radial-gradient(ellipse at 75% 20%, rgba(201,169,110,0.05) 0%, transparent 50%);
+    }
+
+    /* Animated ring */
+    .ring-anim {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(200,200,200,0.12);
+      animation: pulse-ring 6s ease-in-out infinite;
+    }
+    .ring-anim:nth-child(1) { width: 300px; height: 300px; animation-delay: 0s; }
+    .ring-anim:nth-child(2) { width: 480px; height: 480px; animation-delay: 1.5s; }
+    .ring-anim:nth-child(3) { width: 660px; height: 660px; animation-delay: 3s; }
+    @keyframes pulse-ring {
+      0%, 100% { transform: scale(1); opacity: 0.4; }
+      50%       { transform: scale(1.04); opacity: 0.12; }
+    }
+
+    .hero-eyebrow {
+      font-family: 'Josefin Sans', sans-serif;
+      font-weight: 200;
+      font-size: 0.7rem;
+      letter-spacing: 0.4em;
+      color: var(--gold-acc);
+      text-transform: uppercase;
+      margin-bottom: 1.8rem;
+      position: relative;
+      animation: fadeUp 1s ease both;
+    }
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      color: var(--white);
+      line-height: 1.05;
+      position: relative;
+      animation: fadeUp 1s 0.15s ease both;
+    }
+    .hero-title em {
+      font-style: italic;
+      color: var(--silver);
+    }
+    .hero-sub {
+      margin-top: 1.5rem;
+      font-weight: 200;
+      font-size: 0.78rem;
+      letter-spacing: 0.2em;
+      color: var(--silver-dk);
+      max-width: 36ch;
+      line-height: 1.8;
+      position: relative;
+      animation: fadeUp 1s 0.3s ease both;
+    }
+    .hero-cta {
+      margin-top: 3rem;
+      position: relative;
+      animation: fadeUp 1s 0.45s ease both;
+    }
+    .btn-outline {
+      display: inline-block;
+      border: 1px solid var(--silver-dk);
+      color: var(--silver-lt);
+      font-family: 'Josefin Sans', sans-serif;
+      font-weight: 300;
+      font-size: 0.68rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      padding: 0.85rem 2.4rem;
+      text-decoration: none;
+      transition: background 0.3s, color 0.3s, border-color 0.3s;
+    }
+    .btn-outline:hover {
+      background: var(--gold-acc);
+      border-color: var(--gold-acc);
+      color: var(--ink);
+    }
+
+    /* Scroll indicator */
+    .scroll-ind {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      animation: fadeUp 1s 0.8s ease both;
+    }
+    .scroll-ind span {
+      font-size: 0.58rem;
+      letter-spacing: 0.35em;
+      color: var(--silver-dk);
+      text-transform: uppercase;
+    }
+    .scroll-line {
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, var(--gold-acc), transparent);
+      animation: scroll-grow 2s ease-in-out infinite;
+    }
+    @keyframes scroll-grow {
+      0%   { transform: scaleY(0); transform-origin: top; opacity: 0; }
+      50%  { transform: scaleY(1); opacity: 1; }
+      100% { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── SECCIÓN INTRO ──────────────────────── */
+    .intro {
+      background: var(--white);
+      padding: 7rem 2rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      max-width: 1100px;
+      margin: 0 auto;
+      align-items: center;
+    }
+    @media (max-width: 700px) { .intro { grid-template-columns: 1fr; gap: 3rem; } }
+
+    .intro-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.4em;
+      color: var(--gold-acc);
+      text-transform: uppercase;
+      margin-bottom: 1.2rem;
+    }
+    .intro-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 2.4rem;
+      line-height: 1.2;
+      margin-bottom: 1.5rem;
+    }
+    .intro-title em { font-style: italic; color: var(--silver-dk); }
+    .intro-text {
+      font-size: 0.8rem;
+      font-weight: 300;
+      line-height: 2;
+      color: var(--ink-50);
+      max-width: 42ch;
+    }
+
+    .intro-stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    .stat-card {
+      background: var(--cream);
+      padding: 1.8rem 1.5rem;
+      border-left: 2px solid var(--gold-acc);
+    }
+    .stat-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.6rem;
+      font-weight: 300;
+      color: var(--ink);
+    }
+    .stat-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      color: var(--silver-dk);
+      text-transform: uppercase;
+      margin-top: 0.3rem;
+    }
+
+    /* ── CUIDADOS TABS ──────────────────────── */
+    .care-section {
+      background: var(--cream-dk);
+      padding: 7rem 2rem;
+    }
+    .care-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .section-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+    .section-eyebrow {
+      font-size: 0.65rem;
+      letter-spacing: 0.45em;
+      color: var(--gold-acc);
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.1;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--silver);
+      margin-bottom: 3rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'Josefin Sans', sans-serif;
+      font-weight: 300;
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--silver-dk);
+      padding: 0.9rem 1.8rem;
+      position: relative;
+      white-space: nowrap;
+      transition: color 0.25s;
+    }
+    .tab-btn::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0; right: 0;
+      height: 2px;
+      background: var(--gold-acc);
+      transform: scaleX(0);
+      transition: transform 0.3s;
+    }
+    .tab-btn.active { color: var(--ink); }
+    .tab-btn.active::after { transform: scaleX(1); }
+
+    .tab-pane { display: none; animation: fadeUp 0.4s ease; }
+    .tab-pane.active { display: block; }
+
+    /* Care cards */
+    .care-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.5rem;
+    }
+    .care-card {
+      background: var(--white);
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .care-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: var(--gold-acc);
+      transform: scaleY(0);
+      transform-origin: bottom;
+      transition: transform 0.35s;
+    }
+    .care-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.07); }
+    .care-card:hover::before { transform: scaleY(1); }
+
+    .care-icon {
+      width: 44px; height: 44px;
+      background: var(--cream);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1.2rem;
+      font-size: 1.2rem;
+    }
+    .care-card h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 1.15rem;
+      margin-bottom: 0.7rem;
+    }
+    .care-card p {
+      font-size: 0.75rem;
+      font-weight: 300;
+      line-height: 1.9;
+      color: var(--ink-50);
+    }
+    .care-tag {
+      display: inline-block;
+      margin-top: 1rem;
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.7rem;
+      background: var(--cream);
+      color: var(--silver-dk);
+    }
+    .care-tag.do   { background: #EAF5EC; color: #2D6A35; }
+    .care-tag.dont { background: #FBF0EE; color: #8B3A3A; }
+
+    /* ── MANCHAS & PULIDO ──────────────────── */
+    .tarnish-section {
+      background: var(--ink);
+      padding: 7rem 2rem;
+      color: var(--white);
+    }
+    .tarnish-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .tarnish-intro {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: start;
+      margin-bottom: 4rem;
+    }
+    @media (max-width: 700px) { .tarnish-intro { grid-template-columns: 1fr; gap: 2.5rem; } }
+
+    .tarnish-intro .section-eyebrow { color: var(--gold-acc); }
+    .tarnish-intro .section-title   { color: var(--white); }
+    .tarnish-text {
+      font-size: 0.78rem;
+      font-weight: 200;
+      line-height: 2;
+      color: rgba(255,255,255,0.55);
+    }
+
+    /* Step timeline */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .step {
+      padding: 2.5rem 1.8rem;
+      border-right: 1px solid rgba(255,255,255,0.08);
+      position: relative;
+    }
+    .step:last-child { border-right: none; }
+    .step-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3.5rem;
+      font-weight: 300;
+      color: rgba(201,169,110,0.2);
+      line-height: 1;
+      margin-bottom: 0.8rem;
+    }
+    .step h4 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 1.1rem;
+      color: var(--silver-lt);
+      margin-bottom: 0.7rem;
+    }
+    .step p {
+      font-size: 0.72rem;
+      font-weight: 200;
+      line-height: 1.9;
+      color: rgba(255,255,255,0.45);
+    }
+    .step-badge {
+      display: inline-block;
+      margin-top: 1rem;
+      font-size: 0.58rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold-acc);
+      border-bottom: 1px solid var(--gold-acc);
+      padding-bottom: 2px;
+    }
+
+    /* ── TEST TU JOYA ───────────────────────── */
+    .quiz-section {
+      background: var(--white);
+      padding: 7rem 2rem;
+    }
+    .quiz-inner {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    .quiz-card {
+      background: var(--cream);
+      padding: 3rem 3.5rem;
+      margin-top: 3rem;
+    }
+    @media (max-width: 600px) { .quiz-card { padding: 2rem; } }
+
+    .q-progress {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 2.5rem;
+    }
+    .q-prog-dot {
+      flex: 1;
+      height: 2px;
+      background: var(--silver);
+      transition: background 0.4s;
+    }
+    .q-prog-dot.done { background: var(--gold-acc); }
+
+    .q-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 1.5rem;
+      line-height: 1.3;
+      margin-bottom: 2rem;
+      min-height: 3.5rem;
+    }
+    .q-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+    }
+    @media (max-width: 500px) { .q-options { grid-template-columns: 1fr; } }
+
+    .q-opt {
+      background: var(--white);
+      border: 1px solid var(--silver);
+      color: var(--ink);
+      font-family: 'Josefin Sans', sans-serif;
+      font-weight: 300;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      padding: 1rem 1.2rem;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+    .q-opt:hover   { border-color: var(--gold-acc); background: #FBF8F2; }
+    .q-opt.chosen  { background: var(--ink); border-color: var(--ink); color: var(--white); }
+
+    .q-result {
+      display: none;
+      animation: fadeUp 0.5s ease;
+    }
+    .q-result.show { display: block; }
+    .result-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+    .result-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.8rem;
+      font-weight: 300;
+      margin-bottom: 0.8rem;
+    }
+    .result-text {
+      font-size: 0.78rem;
+      font-weight: 300;
+      line-height: 2;
+      color: var(--ink-50);
+      margin-bottom: 1.5rem;
+    }
+    .result-tips {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .result-tips li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.7rem;
+      font-size: 0.73rem;
+      font-weight: 300;
+      line-height: 1.7;
+      color: var(--ink);
+    }
+    .result-tips li::before {
+      content: '◆';
+      color: var(--gold-acc);
+      font-size: 0.45rem;
+      margin-top: 0.4rem;
+      flex-shrink: 0;
+    }
+    .btn-restart {
+      margin-top: 2rem;
+      background: none;
+      border: 1px solid var(--silver-dk);
+      color: var(--ink);
+      font-family: 'Josefin Sans', sans-serif;
+      font-weight: 300;
+      font-size: 0.65rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      padding: 0.8rem 2rem;
+      cursor: pointer;
+      transition: background 0.3s, color 0.3s;
+    }
+    .btn-restart:hover { background: var(--ink); color: var(--white); }
+
+    /* ── MITOS ──────────────────────────────── */
+    .myths-section {
+      background: var(--cream-dk);
+      padding: 7rem 2rem;
+    }
+    .myths-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .myth-accordion {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      margin-top: 3rem;
+    }
+    .myth-item {
+      background: var(--white);
+      overflow: hidden;
+    }
+    .myth-header {
+      width: 100%;
+      background: none;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem 2rem;
+      cursor: pointer;
+      text-align: left;
+      gap: 1rem;
+    }
+    .myth-label {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+    }
+    .myth-badge {
+      font-size: 0.58rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.65rem;
+      flex-shrink: 0;
+    }
+    .myth-badge.mito { background: #FBF0EE; color: #8B3A3A; }
+    .myth-badge.real { background: #EAF5EC; color: #2D6A35; }
+
+    .myth-q {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 1.05rem;
+      color: var(--ink);
+    }
+    .myth-arrow {
+      font-size: 0.8rem;
+      color: var(--silver-dk);
+      transition: transform 0.3s;
+      flex-shrink: 0;
+    }
+    .myth-item.open .myth-arrow { transform: rotate(180deg); }
+
+    .myth-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.45s ease, padding 0.3s;
+      font-size: 0.78rem;
+      font-weight: 300;
+      line-height: 2;
+      color: var(--ink-50);
+      padding: 0 2rem;
+    }
+    .myth-item.open .myth-body {
+      max-height: 200px;
+      padding: 0.2rem 2rem 1.8rem;
+    }
+
+    /* ── FOOTER PLATACO ─────────────────────── */
+    footer {
+      background: var(--ink);
+      color: rgba(255,255,255,0.35);
+      text-align: center;
+      padding: 3rem 2rem;
+      font-size: 0.65rem;
+      font-weight: 200;
+      letter-spacing: 0.25em;
+    }
+    footer strong {
+      color: var(--gold-acc);
+      font-weight: 400;
+      letter-spacing: 0.35em;
+    }
+
+    /* ── Decorative divider ─────────────────── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      justify-content: center;
+      padding: 1.5rem 0;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--silver);
+      max-width: 80px;
+    }
+    .divider-gem { color: var(--gold-acc); font-size: 0.6rem; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════ HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="ring-anim"></div>
+  <div class="ring-anim"></div>
+  <div class="ring-anim"></div>
+
+  <p class="hero-eyebrow">Plataco · Plata 925</p>
+  <h1 class="hero-title">El arte de<br/><em>cuidar tu plata</em></h1>
+  <p class="hero-sub">Una guía completa para que tus joyas brillen durante generaciones.</p>
+  <div class="hero-cta">
+    <a href="#cuidados" class="btn-outline">Descubrir la guía</a>
+  </div>
+
+  <div class="scroll-ind">
+    <span>Desplaza</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ INTRO -->
+<section style="background:var(--white); padding:0;">
+  <div class="intro">
+    <div>
+      <p class="intro-label">¿Por qué importa?</p>
+      <h2 class="intro-title">La plata vive,<br/><em>respira</em> y reacciona</h2>
+      <p class="intro-text">
+        La plata 925 es una aleación noble — 92,5 % plata pura y 7,5 % cobre —
+        que reacciona al oxígeno, la humedad y los compuestos de azufre presentes
+        en el ambiente. Con un cuidado mínimo y consistente, una joya de plata
+        puede durar siglos y mejorar con el paso del tiempo.
+      </p>
+    </div>
+    <div class="intro-stat-grid">
+      <div class="stat-card">
+        <div class="stat-num">92.5%</div>
+        <div class="stat-label">Pureza de la plata de ley</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">∞</div>
+        <div class="stat-label">Vida útil con buen cuidado</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">2 min</div>
+        <div class="stat-label">Para un pulido rápido semanal</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">925</div>
+        <div class="stat-label">Marca de calidad internacional</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ CUIDADOS TABS -->
+<section class="care-section" id="cuidados">
+  <div class="care-inner">
+    <div class="section-header">
+      <p class="section-eyebrow">Guía práctica</p>
+      <h2 class="section-title">Todo lo que necesitas saber</h2>
+    </div>
+
+    <div class="tabs" id="tabBar">
+      <button class="tab-btn active" data-tab="uso">Uso diario</button>
+      <button class="tab-btn" data-tab="limpieza">Limpieza</button>
+      <button class="tab-btn" data-tab="almacen">Almacenamiento</button>
+      <button class="tab-btn" data-tab="piezas">Por tipo de joya</button>
+    </div>
+
+    <!-- USO DIARIO -->
+    <div class="tab-pane active" id="tab-uso">
+      <div class="care-grid">
+        <div class="care-card">
+          <div class="care-icon">🚿</div>
+          <h3>Ducharte con ella</h3>
+          <p>El agua corriente sola no daña la plata, pero el jabón, geles y champús contienen sulfatos que aceleran la oxidación y el opacado. Evítalo cuando puedas.</p>
+          <span class="care-tag dont">Mejor evitar</span>
+        </div>
+        <div class="care-card">
+          <div class="care-icon">🏊</div>
+          <h3>Piscina y mar</h3>
+          <p>El cloro de las piscinas y la sal marina atacan la aleación de cobre de la plata 925. Tras un contacto accidental, aclara con agua dulce y seca inmediatamente.</p>
+          <span class="care-tag dont">No recomendado</span>
+        </div>
+        <div class="care-card">
+          <div class="care-icon">💪</div>
+          <h3>Deporte y sudor</h3>
+          <p>El sudor contiene sales y ácidos que aceleran la oxidación. Retira tus joyas antes de ejercitar y, si no es posible, enjuágalas y sécalas al terminar.</p>
+          <span class="care-tag dont">Retira si puedes</span>
+        </div>
+        <div class="care-card">
+          <div class="care-icon">🧴</div>
+          <h3>Perfumes y cremas</h3>
+          <p>Aplica el perfume y las cremas antes de ponerte las joyas. Los compuestos químicos de cosméticos y fragancias se acumulan en las cadenas y chatones, oscureciendo la pieza.</p>
+          <span class="care-tag dont">Joya, lo último</span>
+        </div>
+        <div class="care-card">
+          <div class="care-icon">🍽️</div>
+          <h3>Cocinar con joyas</h3>
+          <p>El huevo, la cebolla y el ajo son ricos en azufre, el principal enemigo de la plata. La exposición al vapor también puede opacara las superficies más brillantes.</p>
+          <span class="care-tag dont">Retíralas</span>
+        </div>
+        <div class="care-card">
+          <div class="care-icon">✨</div>
+          <h3>El brillo aumenta</h3>
+          <p>Con el uso cotidiano, los roces suaves contra la piel y la ropa pulen de forma natural la plata pulida. Muchas piezas mejoran visiblemente con los años de uso diario.</p>
+          <span class="care-tag do">Buena noticia</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIMPIEZA -->
+    <div class="tab-pane" id="tab-limpieza">
+      <div class="care-grid">
+        <div class="care-card">
+          <div class="care-icon">🪥</div>
+          <h3>Limpieza semanal básica</h3>
+          <p>Frota suavemente con un paño de microfibra seco o un paño específico para plata. Basta con 1-2 minutos para mantener el brillo y eliminar el sudor y la suciedad superficial.</p>
+          <span class="care-tag do">Recomendado</span>
+        </div>
+        <div class="care-card">
+          <div class="care-icon">🫧</div>
+          <h3>Baño con agua y jabón neutro</h3>
+          <p>Sumerge unos minutos en agua tibia con unas gotas de jabón de fregadero sin fragancia. Usa un pincel de cerdas suaves para las zonas talladas. Aclara bien y seca al instante.</p>
+          <span class="care-tag do">Mensual</span>
+        </div>
+        <div class="care-card">
+          <div class="care-icon">🦷</div>
+          <h3>Bicarbonato + pasta de dientes</h3>
+          <p>Solo para piezas muy oxidadas sin incrustaciones. El bicarbonato es abrasivo — puede rayar acabados satinados o martillados. Nunca lo uses en piezas con piedras pegadas o esmalte.</p>
+          <span class="care-tag dont">Con cuidado</span>
+        </div>
+        <div class="care-card">
+          <div class="care-icon">⚡</div>
+          <h3>Baño electrolítico casero</h3>
+          <p>Papel de aluminio + sal + agua caliente en un recipiente. La joya toca el papel y el proceso electroquímico invierte la oxidación. Muy efectivo para piezas muy ennegrecidas.</p>
+          <span class="care-tag do">Funciona bien</span>
+        </div>
+        <div class="care-card">
+          <div class="care-icon">🔴</div>
+          <h3>Lejía y amoníaco</h3>
+          <p>Jamás uses productos de limpieza doméstica agresivos sobre la plata. El amoníaco y la lejía dañan irreparablemente el acabado superficial y pueden debilitar las soldaduras.</p>
+          <span class="care-tag dont">Nunca</span>
+        </div>
+        <div class="care-card">
+          <div class="care-icon">🧤</div>
+          <h3>Tus manos también importan</h3>
+          <p>Las huellas digitales dejan grasa y sal que aceleran la oxidación. Al guardar joyas que no usas, tócalas lo mínimo posible o usa guantes de algodón.</p>
+          <span class="care-tag do">Buen hábito</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALMACENAMIENTO -->
+    <div class="tab-pane" id="tab-almacen">
+      <div class="care-grid">
+        <div class="care-card">
+          <div class="care-icon">🗂️</div>
+          <h3>Separadas y envueltas</h3>
+          <p>Guarda cada joya en su propia bolsita de franela o papel tissú para evitar roces y arañazos entre piezas. Las cadenas guardadas juntas se enredan y las gemas pueden rayar la plata.</p>
+          <span class="care-tag do">Esencial</span>
+        </div>
+        <div class="care-card">
+          <div class="care-icon">💨</div>
+          <h3>Bolsitas antihumedad</h3>
+          <p>Las sílice en gel dentro del joyero absorben la humedad ambiental, el factor más determinante en la velocidad de oxidación. Recuerda renovar los sobres cada 3-6 meses.</p>
+          <span class="care-tag do">Muy recomendado</span>
+        </div>
+        <div class="care-card">
+          <div class="care-icon">🌡️</div>
+          <h3>Temperatura estable</h3>
+          <p>Los cambios bruscos de temperatura generan condensación. Evita guardar joyas en baños o cerca de ventanas. Un armario interior es el lugar ideal.</p>
+          <span class="care-tag do">Importante</span>
+        </div>
+        <div class="care-card">
+          <div class="care-icon">📦</div>
+          <h3>Caja hermética para viajes</h3>
+          <p>Al viajar, la presión de cabina, la humedad variable y los cambios de temperatura son factores de oxidación. Una caja con cierre hermético (tipo Pelican o similar) protege la joya.</p>
+          <span class="care-tag do">Para viajes</span>
+        </div>
+        <div class="care-card">
+          <div class="care-icon">🛁</div>
+          <h3>Evitar el baño</h3>
+          <p>El cuarto de baño acumula vapor, humedad y compuestos de azufre del champú y cosmética. Es el peor lugar del hogar para guardar joyas de plata.</p>
+          <span class="care-tag dont">Nunca guardes aquí</span>
+        </div>
+        <div class="care-card">
+          <div class="care-icon">🌿</div>
+          <h3>Carbón activo o tiza</h3>
+          <p>Coloca un trozo de carbón activo o una tiza de pizarrón en el joyero. Absorben compuestos de azufre del ambiente, uno de los grandes causantes del oscurecimiento.</p>
+          <span class="care-tag do">Truco efectivo</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- POR TIPO DE JOYA -->
+    <div class="tab-pane" id="tab-piezas">
+      <div class="care-grid">
+        <div class="care-card">
+          <div class="care-icon">💍</div>
+          <h3>Anillos</h3>
+          <p>La zona interior acumula más suciedad por el contacto con la piel. Limpia la parte interior con un palillo de madera o pincel fino. Los anillos texturizados o martillados retienen más suciedad en las hendiduras.</p>
+          <span class="care-tag do">Limpia el interior</span>
+        </div>
+        <div class="care-card">
+          <div class="care-icon">📿</div>
+          <h3>Collares y cadenas</h3>
+          <p>Los eslabones pequeños acumulan partículas entre ellos. Sumerge en agua jabonosa caliente y agita suavemente. Tiende la cadena recta para secarla y evitar que el agua estancada deje manchas.</p>
+          <span class="care-tag do">Seca tendida</span>
+        </div>
+        <div class="care-card">
+          <div class="care-icon">🔗</div>
+          <h3>Pulseras</h3>
+          <p>Las pulseras tipo esclava y los rígidos acumulan suciedad bajo el engaste. Los cierres de mosquetón deben lubricarse ocasionalmente con aceite mineral para evitar que se atasquen.</p>
+          <span class="care-tag do">Lubrica el cierre</span>
+        </div>
+        <div class="care-card">
+          <div class="care-icon">👂</div>
+          <h3>Pendientes</h3>
+          <p>Limpia el vástago con alcohol isopropílico al 70 % después de cada uso. La zona del lóbulo acumula células muertas y grasa en el vástago, que con el tiempo pueden causar irritación.</p>
+          <span class="care-tag do">Higiene del vástago</span>
+        </div>
+        <div class="care-card">
+          <div class="care-icon">🌸</div>
+          <h3>Broches con filigrana</h3>
+          <p>El trabajo calado y la filigrana acumulan suciedad en recovecos imposibles de limpiar con paño. Usa un pincel de cerdas muy suaves (pincel de maquillaje limpio) con agua jabonosa tibia.</p>
+          <span class="care-tag do">Pincel fino</span>
+        </div>
+        <div class="care-card">
+          <div class="care-icon">💎</div>
+          <h3>Joyas con piedras</h3>
+          <p>Nunca sumerjas joyas con piedras en agua durante largo tiempo, especialmente ópalo, turquesa, esmeralda o perlas. Estas gemas son porosas o sensibles al agua y pueden agrietarse o perder color.</p>
+          <span class="care-tag dont">Cuidado con el agua</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ PULIDO PASO A PASO -->
+<section class="tarnish-section">
+  <div class="tarnish-inner">
+    <div class="tarnish-intro">
+      <div>
+        <p class="section-eyebrow">Cuando la plata se oscurece</p>
+        <h2 class="section-title" style="color:var(--white);">Cómo recuperar<br/>el brillo perdido</h2>
+      </div>
+      <p class="tarnish-text">
+        El oscurecimiento de la plata (patina o tarnish) es un proceso natural y completamente
+        reversible. Se produce cuando el cobre de la aleación reacciona con el dioxido de azufre
+        del aire formando sulfuro de cobre. Con los pasos correctos, tu joya puede recuperar
+        su brillo original en menos de 15 minutos.
+      </p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h4>Evalúa el nivel</h4>
+        <p>¿Tiene un leve opacado (amarillo-gris) o está muy ennegrecida? El nivel de oxidación determina el método. Las manchas ligeras requieren solo un paño; las severas necesitan el método electrolítico.</p>
+        <span class="step-badge">Diagnóstico</span>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h4>Prepara la solución</h4>
+        <p>Para oxidación media: agua tibia + unas gotas de lavavajillas. Para oxidación severa: prepara el baño electrolítico con papel de aluminio, sal gruesa y agua muy caliente en un recipiente de vidrio.</p>
+        <span class="step-badge">Preparación</span>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h4>Limpia con suavidad</h4>
+        <p>Usa un paño de microfibra, franela de joyería o un pincel de cerdas muy suaves. Nunca estropajos, lana de acero ni paños abrasivos. En acabados satinados, sigue siempre la dirección del acabado.</p>
+        <span class="step-badge">Acción</span>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <h4>Aclara y seca bien</h4>
+        <p>Aclara con abundante agua fría para eliminar residuos de jabón o sal. Seca inmediatamente con un paño limpio y seco. Nunca dejes que se seque al aire — el agua estancada forma manchas difíciles de eliminar.</p>
+        <span class="step-badge">Acabado</span>
+      </div>
+      <div class="step">
+        <div class="step-num">05</div>
+        <h4>Pule y protege</h4>
+        <p>Con un paño de pulido de joyería (impregnado con compuesto antioxidante), frota en movimientos circulares suaves. Guarda la pieza limpia en su bolsita y un ambiente controlado.</p>
+        <span class="step-badge">Protección</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ QUIZ -->
+<section class="quiz-section">
+  <div class="quiz-inner">
+    <div class="section-header">
+      <p class="section-eyebrow">Personalizado para ti</p>
+      <h2 class="section-title">¿Qué cuida mejor tu joya?</h2>
+      <p style="margin-top:1rem; font-size:0.75rem; font-weight:300; color:var(--ink-50); line-height:1.8;">
+        Responde 4 preguntas y recibe un consejo a medida para tu pieza favorita.
+      </p>
+    </div>
+
+    <div class="quiz-card" id="quizCard">
+      <div class="q-progress" id="qProgress">
+        <div class="q-prog-dot"></div>
+        <div class="q-prog-dot"></div>
+        <div class="q-prog-dot"></div>
+        <div class="q-prog-dot"></div>
+      </div>
+
+      <div id="quizQ">
+        <p class="q-text" id="qText"></p>
+        <div class="q-options" id="qOpts"></div>
+      </div>
+
+      <div class="q-result" id="quizResult">
+        <div class="result-icon" id="rIcon"></div>
+        <h3 class="result-title" id="rTitle"></h3>
+        <p class="result-text" id="rText"></p>
+        <ul class="result-tips" id="rTips"></ul>
+        <button class="btn-restart" onclick="restartQuiz()">Volver a empezar ↺</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ MITOS -->
+<section class="myths-section">
+  <div class="myths-inner">
+    <div class="section-header">
+      <p class="section-eyebrow">Verdad o mito</p>
+      <h2 class="section-title">Lo que se dice de la plata</h2>
+    </div>
+
+    <div class="myth-accordion" id="mythAccordion">
+      <!-- generated by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ FOOTER -->
+<footer>
+  <p>
+    <strong>PLATACO</strong> &nbsp;·&nbsp; Plata 925 · Joyería artesanal &nbsp;·&nbsp;
+    Guía de cuidados
+  </p>
+  <p style="margin-top:0.7rem;">
+    Con amor por la plata y por quienes la lucen.
+  </p>
+</footer>
+
+<script>
+/* ── TABS ── */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const id = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + id).classList.add('active');
+  });
+});
+
+/* ── QUIZ ── */
+const questions = [
+  {
+    text: '¿Cuál es tu joya favorita de Plataco?',
+    opts: ['Un anillo', 'Un collar o cadena', 'Una pulsera', 'Pendientes o broches']
+  },
+  {
+    text: '¿Con qué frecuencia la usas?',
+    opts: ['Todos los días sin quitarla', 'Varios días a la semana', 'Ocasiones especiales', 'La acabo de estrenar']
+  },
+  {
+    text: '¿Cómo está el brillo en este momento?',
+    opts: ['Perfecta, reluciente', 'Algo opaca, sin brillo', 'Amarillenta o grisácea', 'Manchas oscuras evidentes']
+  },
+  {
+    text: '¿Cómo la guardas habitualmente?',
+    opts: ['En su bolsita o caja', 'En el baño o tocador', 'Mezclada con otras joyas', 'La dejo puesta siempre']
+  }
+];
+
+const results = [
+  {
+    // uso diario + perfecta + caja
+    icon: '✨',
+    title: 'Tu joya está en perfectas manos',
+    text: 'Llevas bien el cuidado de tu pieza. Con un pulido suave semanal y guardándola correctamente, te durará generaciones. Aquí van unos recordatorios:',
+    tips: [
+      'Pásale un paño de microfibra cada semana, 2 minutos bastan.',
+      'Evita el perfume y las cremas directamente sobre la joya.',
+      'Si la bañas con agua, sécala de inmediato y por completo.',
+      'Guarda siempre en su bolsita con una pastilla de sílice gel.'
+    ]
+  },
+  {
+    // opaca o manchas o mal almacenada
+    icon: '🔧',
+    title: 'Tu joya necesita algo de atención',
+    text: 'No te preocupes — la plata se recupera totalmente con los cuidados adecuados. Sigue estos pasos para devolverle el brillo:',
+    tips: [
+      'Prepara un baño de agua tibia con jabón neutro sin fragancia.',
+      'Frota suavemente con un pincel de cerdas suaves durante 2-3 minutos.',
+      'Si el oscurecimiento es severo, prueba el método del papel de aluminio.',
+      'Guárdala en una bolsita de franela individual con sílice gel.'
+    ]
+  },
+  {
+    // ocasional + nueva
+    icon: '💡',
+    title: 'Empieza con buen pie',
+    text: 'Las joyas que se usan ocasionalmente tienden a oxidarse más rápido porque el frotamiento del uso diario las protege. Toma nota:',
+    tips: [
+      'Guarda las joyas que no usas en bolsitas individuales cerradas al vacío.',
+      'Añade un trozo de tiza o carbón activo al joyero para absorber el azufre.',
+      'Antes de ponértela tras un tiempo guardada, pasa el paño de pulido.',
+      'Las joyas "de gala" se benefician de una limpieza suave antes y después de usarlas.'
+    ]
+  }
+];
+
+let current = 0, answers = [];
+
+function getResult() {
+  const wear  = answers[1]; // frecuencia
+  const shine = answers[2]; // estado brillo
+  const store = answers[3]; // almacenamiento
+  if (shine === 0 && store === 0) return results[0];
+  if (shine >= 2 || store >= 2)   return results[1];
+  if (wear >= 2)                   return results[2];
+  return results[0];
+}
+
+function renderQ() {
+  const q = questions[current];
+  document.getElementById('qText').textContent = q.text;
+  const opts = document.getElementById('qOpts');
+  opts.innerHTML = '';
+  q.opts.forEach((o, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'q-opt';
+    btn.textContent = o;
+    btn.addEventListener('click', () => choose(i));
+    opts.appendChild(btn);
+  });
+  // update progress
+  document.querySelectorAll('.q-prog-dot').forEach((d, i) => {
+    d.classList.toggle('done', i < current);
+  });
+}
+
+function choose(idx) {
+  answers[current] = idx;
+  const btns = document.querySelectorAll('.q-opt');
+  btns.forEach((b, i) => b.classList.toggle('chosen', i === idx));
+
+  setTimeout(() => {
+    current++;
+    if (current < questions.length) {
+      renderQ();
+    } else {
+      showResult();
+    }
+  }, 380);
+}
+
+function showResult() {
+  document.getElementById('quizQ').style.display = 'none';
+  const r = getResult();
+  document.getElementById('rIcon').textContent  = r.icon;
+  document.getElementById('rTitle').textContent = r.title;
+  document.getElementById('rText').textContent  = r.text;
+  const ul = document.getElementById('rTips');
+  ul.innerHTML = '';
+  r.tips.forEach(t => {
+    const li = document.createElement('li');
+    li.textContent = t;
+    ul.appendChild(li);
+  });
+  document.getElementById('quizResult').classList.add('show');
+  document.querySelectorAll('.q-prog-dot').forEach(d => d.classList.add('done'));
+}
+
+function restartQuiz() {
+  current = 0; answers = [];
+  document.getElementById('quizResult').classList.remove('show');
+  document.getElementById('quizQ').style.display = '';
+  renderQ();
+}
+
+renderQ();
+
+/* ── MYTHS ── */
+const myths = [
+  { type: 'mito', q: '"La plata de calidad nunca se oxida"', a: 'Falso. Toda la plata — incluso la de mayor pureza — se oxida al contacto con el dioxido de azufre ambiental. La única plata que no se oxida es el platino, que es otro metal completamente distinto. La marca 925 garantiza la pureza, no la inmunidad a la oxidación.' },
+  { type: 'real', q: '"La pasta de dientes limpia la plata"', a: 'Verdad, pero con matices. La pasta de dientes contiene abrasivos suaves que ayudan a eliminar la pátina negra. Sin embargo, puede rayar acabados satinados o martillados y dañar piedras preciosas. Solo es recomendable para piezas lisas y pulidas con oxidación severa.' },
+  { type: 'mito', q: '"Guardar joyas de plata en el baño está bien si están en una caja"', a: 'Mito peligroso. El vapor del baño penetra en casi cualquier caja no hermética. La humedad y los compuestos de azufre de los productos de higiene son los enemigos número uno de la plata. El baño es el peor lugar del hogar para guardar joyas.' },
+  { type: 'real', q: '"El uso diario conserva mejor la plata que guardarla"', a: 'Sorprendentemente, verdad. El frotamiento suave del uso diario contra la piel pule de forma natural la superficie y retrasa la oxidación. Las joyas guardadas sin protección se oxidan más rápido que las usadas con regularidad.' },
+  { type: 'mito', q: '"El vinagre es seguro para limpiar plata"', a: 'Mito con peligros ocultos. El vinagre es ácido acético que puede dañar la aleación de cobre de la plata 925 con exposiciones prolongadas. Además, es absolutamente destructivo para turquesas, perlas, corales y piedras porosas. Úsalo solo con extremo cuidado y en piezas lisas sin piedras.' },
+  { type: 'real', q: '"La plata de ley lleva siempre una marca 925"', a: 'Verdad en la mayoría de países. El marcaje "925" o "Sterling" es obligatorio en muchos mercados (Europa, Reino Unido, EEUU) e indica que la pieza contiene al menos el 92,5 % de plata pura. Sin ese sello, no puedes estar seguro de la pureza del metal.' },
+  { type: 'mito', q: '"El alcohol limpia y desinfecta las joyas de plata sin riesgo"', a: 'Parcialmente mito. El alcohol isopropílico al 70% es seguro para el metal de plata y excelente para limpiar el vástago de pendientes. Sin embargo, puede dañar algunas piedras (esmeralda, ópalo, perlas, turquesa) y disolver adhesivos de chatones. Aplícalo solo en el metal, no en la joya entera.' },
+  { type: 'real', q: '"Los días húmedos aceleran la oxidación de la plata"', a: 'Totalmente cierto. La humedad actúa como catalizador de la reacción entre el cobre de la aleación y el azufre ambiental. En ciudades costeras o ambientes húmedos, la plata puede oscurecerse notablemente más rápido que en zonas secas.' }
+];
+
+const accordion = document.getElementById('mythAccordion');
+myths.forEach((m, i) => {
+  accordion.innerHTML += `
+    <div class="myth-item" id="myth-${i}">
+      <button class="myth-header" onclick="toggleMyth(${i})">
+        <div class="myth-label">
+          <span class="myth-badge ${m.type}">${m.type === 'mito' ? 'Mito' : 'Real'}</span>
+          <span class="myth-q">${m.q}</span>
+        </div>
+        <span class="myth-arrow">▾</span>
+      </button>
+      <div class="myth-body">${m.a}</div>
+    </div>`;
+});
+
+function toggleMyth(i) {
+  const item = document.getElementById('myth-' + i);
+  const wasOpen = item.classList.contains('open');
+  document.querySelectorAll('.myth-item').forEach(el => el.classList.remove('open'));
+  if (!wasOpen) item.classList.add('open');
+}
+
+/* ── Intersection Observer fade-in ── */
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.style.opacity = '1';
+      e.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.care-card, .stat-card, .step').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(20px)';
+  el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+  observer.observe(el);
+});
+</script>
+</body>
+</html>
