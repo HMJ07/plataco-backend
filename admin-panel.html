@@ -100,9 +100,9 @@
   #loginError { color:var(--danger); font-size:0.8rem; margin-top:10px; display:none; }
 
   /* ── Content ── */
-  .content { padding:32px; }
-  .page { display:none; position:relative; }
-  .page.active { display:block; min-height:200px; }
+  .content { padding:32px; width:100%; box-sizing:border-box; }
+  .page { display:none; }
+  .page.active { display:block; width:100%; }
 
   /* ── Stats cards ── */
   .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:28px; }
@@ -449,10 +449,11 @@
         </table>
       </div>
     </div>
+    </div><!-- /reviewsPage -->
 
     <!-- CUPONES -->
-    <div id="couponsPage" class="page" style="min-height:300px">
-      <div class="card" style="margin-bottom:1.5rem;overflow:visible">
+    <div id="couponsPage" class="page">
+      <div class="card" style="margin-bottom:1.5rem">
         <div class="card-header">
           <h3>Cupones de descuento</h3>
           <button class="btn btn-sm" style="background:var(--accent-light);color:white;border:none" onclick="openCouponModal()">+ Nuevo cupón</button>
@@ -1355,6 +1356,9 @@ async function deleteReview(id) {
 
 
 // ── Cupones ───────────────────────────────────────────────
+// Mapa para pasar objetos cupón a los botones sin JSON inline
+const _couponMap = {};
+
 async function loadCoupons() {
   const tbody = document.getElementById('couponsBody');
   tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#999;padding:24px">Cargando…</td></tr>';
@@ -1365,11 +1369,13 @@ async function loadCoupons() {
       tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#999;padding:24px">Sin cupones todavía.</td></tr>';
       return;
     }
-    tbody.innerHTML = coupons.map(c => {
+    // Guardar cupones en mapa para evitar JSON inline en onclick
+    coupons.forEach(c => { _couponMap[c.id] = c; });
+    const rows = coupons.map(c => {
       const typeLabel = c.discount_type === 'percent' ? `${c.discount_value}%` : `${parseFloat(c.discount_value).toFixed(2)}€`;
       const until = c.valid_until ? new Date(c.valid_until).toLocaleDateString('es-ES') : '—';
       const maxUses = c.max_uses !== null ? c.max_uses : '∞';
-      const active = c.is_active
+      const activeHtml = c.is_active
         ? '<span style="color:#16a34a;font-weight:600">Sí</span>'
         : '<span style="color:#9ca3af">No</span>';
       return `<tr>
@@ -1380,13 +1386,14 @@ async function loadCoupons() {
         <td>${parseFloat(c.min_order_eur || 0).toFixed(2)}€</td>
         <td>${c.uses_count || c.actual_uses || 0} / ${maxUses}</td>
         <td style="font-size:0.82rem">${until}</td>
-        <td>${active}</td>
+        <td>${activeHtml}</td>
         <td style="white-space:nowrap">
-          <button class="btn btn-outline btn-sm" onclick='openCouponModal(${JSON.stringify(c)})'>Editar</button>
-          <button class="btn btn-sm" style="background:#fee2e2;color:#b91c1c;border:none;margin-left:4px" onclick="deleteCoupon('${c.id}')">Eliminar</button>
+          <button class="btn btn-outline btn-sm" data-coupon-id="${c.id}" onclick="openCouponModal(_couponMap[this.dataset.couponId])">Editar</button>
+          <button class="btn btn-sm" style="background:#fee2e2;color:#b91c1c;border:none;margin-left:4px" data-coupon-id="${c.id}" onclick="deleteCoupon(this.dataset.couponId)">Eliminar</button>
         </td>
       </tr>`;
     }).join('');
+    tbody.innerHTML = rows;
   } catch(e) {
     tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:red;padding:24px">Error: ${e.message}</td></tr>`;
   }
