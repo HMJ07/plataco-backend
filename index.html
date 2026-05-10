@@ -2939,19 +2939,25 @@ async function tryonAnalyzeWithAI(){
   const base64 = compositeDataURL.split(',')[1];
   const p = tryonProduct;
 
+  // Llamada directa a Anthropic (igual que Gift Finder y guía de tallas)
   try {
-    const apiUrl = window.PLATACO_API_URL || 'http://localhost:4000/api';
-    const res = await fetch(`${apiUrl}/tryon/analyze`, {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        image_base64:  base64,
-        product_name:  p ? p.name : '',
-        material:      p ? p.material : '',
-      }),
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 300,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: base64 } },
+            { type: 'text', text: `Eres un estilista de joyería de lujo. Analiza cómo luce "${p ? p.name : 'esta joya'}" (${p ? p.material : ''}) en la imagen. Escribe exactamente 3 frases en español: cómo luce en esa zona del cuerpo, qué favorece del estilo, y una ocasión recomendada. Tono cálido y sofisticado.` }
+          ]
+        }]
+      })
     });
     const data = await res.json();
-    const opinion = data.opinion || 'Esta joya realza tu estilo de forma elegante y natural.';
+    const opinion = data.content?.map(c => c.text || '').join('').trim() || 'Esta joya realza tu estilo de forma elegante y natural.';
     document.getElementById('tryonAiOpinion').innerHTML = `<strong style="color:var(--gold);font-style:normal;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;">✦ Opinión de tu estilista</strong><br><br>${opinion}`;
   } catch(e) {
     document.getElementById('tryonAiOpinion').innerHTML = `<strong style="color:var(--gold);font-style:normal;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;">✦ Vista previa lista</strong><br><br>La joya luce perfecta. Pulsa "Añadir al carrito" para hacerla tuya.`;
@@ -3204,6 +3210,7 @@ function gfRestart(){
           <canvas id="tryonResultCanvas"></canvas>
           <div class="tryon-result-badge">✦ Tu look</div>
         </div>
+        <div id="tryonAiOpinion" style="font-size:0.82rem;color:#aaa;line-height:1.8;font-style:italic;margin:1rem 0;padding:0.8rem 1rem;border-left:1px solid var(--gold)"></div>
         <div class="tryon-result-actions">
           <button class="tryon-btn-back" onclick="tryonGoTo(2)">← Reajustar</button>
           <button class="tryon-btn-primary" onclick="tryonAddToCart()">Añadir al carrito</button>
