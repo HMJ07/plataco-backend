@@ -457,13 +457,15 @@
           <h3>Cupones de descuento</h3>
           <button class="btn btn-sm" style="background:var(--accent-light);color:white;border:none" onclick="openCouponModal()">+ Nuevo cupón</button>
         </div>
-        <table>
-          <thead><tr>
-            <th>Código</th><th>Descripción</th><th>Tipo</th><th>Valor</th>
-            <th>Mín. (€)</th><th>Usos / Máx.</th><th>Caduca</th><th>Activo</th><th>Acciones</th>
-          </tr></thead>
-          <tbody id="couponsBody"><tr><td colspan="9" style="text-align:center;color:#999;padding:24px">Cargando…</td></tr></tbody>
-        </table>
+        <div style="overflow-x:auto;width:100%">
+          <table style="width:100%;border-collapse:collapse">
+            <thead><tr>
+              <th>Código</th><th>Descripción</th><th>Tipo</th><th>Valor</th>
+              <th>Mín. (€)</th><th>Usos / Máx.</th><th>Caduca</th><th>Activo</th><th>Acciones</th>
+            </tr></thead>
+            <tbody id="couponsBody"><tr><td colspan="9" style="text-align:center;color:#999;padding:24px">Cargando…</td></tr></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
