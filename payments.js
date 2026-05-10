@@ -224,7 +224,7 @@ router.post('/confirm-order', (req, res, next) => {
           currency, total_customer_currency, exchange_rate,
           ship_first_name, ship_last_name, ship_address1, ship_address2,
           ship_city, ship_state, ship_postal_code, ship_country, ship_phone
-        ) VALUES ($1,$2,'paid',$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
+        ) VALUES ($1,$2,'paid',$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
         RETURNING *
       `, [
         user_id, guest_email || null,
