@@ -2738,9 +2738,13 @@ function tryonGoTo(step){
     const line = document.getElementById('tryonStepLine'+i);
     if(line) line.classList.toggle('done', i < step);
   });
+  // Para paso 3: capturar canvas mientras panel 2 aún es visible, luego cambiar
+  if(step === 3) {
+    tryonAnalyzeWithAI();
+    return; // la función se encarga de activar panel 3 al terminar
+  }
   document.getElementById('tryonPanel'+step).classList.add('active');
   if(step === 2) tryonRenderCanvas();
-  if(step === 3) tryonAnalyzeWithAI();
 }
 
 function handleTryonDrop(e){
@@ -2874,8 +2878,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
 });
 
 async function tryonAnalyzeWithAI(){
+  // Activar panel 3 (con spinner) antes de hacer nada
+  document.getElementById('tryonPanel3').classList.add('active');
   document.getElementById('tryonAiLoading').style.display='flex';
   document.getElementById('tryonResult').style.display='none';
+
+  // Pequeña pausa para que el DOM se actualice y el spinner sea visible
+  await new Promise(r => setTimeout(r, 50));
 
   // Render composite image on result canvas
   const srcCanvas = document.getElementById('tryonCanvas');
@@ -2926,13 +2935,18 @@ async function tryonAnalyzeWithAI(){
 
   // Dibujar recorte en un canvas auxiliar
   const cropCanvas = document.createElement('canvas');
-  cropCanvas.width = cropW;
-  cropCanvas.height = cropH;
-  cropCanvas.getContext('2d').drawImage(resCanvas, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+  // Seguridad: si las dimensiones son 0 (panel oculto), usar canvas completo
+  const safeCropW = cropW > 0 ? cropW : resCanvas.width;
+  const safeCropH = cropH > 0 ? cropH : resCanvas.height;
+  const safeCropX = safeCropW === resCanvas.width ? 0 : cropX;
+  const safeCropY = safeCropH === resCanvas.height ? 0 : cropY;
+  cropCanvas.width = safeCropW;
+  cropCanvas.height = safeCropH;
+  cropCanvas.getContext('2d').drawImage(resCanvas, safeCropX, safeCropY, safeCropW, safeCropH, 0, 0, safeCropW, safeCropH);
 
   // Mostrar el recorte en el canvas de resultado (en vez de la foto completa)
-  resCanvas.width = cropW;
-  resCanvas.height = cropH;
+  resCanvas.width = safeCropW;
+  resCanvas.height = safeCropH;
   resCanvas.getContext('2d').drawImage(cropCanvas, 0, 0);
 
   const p = tryonProduct;
