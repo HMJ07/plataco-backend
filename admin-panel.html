@@ -658,15 +658,17 @@ function showApp() {
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  const titles = { dashboard:'Dashboard', orders:'Pedidos', products:'Productos', reviews:'Reseñas' };
+  const titles = { dashboard:'Dashboard', orders:'Pedidos', products:'Productos', reviews:'Reseñas', coupons:'Cupones' };
   document.getElementById(name + 'Page').classList.add('active');
   document.getElementById('pageTitle').textContent = titles[name] || name;
   document.querySelectorAll('.nav-item').forEach(n => {
-    if (n.textContent.toLowerCase().trim().includes(name)) n.classList.add('active');
+    const txt = n.textContent.toLowerCase().trim();
+    if (name === 'coupons' ? txt.includes('cupones') : txt.includes(name)) n.classList.add('active');
   });
   if (name === 'orders') loadOrders();
   if (name === 'products') loadProducts();
   if (name === 'reviews') { loadReviews(); initEditStarPicker(); }
+  if (name === 'coupons') loadCoupons();
 }
 
 function toast(msg, type='') {
