@@ -1413,6 +1413,129 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
   </button>
 </div>
 
+<!-- ══════════════════════════════════════
+   GUÍA DE CUIDADOS — POPUP + SECCIÓN
+══════════════════════════════════════ -->
+
+<!-- POPUP MODAL DE GUÍA DE CUIDADOS -->
+<div id="careGuideOverlay" style="
+  display:none;position:fixed;inset:0;z-index:3000;
+  background:rgba(0,0,0,0.88);
+  align-items:center;justify-content:center;
+  padding:1rem;overflow-y:auto;
+" onclick="if(event.target===this)closeCareGuide()">
+  <div style="
+    background:#0d0d0d;border:1px solid #1e1e1e;
+    width:100%;max-width:700px;position:relative;
+    padding:0;overflow:hidden;
+    animation:gfFadeUp 0.4s ease both;
+    max-height:90vh;overflow-y:auto;
+  ">
+    <!-- Cabecera del popup -->
+    <div style="
+      background:linear-gradient(135deg,#111 0%,#1a1a1a 100%);
+      padding:2.5rem 2.5rem 2rem;
+      border-bottom:1px solid #1e1e1e;
+      position:sticky;top:0;z-index:2;
+    ">
+      <button onclick="closeCareGuide()" style="
+        position:absolute;top:1.2rem;right:1.4rem;
+        background:none;border:none;color:#444;font-size:1.2rem;
+        cursor:pointer;transition:color 0.2s;line-height:1;
+      " onmouseover="this.style.color='white'" onmouseout="this.style.color='#444'">✕</button>
+      <p style="font-size:0.62rem;letter-spacing:0.45em;text-transform:uppercase;color:var(--gold);margin-bottom:0.6rem;">Plataco · Plata 925</p>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:300;color:white;line-height:1.15;margin-bottom:0.5rem;">
+        El arte de <em style="font-style:italic;color:#C8C8C8;">cuidar tu plata</em>
+      </h3>
+      <p style="color:#555;font-size:0.78rem;letter-spacing:0.06em;line-height:1.8;">
+        Una guía completa para que tus joyas brillen durante generaciones.
+      </p>
+    </div>
+
+    <!-- Contenido rápido dentro del popup -->
+    <div style="padding:2rem 2.5rem;">
+
+      <!-- 3 pilares rápidos -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem;">
+        <div style="background:#111;padding:1.4rem 1rem;border-left:2px solid var(--gold);">
+          <div style="font-size:1.4rem;margin-bottom:0.5rem;">🧴</div>
+          <p style="font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:white;margin-bottom:0.4rem;">Uso diario</p>
+          <p style="font-size:0.7rem;color:#555;line-height:1.7;">Retira las joyas antes de ducharte, hacer deporte o aplicar cremas.</p>
+        </div>
+        <div style="background:#111;padding:1.4rem 1rem;border-left:2px solid var(--gold);">
+          <div style="font-size:1.4rem;margin-bottom:0.5rem;">🪥</div>
+          <p style="font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:white;margin-bottom:0.4rem;">Limpieza</p>
+          <p style="font-size:0.7rem;color:#555;line-height:1.7;">Paño de microfibra semanal. Agua tibia y jabón neutro al mes.</p>
+        </div>
+        <div style="background:#111;padding:1.4rem 1rem;border-left:2px solid var(--gold);">
+          <div style="font-size:1.4rem;margin-bottom:0.5rem;">🗂️</div>
+          <p style="font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:white;margin-bottom:0.4rem;">Almacenamiento</p>
+          <p style="font-size:0.7rem;color:#555;line-height:1.7;">Cada pieza en su bolsita. Lejos del baño. Con sílice gel.</p>
+        </div>
+      </div>
+
+      <!-- Tip destacado -->
+      <div style="border:1px solid #1e1e1e;padding:1.4rem 1.6rem;margin-bottom:2rem;display:flex;gap:1rem;align-items:flex-start;">
+        <span style="color:var(--gold);font-size:1.1rem;flex-shrink:0;margin-top:0.1rem;">✦</span>
+        <div>
+          <p style="font-size:0.68rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:0.4rem;">Truco rápido</p>
+          <p style="font-size:0.82rem;color:#888;line-height:1.85;font-style:italic;">
+            Si tu joya se ha oscurecido, coloca papel de aluminio en un bol, añade agua caliente y sal gruesa, y sumerge la pieza durante 5 minutos. El proceso electroquímico disuelve la oxidación sin frotar.
+          </p>
+        </div>
+      </div>
+
+      <!-- CTA a la página completa -->
+      <div style="text-align:center;padding-top:0.5rem;">
+        <p style="font-size:0.7rem;color:#444;letter-spacing:0.1em;margin-bottom:1.2rem;">
+          Quiz personalizado · 24 consejos por tipo de joya · Mitos vs. Realidad
+        </p>
+        <a href="plataco-guia-cuidados.html" target="_blank" style="
+          display:inline-block;
+          background:var(--gold);color:var(--dark);
+          font-family:'Jost',sans-serif;font-size:0.7rem;
+          font-weight:400;letter-spacing:0.35em;text-transform:uppercase;
+          padding:0.9rem 2.4rem;text-decoration:none;
+          transition:opacity 0.2s;
+        " onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+          Ver la guía completa &rarr;
+        </a>
+        <p style="margin-top:1rem;font-size:0.65rem;color:#333;letter-spacing:0.1em;">
+          O desplázate hacia abajo para ver el resumen en la página
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP GUIA DE CUIDADOS -->
+<div id="careGuideOverlay" onclick="if(event.target===this)closeCareGuide()" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.88);align-items:center;justify-content:center;padding:1rem;overflow-y:auto;">
+  <div style="background:#0d0d0d;border:1px solid #1e1e1e;width:100%;max-width:680px;position:relative;overflow:hidden;animation:gfFadeUp 0.4s ease both;max-height:90vh;overflow-y:auto;">
+    <div style="background:linear-gradient(135deg,#111 0%,#1a1a1a 100%);padding:2.5rem 2.5rem 1.8rem;border-bottom:1px solid #1e1e1e;position:sticky;top:0;z-index:2;">
+      <button onclick="closeCareGuide()" style="position:absolute;top:1.1rem;right:1.3rem;background:none;border:none;color:#444;font-size:1.2rem;cursor:pointer;line-height:1;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#444'">&#10005;</button>
+      <p style="font-size:0.62rem;letter-spacing:0.45em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem;">Plataco &middot; Plata 925</p>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.85rem;font-weight:300;color:white;line-height:1.15;margin-bottom:0.4rem;">El arte de <em style="font-style:italic;color:#C8C8C8;">cuidar tu plata</em></h3>
+      <p style="color:#555;font-size:0.76rem;letter-spacing:0.05em;line-height:1.8;">Una guia completa para que tus joyas brillen durante generaciones.</p>
+    </div>
+    <div style="padding:2rem 2.5rem;">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem;">
+        <div style="background:#111;padding:1.3rem 1rem;border-left:2px solid var(--gold);"><div style="font-size:1.3rem;margin-bottom:0.5rem;">&#128703;</div><p style="font-family:'Cormorant Garamond',serif;font-size:0.92rem;color:white;margin-bottom:0.35rem;">Uso diario</p><p style="font-size:0.68rem;color:#555;line-height:1.7;">Retira las joyas antes de ducharte, deporte o aplicar cremas.</p></div>
+        <div style="background:#111;padding:1.3rem 1rem;border-left:2px solid var(--gold);"><div style="font-size:1.3rem;margin-bottom:0.5rem;">&#129695;</div><p style="font-family:'Cormorant Garamond',serif;font-size:0.92rem;color:white;margin-bottom:0.35rem;">Limpieza</p><p style="font-size:0.68rem;color:#555;line-height:1.7;">Pano de microfibra semanal. Agua tibia y jabon neutro al mes.</p></div>
+        <div style="background:#111;padding:1.3rem 1rem;border-left:2px solid var(--gold);"><div style="font-size:1.3rem;margin-bottom:0.5rem;">&#128450;</div><p style="font-family:'Cormorant Garamond',serif;font-size:0.92rem;color:white;margin-bottom:0.35rem;">Almacenamiento</p><p style="font-size:0.68rem;color:#555;line-height:1.7;">Cada pieza en su bolsita. Lejos del bano. Con silice gel.</p></div>
+      </div>
+      <div style="border:1px solid #1e1e1e;padding:1.3rem 1.5rem;margin-bottom:2rem;display:flex;gap:1rem;align-items:flex-start;">
+        <span style="color:var(--gold);font-size:1rem;flex-shrink:0;margin-top:0.15rem;">&#10022;</span>
+        <div><p style="font-size:0.65rem;letter-spacing:0.28em;text-transform:uppercase;color:var(--gold);margin-bottom:0.35rem;">Truco rapido</p><p style="font-size:0.8rem;color:#888;line-height:1.85;font-style:italic;">Papel de aluminio + agua caliente + sal gruesa en un bol. Sumerge la pieza 5 min. La reaccion electroquimica elimina la patina sin frotar.</p></div>
+      </div>
+      <div style="text-align:center;padding-top:0.3rem;">
+        <p style="font-size:0.68rem;color:#333;letter-spacing:0.1em;margin-bottom:1.1rem;">Quiz personalizado &middot; 24 consejos por tipo de joya &middot; Mitos vs. Realidad</p>
+        <a href="plataco-guia-cuidados.html" target="_blank" style="display:inline-block;background:var(--gold);color:var(--dark);font-family:'Jost',sans-serif;font-size:0.68rem;font-weight:400;letter-spacing:0.35em;text-transform:uppercase;padding:0.9rem 2.3rem;text-decoration:none;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">Ver la guia completa &rarr;</a>
+        <p style="margin-top:0.9rem;font-size:0.62rem;color:#2a2a2a;letter-spacing:0.1em;">O desplazate hacia abajo &mdash; hay un apartado en la pagina</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- TRUST BAR -->
 <div class="trust-bar">
   <div class="trust-item">
@@ -1430,6 +1553,10 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
   <div class="trust-item">
     <div class="trust-num">30</div>
     <div class="trust-label">Días devolución</div>
+  </div>
+  <div class="trust-item" style="cursor:pointer;border-left:1px solid #e0d9ce;" onclick="openCareGuide()">
+    <div class="trust-num" style="font-size:0.9rem;letter-spacing:0.1em;">✦</div>
+    <div class="trust-label" style="color:var(--gold);">Guia de cuidados</div>
   </div>
 </div>
 
@@ -1611,6 +1738,51 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
 
   <div class="product-grid" id="productGrid"></div>
 </main>
+
+<!-- GUÍA DE CUIDADOS — SECCIÓN EN PÁGINA -->
+<section id="careguide-section" style="
+  background:#0d0d0d;
+  padding:6rem 2rem;
+  position:relative;
+  overflow:hidden;
+">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 55% 45% at 15% 50%, rgba(201,168,76,0.06) 0%, transparent 65%),radial-gradient(ellipse 40% 55% at 85% 30%, rgba(200,200,200,0.03) 0%, transparent 60%);pointer-events:none;"></div>
+  <div style="max-width:1060px;margin:0 auto;position:relative;z-index:1;">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start;margin-bottom:4rem;">
+      <div>
+        <p style="font-size:0.65rem;letter-spacing:0.45em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;display:flex;align-items:center;gap:0.8rem;"><span style="display:inline-block;height:1px;width:30px;background:var(--gold);"></span>Guia de cuidados</p>
+        <h2 style="font-family:'Cormorant Garamond',serif;font-size:2.6rem;font-weight:300;color:white;line-height:1.1;margin-bottom:1.2rem;">Tu joya,<br/><em style="font-style:italic;color:#C8C8C8;">para siempre</em></h2>
+        <p style="font-size:0.78rem;font-weight:300;line-height:2;color:#555;max-width:38ch;">La plata 925 es una de las materias mas nobles y duraderas, pero tambien reactiva. Con unos habitos sencillos, tus piezas brillaran durante generaciones.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#1a1a1a;">
+        <div style="background:#0d0d0d;padding:1.8rem 1.5rem;"><p style="font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:300;color:var(--gold);">92.5%</p><p style="font-size:0.62rem;letter-spacing:0.22em;text-transform:uppercase;color:#444;margin-top:0.3rem;">Pureza de la plata de ley</p></div>
+        <div style="background:#0d0d0d;padding:1.8rem 1.5rem;"><p style="font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:300;color:var(--gold);">&#8734;</p><p style="font-size:0.62rem;letter-spacing:0.22em;text-transform:uppercase;color:#444;margin-top:0.3rem;">Vida util con buen cuidado</p></div>
+        <div style="background:#0d0d0d;padding:1.8rem 1.5rem;"><p style="font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:300;color:var(--gold);">2'</p><p style="font-size:0.62rem;letter-spacing:0.22em;text-transform:uppercase;color:#444;margin-top:0.3rem;">Pulido rapido semanal</p></div>
+        <div style="background:#0d0d0d;padding:1.8rem 1.5rem;"><p style="font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:300;color:var(--gold);">5'</p><p style="font-size:0.62rem;letter-spacing:0.22em;text-transform:uppercase;color:#444;margin-top:0.3rem;">Para eliminar oxidacion severa</p></div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1px;background:#1a1a1a;margin-bottom:3rem;">
+      <div style="background:#0d0d0d;padding:2rem 1.8rem;transition:background 0.25s;" onmouseover="this.style.background='#111'" onmouseout="this.style.background='#0d0d0d'"><div style="font-size:1.3rem;margin-bottom:1rem;">&#128703;</div><p style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:white;margin-bottom:0.5rem;">Evita el agua</p><p style="font-size:0.72rem;color:#555;line-height:1.8;">Jabones, geles y piscinas aceleran la oxidacion. Retirate las joyas antes de ducharte o nadar.</p><span style="display:inline-block;margin-top:0.8rem;font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;padding:0.25rem 0.6rem;background:#1a0a0a;color:#8B3A3A;">Mejor evitar</span></div>
+      <div style="background:#0d0d0d;padding:2rem 1.8rem;transition:background 0.25s;" onmouseover="this.style.background='#111'" onmouseout="this.style.background='#0d0d0d'"><div style="font-size:1.3rem;margin-bottom:1rem;">&#129514;</div><p style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:white;margin-bottom:0.5rem;">Cremas y perfumes</p><p style="font-size:0.72rem;color:#555;line-height:1.8;">Aplica siempre antes de ponerte la joya. Los cosmeticos acumulan residuos en los engastes.</p><span style="display:inline-block;margin-top:0.8rem;font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;padding:0.25rem 0.6rem;background:#1a0a0a;color:#8B3A3A;">Joya al final</span></div>
+      <div style="background:#0d0d0d;padding:2rem 1.8rem;transition:background 0.25s;" onmouseover="this.style.background='#111'" onmouseout="this.style.background='#0d0d0d'"><div style="font-size:1.3rem;margin-bottom:1rem;">&#129695;</div><p style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:white;margin-bottom:0.5rem;">Limpieza semanal</p><p style="font-size:0.72rem;color:#555;line-height:1.8;">Un pano de microfibra seco, 2 minutos suaves, mantiene el brillo sin esfuerzo.</p><span style="display:inline-block;margin-top:0.8rem;font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;padding:0.25rem 0.6rem;background:#0a1a0a;color:#2D6A35;">Recomendado</span></div>
+      <div style="background:#0d0d0d;padding:2rem 1.8rem;transition:background 0.25s;" onmouseover="this.style.background='#111'" onmouseout="this.style.background='#0d0d0d'"><div style="font-size:1.3rem;margin-bottom:1rem;">&#128450;</div><p style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:white;margin-bottom:0.5rem;">Bolsita individual</p><p style="font-size:0.72rem;color:#555;line-height:1.8;">Cada joya en su propia bolsa de franela. Evita roces y frena la oxidacion.</p><span style="display:inline-block;margin-top:0.8rem;font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;padding:0.25rem 0.6rem;background:#0a1a0a;color:#2D6A35;">Esencial</span></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:center;border-top:1px solid #1a1a1a;padding-top:3rem;">
+      <div style="border-left:2px solid var(--gold);padding:1rem 1.5rem;">
+        <p style="font-size:0.62rem;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem;">&#10022; Truco para oxidacion severa</p>
+        <p style="font-size:0.82rem;color:#666;line-height:1.9;font-style:italic;">Papel de aluminio + agua caliente + sal gruesa en un bol. Sumerge la pieza 5 minutos. La reaccion electroquimica elimina la patina sin raspar ni desgastar la plata.</p>
+      </div>
+      <div style="text-align:center;flex-shrink:0;">
+        <p style="font-size:0.62rem;color:#333;letter-spacing:0.1em;margin-bottom:1rem;">Guia completa con quiz<br/>y 24 consejos por tipo de joya</p>
+        <a href="plataco-guia-cuidados.html" target="_blank" style="display:inline-block;border:1px solid #333;color:#888;font-family:'Jost',sans-serif;font-size:0.65rem;font-weight:300;letter-spacing:0.35em;text-transform:uppercase;padding:0.85rem 2rem;text-decoration:none;transition:all 0.25s;white-space:nowrap;" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='#333';this.style.color='#888'">Ver guia completa &rarr;</a>
+      </div>
+    </div>
+
+  </div>
+</section>
 
 <!-- BANDA DESTACADA -->
 <div class="featured-band">
@@ -3248,6 +3420,22 @@ function gfRestart(){
 // ── Fin Gift Finder ─────────────────────────────────────────
 
 // ── Fin guía de tallas ──────────────────────────────────────
+// ── Guia de cuidados popup ──────────────────────────────────
+function openCareGuide() {
+  var el = document.getElementById('careGuideOverlay');
+  el.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeCareGuide() {
+  var el = document.getElementById('careGuideOverlay');
+  el.style.display = 'none';
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeCareGuide();
+});
+// ── Fin guia de cuidados popup ──────────────────────────────
+
 </script>
 
 <!-- PROBADOR VIRTUAL IA -->
