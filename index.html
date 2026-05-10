@@ -2935,32 +2935,16 @@ async function tryonAnalyzeWithAI(){
   resCanvas.height = cropH;
   resCanvas.getContext('2d').drawImage(cropCanvas, 0, 0);
 
-  const compositeDataURL = cropCanvas.toDataURL('image/jpeg', 0.85);
-  const base64 = compositeDataURL.split(',')[1];
   const p = tryonProduct;
 
-  // Llamada directa a Anthropic (igual que Gift Finder y guía de tallas)
+  // ── Análisis local de imagen (sin API de pago) ──────────────
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 300,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: base64 } },
-            { type: 'text', text: `Eres un estilista de joyería de lujo. Analiza cómo luce "${p ? p.name : 'esta joya'}" (${p ? p.material : ''}) en la imagen. Escribe exactamente 3 frases en español: cómo luce en esa zona del cuerpo, qué favorece del estilo, y una ocasión recomendada. Tono cálido y sofisticado.` }
-          ]
-        }]
-      })
-    });
-    const data = await res.json();
-    const opinion = data.content?.map(c => c.text || '').join('').trim() || 'Esta joya realza tu estilo de forma elegante y natural.';
-    document.getElementById('tryonAiOpinion').innerHTML = `<strong style="color:var(--gold);font-style:normal;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;">✦ Opinión de tu estilista</strong><br><br>${opinion}`;
+    const opinion = tryonGenerateLocalOpinion(cropCanvas, p);
+    document.getElementById('tryonAiOpinion').innerHTML =
+      `<strong style="color:var(--gold);font-style:normal;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;">✦ Opinión de tu estilista</strong><br><br>${opinion}`;
   } catch(e) {
-    document.getElementById('tryonAiOpinion').innerHTML = `<strong style="color:var(--gold);font-style:normal;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;">✦ Vista previa lista</strong><br><br>La joya luce perfecta. Pulsa "Añadir al carrito" para hacerla tuya.`;
+    document.getElementById('tryonAiOpinion').innerHTML =
+      `<strong style="color:var(--gold);font-style:normal;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;">✦ Vista previa lista</strong><br><br>La joya luce perfecta. Pulsa "Añadir al carrito" para hacerla tuya.`;
   }
 
   document.getElementById('tryonAiLoading').style.display='none';
@@ -2979,6 +2963,121 @@ function tryonDownload(){
   link.download = `plataco-${tryonProduct?.name||'joya'}.jpg`;
   link.href = canvas.toDataURL('image/jpeg', 0.9);
   link.click();
+}
+
+// ── Motor de análisis local (sin API de pago) ─────────────────────────────
+// Analiza el canvas de la zona de la joya usando pixels reales:
+// tono de piel, luminosidad, contraste → construye la opinión personalizada
+function tryonGenerateLocalOpinion(canvas, product) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+
+  // Samplear píxeles del canvas (evitar bordes negros)
+  const margin = Math.floor(Math.min(w, h) * 0.1);
+  const imageData = ctx.getImageData(margin, margin, w - margin * 2, h - margin * 2);
+  const d = imageData.data;
+
+  let rSum = 0, gSum = 0, bSum = 0, count = 0;
+  // Samplear 1 de cada 8 píxeles para velocidad
+  for (let i = 0; i < d.length; i += 32) {
+    const r = d[i], g = d[i+1], b = d[i+2], a = d[i+3];
+    if (a < 128) continue; // ignorar transparentes
+    rSum += r; gSum += g; bSum += b; count++;
+  }
+  if (count === 0) return _tryonFallbackOpinion(product);
+
+  const rAvg = rSum / count;
+  const gAvg = gSum / count;
+  const bAvg = bSum / count;
+
+  // Luminosidad percibida (0–255)
+  const lum = 0.299 * rAvg + 0.587 * gAvg + 0.114 * bAvg;
+
+  // Clasificar tono de piel (ITA: Individual Typology Angle simplificado)
+  // Se basa en la diferencia R-B y luminosidad
+  const rb = rAvg - bAvg;
+  let skinTone;
+  if (lum > 200) skinTone = 'muy clara';
+  else if (lum > 165 && rb > 30) skinTone = 'clara';
+  else if (lum > 140 && rb > 20) skinTone = 'media clara';
+  else if (lum > 110) skinTone = 'media';
+  else if (lum > 80)  skinTone = 'media oscura';
+  else                skinTone = 'oscura';
+
+  // Warmth: ¿tono cálido (amarillo-rojizo) o frío (rosado-azulado)?
+  const warmth = (rAvg - bAvg > 15) ? 'cálido' : (bAvg - rAvg > 10) ? 'frío' : 'neutro';
+
+  // Saturación media (detecta si hay color vivo o es neutro/blanco)
+  const maxC = Math.max(rAvg, gAvg, bAvg);
+  const minC = Math.min(rAvg, gAvg, bAvg);
+  const sat = maxC > 0 ? (maxC - minC) / maxC : 0;
+
+  // Zona estimada por posición vertical del bounding box de la joya
+  const jewelImg = document.getElementById('tryonJewelImg');
+  const srcCanvas = document.getElementById('tryonCanvas');
+  const canvasRect = srcCanvas.getBoundingClientRect();
+  const wrapRect = document.getElementById('tryonCanvasWrap').getBoundingClientRect();
+  const relY = (tryonJewelState.y - (canvasRect.top - wrapRect.top)) / canvasRect.height;
+
+  let zona;
+  if (relY < 0.22)       zona = 'cabello';
+  else if (relY < 0.35)  zona = 'oreja';
+  else if (relY < 0.55)  zona = 'cuello';
+  else if (relY < 0.72)  zona = 'escote';
+  else if (relY < 0.85)  zona = 'muñeca';
+  else                   zona = 'mano';
+
+  const nombre = product?.name  || 'esta joya';
+  const mat    = (product?.material || '').toLowerCase();
+
+  // ── Banco de frases por zona ──────────────────────────────────
+  const fraseZona = {
+    cabello:  [`${nombre} enmarca tu rostro con una elegancia que pocas piezas logran`, `la posición en el cabello convierte ${nombre} en el foco natural de cualquier mirada`],
+    oreja:    [`${nombre} en la oreja define tu perfil con una delicadeza extraordinaria`, `colgando cerca del rostro, ${nombre} realza cada rasgo con precisión y sutileza`],
+    cuello:   [`${nombre} descansa en tu cuello con una gracia que alarga y estiliza la silueta`, `en el cuello, ${nombre} crea ese punto de luz que hace que la mirada se eleve naturalmente`],
+    escote:   [`${nombre} en el escote añade una dimensión de sofisticación difícil de igualar`, `posicionada así, ${nombre} acompaña la línea del cuerpo con un equilibrio perfecto`],
+    muñeca:   [`${nombre} en la muñeca se mueve contigo, recordándote a cada gesto que llevas algo especial`, `en la muñeca, ${nombre} captura la luz con cada movimiento de forma irresistible`],
+    mano:     [`${nombre} en la mano habla por sí sola antes de que pronuncies una sola palabra`, `en el dedo, ${nombre} es un guiño de elegancia que no pasa desapercibido`],
+  };
+
+  // ── Frases de tono de piel ─────────────────────────────────────
+  const fraseTono = {
+    'muy clara':   { cálido: `su brillo contrasta con tu piel de porcelana creando un efecto digno de pasarela`, frío: `los destellos fríos de ${mat || 'la joya'} armonizan con tu luminosidad natural`, neutro: `el contraste entre el metal y tu piel clara resulta de una elegancia atemporal` },
+    'clara':       { cálido: `los tonos dorados de ${mat || 'la pieza'} resuenan con la calidez de tu piel en perfecta sinfonía`, frío: `su brillo plateado crea un contraste refinado que ilumina tu tono claro`, neutro: `${nombre} realza la luminosidad de tu piel con un equilibrio impecable` },
+    'media clara': { cálido: `${mat || 'el metal'} cálido complementa tu tono de piel con una calidez que parece calculada al milímetro`, frío: `el contraste entre el metal y tu tono medio-claro aporta una sofisticación moderna`, neutro: `en tu piel, ${nombre} luce con esa naturalidad que solo tienen las combinaciones perfectas` },
+    'media':       { cálido: `el tono dorado de ${mat || 'la joya'} despierta los cálidos destellos naturales de tu piel`, frío: `el brillo frío de ${mat || 'la pieza'} juega con la profundidad de tu tono de forma magistral`, neutro: `${nombre} en tu piel media crea un equilibrio visual que resulta magnético` },
+    'media oscura':{ cálido: `${mat || 'el metal'} dorado sobre tu piel crea ese contraste luminoso que es pura joyería cinematográfica`, frío: `los reflejos plateados de ${nombre} crean un contrapunto brillante sobre tu piel que cautiva`, neutro: `la combinación de ${nombre} con tu tono de piel genera una riqueza visual excepcional` },
+    'oscura':      { cálido: `el brillo de ${nombre} sobre tu piel oscura crea un contraste de una belleza absolutamente soberbia`, frío: `los destellos de ${mat || 'la pieza'} contra tu piel generan un contraste de película`, neutro: `${nombre} en tu piel irradia con una intensidad que pocas personas tienen el privilegio de lucir` },
+  };
+
+  // ── Frases de ocasión por material/producto ───────────────────
+  const keywords = (nombre + ' ' + mat).toLowerCase();
+  let ocas;
+  if (/anillo|anell|ring/i.test(keywords))           ocas = [`es perfecta para una cena íntima o para ese evento en el que quieres dejar huella`, `combínala con un vestido midi o un traje sastre para una noche que se recuerde`];
+  else if (/pendiente|aretes|earring/i.test(keywords)) ocas = [`llévala a una celebración especial o úsala para elevar incluso un look de fin de semana`, `ideal para una velada elegante o para añadir ese toque final a tu traje favorito`];
+  else if (/collar|necklace|gargantilla/i.test(keywords)) ocas = [`es el complemento definitivo para un escote en V o una camisa de seda en una noche de gala`, `combínala con un mono negro o un vestido de cóctel para un resultado impecable`];
+  else if (/pulsera|brazalete|bracelet/i.test(keywords)) ocas = [`llévala a una boda, un cóctel o simplemente para convertir el martes en algo especial`, `apílala con otras piezas finas para un look de superposición muy parisino`];
+  else if (/oro|gold/i.test(keywords))    ocas = [`perfecta para una celebración o para ese look diario que merece un toque de lujo discreto`, `combínala con tonos neutros o crema para un resultado armónico y sofisticado`];
+  else if (/plata|silver|platin/i.test(keywords)) ocas = [`ideal para looks monocromáticos en gris, blanco o azul noche que buscan un remate brillante`, `perfecta para una reunión importante o una primera cita donde quieras lucir impecable`];
+  else                                    ocas = [`es una pieza versátil que eleva tanto un look casual como el más sofisticado`, `llévala a cualquier ocasión en la que quieras sentirte extraordinaria`];
+
+  // ── Construir las 3 frases ─────────────────────────────────────
+  const f1arr = fraseZona[zona] || fraseZona['cuello'];
+  const f1 = f1arr[Math.floor(Math.random() * f1arr.length)];
+
+  const tonoObj = fraseTono[skinTone] || fraseTono['media'];
+  const f2 = tonoObj[warmth] || tonoObj['neutro'];
+
+  const f3 = ocas[Math.floor(Math.random() * ocas.length)];
+
+  return `${_cap(f1)}. ${_cap(f2)}. ${_cap(f3)}.`;
+}
+
+function _cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+
+function _tryonFallbackOpinion(product) {
+  const n = product?.name || 'Esta joya';
+  return `${n} luce con una elegancia natural que realza tu estilo de forma única. El brillo de la pieza crea un punto de luz que favorece tu figura y atrae la mirada en el lugar exacto. Perfecta para cualquier ocasión en la que quieras lucir especial, desde una cena íntima hasta una celebración.`;
 }
 // ── Fin Probador Virtual ─────────────────────────────────────
 
