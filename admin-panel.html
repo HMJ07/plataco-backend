@@ -101,8 +101,8 @@
 
   /* ── Content ── */
   .content { padding:32px; }
-  .page { display:none; }
-  .page.active { display:block; }
+  .page { display:none; position:relative; }
+  .page.active { display:block; min-height:200px; }
 
   /* ── Stats cards ── */
   .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:28px; }
@@ -451,8 +451,8 @@
     </div>
 
     <!-- CUPONES -->
-    <div id="couponsPage" class="page">
-      <div class="card" style="margin-bottom:1.5rem">
+    <div id="couponsPage" class="page" style="min-height:300px">
+      <div class="card" style="margin-bottom:1.5rem;overflow:visible">
         <div class="card-header">
           <h3>Cupones de descuento</h3>
           <button class="btn btn-sm" style="background:var(--accent-light);color:white;border:none" onclick="openCouponModal()">+ Nuevo cupón</button>
