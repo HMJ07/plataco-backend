@@ -294,6 +294,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
       Reseñas
     </div>
+    <div class="nav-item" onclick="showPage('coupons')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7h.01M17 17h.01M6.5 17.5l11-11M3 10a7 7 0 0014 0v-3a2 2 0 00-2-2H7a2 2 0 00-2 2v3z"/><path d="M3 14a7 7 0 0014 0v3a2 2 0 01-2 2H7a2 2 0 01-2-2v-3z"/></svg>
+      Cupones
+    </div>
   </div>
   <div class="sidebar-user">
     <strong id="sidebarUserName">—</strong>
@@ -445,10 +449,88 @@
         </table>
       </div>
     </div>
-  </div>
+
+    <!-- CUPONES -->
+    <div id="couponsPage" class="page">
+      <div class="card" style="margin-bottom:1.5rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.2rem">
+          <h3 style="font-size:1rem;font-weight:600">Cupones de descuento</h3>
+          <button class="btn btn-sm" style="background:var(--accent-light);color:white;border:none" onclick="openCouponModal()">+ Nuevo cupón</button>
+        </div>
+        <table class="table">
+          <thead><tr>
+            <th>Código</th><th>Descripción</th><th>Tipo</th><th>Valor</th>
+            <th>Mín. (€)</th><th>Usos / Máx.</th><th>Caduca</th><th>Activo</th><th>Acciones</th>
+          </tr></thead>
+          <tbody id="couponsBody"><tr><td colspan="9" style="text-align:center;color:#999;padding:24px">Cargando…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
 
   </div><!-- /content -->
 </div><!-- /main -->
+
+<!-- MODAL CREAR/EDITAR CUPÓN -->
+<div class="modal-overlay" id="couponModal" onclick="closeCouponModal(event)" style="display:none">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:520px;width:95%">
+    <div class="modal-header">
+      <h3 id="couponModalTitle">Nuevo cupón</h3>
+      <button class="modal-close" onclick="closeCouponModal()">×</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:1rem;padding:1.5rem">
+      <input type="hidden" id="couponId">
+      <div class="form-row">
+        <label class="form-label">Código *</label>
+        <input class="form-input" id="couponCode" type="text" placeholder="VERANO10" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Descripción</label>
+        <input class="form-input" id="couponDesc" type="text" placeholder="10% de descuento en verano">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="form-row">
+          <label class="form-label">Tipo *</label>
+          <select class="form-input" id="couponType">
+            <option value="percent">Porcentaje (%)</option>
+            <option value="fixed">Fijo (€)</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Valor *</label>
+          <input class="form-input" id="couponValue" type="number" min="0.01" step="0.01" placeholder="10">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="form-row">
+          <label class="form-label">Pedido mínimo (€)</label>
+          <input class="form-input" id="couponMinOrder" type="number" min="0" step="0.01" placeholder="0">
+        </div>
+        <div class="form-row">
+          <label class="form-label">Máx. usos totales</label>
+          <input class="form-input" id="couponMaxUses" type="number" min="1" placeholder="Ilimitado">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="form-row">
+          <label class="form-label">Máx. usos por usuario</label>
+          <input class="form-input" id="couponMaxPerUser" type="number" min="1" placeholder="1" value="1">
+        </div>
+        <div class="form-row">
+          <label class="form-label">Fecha de caducidad</label>
+          <input class="form-input" id="couponValidUntil" type="datetime-local">
+        </div>
+      </div>
+      <div class="form-row" style="flex-direction:row;align-items:center;gap:0.5rem">
+        <input type="checkbox" id="couponActive" checked style="width:16px;height:16px;cursor:pointer">
+        <label for="couponActive" style="font-size:0.85rem;cursor:pointer">Cupón activo</label>
+      </div>
+      <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:0.5rem">
+        <button class="btn btn-outline btn-sm" onclick="closeCouponModal()">Cancelar</button>
+        <button class="btn btn-sm" id="saveCouponBtn" style="background:var(--accent-light);color:white;border:none" onclick="saveCoupon()">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="modal-overlay" id="productModal" onclick="closeProductModal(event)">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:640px;width:95%">
@@ -1264,6 +1346,115 @@ async function deleteReview(id) {
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
+
+
+// ── Cupones ───────────────────────────────────────────────
+async function loadCoupons() {
+  const tbody = document.getElementById('couponsBody');
+  tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#999;padding:24px">Cargando…</td></tr>';
+  try {
+    const data = await apiFetch('/api/admin/coupons', 'GET');
+    const coupons = Array.isArray(data) ? data : (data.coupons || []);
+    if (!coupons.length) {
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#999;padding:24px">Sin cupones todavía.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = coupons.map(c => {
+      const typeLabel = c.discount_type === 'percent' ? `${c.discount_value}%` : `${parseFloat(c.discount_value).toFixed(2)}€`;
+      const until = c.valid_until ? new Date(c.valid_until).toLocaleDateString('es-ES') : '—';
+      const maxUses = c.max_uses !== null ? c.max_uses : '∞';
+      const active = c.is_active
+        ? '<span style="color:#16a34a;font-weight:600">Sí</span>'
+        : '<span style="color:#9ca3af">No</span>';
+      return `<tr>
+        <td><strong style="letter-spacing:0.05em">${c.code}</strong></td>
+        <td style="font-size:0.82rem;color:#555">${c.description || '—'}</td>
+        <td>${c.discount_type === 'percent' ? 'Porcentaje' : 'Fijo'}</td>
+        <td><strong>${typeLabel}</strong></td>
+        <td>${parseFloat(c.min_order_eur || 0).toFixed(2)}€</td>
+        <td>${c.uses_count || c.actual_uses || 0} / ${maxUses}</td>
+        <td style="font-size:0.82rem">${until}</td>
+        <td>${active}</td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-outline btn-sm" onclick='openCouponModal(${JSON.stringify(c)})'>Editar</button>
+          <button class="btn btn-sm" style="background:#fee2e2;color:#b91c1c;border:none;margin-left:4px" onclick="deleteCoupon('${c.id}')">Eliminar</button>
+        </td>
+      </tr>`;
+    }).join('');
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:red;padding:24px">Error: ${e.message}</td></tr>`;
+  }
+}
+
+function openCouponModal(coupon) {
+  const isEdit = !!coupon;
+  document.getElementById('couponModalTitle').textContent = isEdit ? 'Editar cupón' : 'Nuevo cupón';
+  document.getElementById('couponId').value         = isEdit ? coupon.id : '';
+  document.getElementById('couponCode').value       = isEdit ? coupon.code : '';
+  document.getElementById('couponCode').disabled    = isEdit;
+  document.getElementById('couponDesc').value       = isEdit ? (coupon.description || '') : '';
+  document.getElementById('couponType').value       = isEdit ? coupon.discount_type : 'percent';
+  document.getElementById('couponValue').value      = isEdit ? coupon.discount_value : '';
+  document.getElementById('couponMinOrder').value   = isEdit ? (coupon.min_order_eur || 0) : '';
+  document.getElementById('couponMaxUses').value    = isEdit ? (coupon.max_uses || '') : '';
+  document.getElementById('couponMaxPerUser').value = isEdit ? (coupon.max_uses_per_user || 1) : 1;
+  document.getElementById('couponActive').checked  = isEdit ? coupon.is_active : true;
+  if (isEdit && coupon.valid_until) {
+    const d = new Date(coupon.valid_until);
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    document.getElementById('couponValidUntil').value = d.toISOString().slice(0,16);
+  } else {
+    document.getElementById('couponValidUntil').value = '';
+  }
+  document.getElementById('couponModal').style.display = 'flex';
+}
+
+function closeCouponModal(e) {
+  if (!e || e.target === document.getElementById('couponModal')) {
+    document.getElementById('couponModal').style.display = 'none';
+  }
+}
+
+async function saveCoupon() {
+  const id   = document.getElementById('couponId').value;
+  const code = document.getElementById('couponCode').value.trim().toUpperCase();
+  const discount_value = parseFloat(document.getElementById('couponValue').value);
+  if (!code || !discount_value) { toast('Código y valor son obligatorios', 'error'); return; }
+  const body = {
+    code,
+    description:       document.getElementById('couponDesc').value.trim() || null,
+    discount_type:     document.getElementById('couponType').value,
+    discount_value,
+    min_order_eur:     parseFloat(document.getElementById('couponMinOrder').value) || 0,
+    max_uses:          parseInt(document.getElementById('couponMaxUses').value) || null,
+    max_uses_per_user: parseInt(document.getElementById('couponMaxPerUser').value) || 1,
+    valid_until:       document.getElementById('couponValidUntil').value || null,
+    is_active:         document.getElementById('couponActive').checked,
+  };
+  const btn = document.getElementById('saveCouponBtn');
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  try {
+    if (id) {
+      await apiFetch(`/api/admin/coupons/${id}`, 'PUT', body);
+      toast('Cupón actualizado ✓', 'success');
+    } else {
+      await apiFetch('/api/admin/coupons', 'POST', body);
+      toast('Cupón creado ✓', 'success');
+    }
+    closeCouponModal();
+    loadCoupons();
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+  finally { btn.disabled = false; btn.textContent = 'Guardar'; }
+}
+
+async function deleteCoupon(id) {
+  if (!confirm('¿Eliminar este cupón? Los pedidos que ya lo usaron no se verán afectados.')) return;
+  try {
+    await apiFetch(`/api/admin/coupons/${id}`, 'DELETE');
+    toast('Cupón eliminado', 'success');
+    loadCoupons();
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
 
 // ── Init ──────────────────────────────────────────────────
 (async () => {

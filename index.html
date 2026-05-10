@@ -3200,37 +3200,18 @@ async function tryonAnalyzeWithAI(){
   const p = tryonProduct;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
+    const apiUrl = window.PLATACO_API_URL || 'http://localhost:4000/api';
+    const res = await fetch(`${apiUrl}/tryon/analyze`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1000,
-        messages:[{
-          role:'user',
-          content:[
-            {
-              type:'image',
-              source:{type:'base64', media_type:'image/jpeg', data: base64}
-            },
-            {
-              type:'text',
-              text:`Eres un estilista de joyería de lujo con mucho gusto. Estás analizando cómo le queda "${p.name}" (${p.material}) a esta persona según la imagen. 
-              
-La joya está superpuesta en la foto. Escribe un comentario personal, entusiasta y elegante de 3-4 frases en español que: 
-1) Describe cómo luce la joya en esa parte del cuerpo 
-2) Qué favorece de su estilo o piel 
-3) Una sugerencia de cómo combinarla o en qué ocasión llevarla
-
-Tono: como un estilista de boutique de lujo que conoce a la clienta. Cálido, sofisticado. Sin ser genérico.`
-            }
-          ]
-        }]
-      })
+        image_base64:  base64,
+        product_name:  p ? p.name : '',
+        material:      p ? p.material : '',
+      }),
     });
     const data = await res.json();
-    const opinion = data.content?.map(c=>c.text||'').join('').trim()
-      || 'Esta joya realza tu estilo de forma elegante y natural.';
+    const opinion = data.opinion || 'Esta joya realza tu estilo de forma elegante y natural.';
     document.getElementById('tryonAiOpinion').innerHTML = `<strong style="color:var(--gold);font-style:normal;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;">✦ Opinión de tu estilista</strong><br><br>${opinion}`;
   } catch(e) {
     document.getElementById('tryonAiOpinion').innerHTML = `<strong style="color:var(--gold);font-style:normal;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;">✦ Vista previa lista</strong><br><br>La joya luce perfecta. Pulsa "Añadir al carrito" para hacerla tuya.`;

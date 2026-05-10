@@ -36,6 +36,23 @@ header{background:var(--dark);color:white;padding:1rem 2rem;display:flex;align-i
 .total-row.shipping .val{color:var(--success)}
 .total-row.grand{border-top:1px solid var(--dark);margin-top:0.5rem;padding-top:0.8rem;font-size:1rem;font-weight:500}
 .total-row.grand .val{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300}
+.total-row.discount .val{color:var(--success)}
+
+/* CUPÓN */
+.coupon-wrap{margin:1.2rem 0 0;border-top:1px solid var(--border);padding-top:1.2rem}
+.coupon-label{font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);margin-bottom:0.5rem}
+.coupon-row{display:flex;gap:0.5rem}
+.coupon-input{flex:1;border:1px solid var(--border);padding:0.6rem 0.8rem;font-family:'Jost',sans-serif;font-size:0.85rem;outline:none;background:white;text-transform:uppercase;letter-spacing:0.05em;transition:border 0.2s}
+.coupon-input:focus{border-color:var(--dark)}
+.coupon-btn{background:var(--dark);color:white;border:none;padding:0.6rem 1.1rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.72rem;letter-spacing:0.18em;text-transform:uppercase;white-space:nowrap;transition:opacity 0.2s}
+.coupon-btn:hover{opacity:0.8}
+.coupon-btn:disabled{opacity:0.5;cursor:not-allowed}
+.coupon-msg{font-size:0.78rem;margin-top:0.45rem;min-height:1rem}
+.coupon-msg.ok{color:var(--success)}
+.coupon-msg.err{color:var(--error)}
+.coupon-applied{display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:var(--success);margin-top:0.6rem}
+.coupon-remove{background:none;border:none;cursor:pointer;color:var(--accent);font-size:0.9rem;line-height:1;padding:0 0.2rem}
+.coupon-remove:hover{color:var(--error)}
 
 /* CURRENCY SELECTOR */
 .currency-bar{display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
@@ -302,9 +319,30 @@ header{background:var(--dark);color:white;padding:1rem 2rem;display:flex;align-i
           <span>Envío</span>
           <span class="val" id="summaryShipping">—</span>
         </div>
+        <div class="total-row discount" id="discountRow" style="display:none">
+          <span>Descuento</span>
+          <span class="val" id="summaryDiscount">—</span>
+        </div>
         <div class="total-row grand">
           <span>Total</span>
           <span class="val" id="summaryTotal">—</span>
+        </div>
+      </div>
+      <!-- CUPÓN -->
+      <div class="coupon-wrap">
+        <p class="coupon-label">Código de descuento</p>
+        <div id="couponEntry">
+          <div class="coupon-row">
+            <input class="coupon-input" id="couponInput" type="text" placeholder="BIENVENIDA10" maxlength="50" oninput="this.value=this.value.toUpperCase()">
+            <button class="coupon-btn" id="couponBtn" onclick="applyCoupon()">Aplicar</button>
+          </div>
+          <p class="coupon-msg" id="couponMsg"></p>
+        </div>
+        <div id="couponApplied" style="display:none">
+          <div class="coupon-applied">
+            <span>✓ Cupón <strong id="couponAppliedCode"></strong> aplicado</span>
+            <button class="coupon-remove" onclick="removeCoupon()" title="Quitar cupón">✕</button>
+          </div>
         </div>
       </div>
     </div>
@@ -325,6 +363,9 @@ let stripeCardElement = null;
 let stripe = null;
 let authToken = localStorage.getItem('plataco_token') || null;
 let authUser  = null;
+
+// ── Estado cupón ──────────────────────────────────────────
+let appliedCoupon = null; // { coupon_id, code, discount_eur }
 
 const CART_DEMO = JSON.parse(localStorage.getItem('plataco_cart') || '[]');
 
@@ -359,7 +400,8 @@ function fmtPrice(eur) {
 function renderSummary() {
   const subtotal = CART_DEMO.reduce((s, i) => s + i.unit_price_eur * i.quantity, 0);
   const shipping = subtotal >= 80 ? 0 : 6.95;
-  const total = subtotal + shipping;
+  const discount = appliedCoupon ? appliedCoupon.discount_eur : 0;
+  const total = Math.max(0, subtotal + shipping - discount);
 
   document.getElementById('summaryItems').innerHTML = CART_DEMO.map(item => `
     <div class="summary-item">
@@ -374,8 +416,56 @@ function renderSummary() {
 
   document.getElementById('summarySubtotal').textContent = fmtPrice(subtotal);
   document.getElementById('summaryShipping').textContent = shipping === 0 ? 'Gratis' : fmtPrice(shipping);
+  const discountRow = document.getElementById('discountRow');
+  if (discount > 0) {
+    document.getElementById('summaryDiscount').textContent = '−' + fmtPrice(discount);
+    discountRow.style.display = 'flex';
+  } else {
+    discountRow.style.display = 'none';
+  }
   document.getElementById('summaryTotal').textContent = fmtPrice(total);
   document.getElementById('submitBtn').querySelector('#btnText').textContent = `Pagar ${fmtPrice(total)}`;
+}
+
+// ── Cupones ───────────────────────────────────────────────
+async function applyCoupon() {
+  const code = document.getElementById('couponInput').value.trim();
+  const msg  = document.getElementById('couponMsg');
+  const btn  = document.getElementById('couponBtn');
+  if (!code) { msg.textContent = 'Introduce un código.'; msg.className = 'coupon-msg err'; return; }
+  btn.disabled = true; btn.textContent = '…';
+  msg.textContent = ''; msg.className = 'coupon-msg';
+  try {
+    const subtotal = CART_DEMO.reduce((s, i) => s + i.unit_price_eur * i.quantity, 0);
+    const headers = { 'Content-Type': 'application/json' };
+    if (authToken) headers['Authorization'] = 'Bearer ' + authToken;
+    const res = await fetch(`${API_URL}/coupons/validate`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ code, cart_total_eur: subtotal }),
+    });
+    const data = await res.json();
+    if (!res.ok) { msg.textContent = data.error || 'Cupón inválido.'; msg.className = 'coupon-msg err'; return; }
+    appliedCoupon = { coupon_id: data.coupon_id, code: data.code, discount_eur: data.discount_eur };
+    document.getElementById('couponAppliedCode').textContent = data.code;
+    document.getElementById('couponEntry').style.display = 'none';
+    document.getElementById('couponApplied').style.display = 'block';
+    renderSummary();
+  } catch(e) {
+    msg.textContent = 'Error de red. Inténtalo de nuevo.'; msg.className = 'coupon-msg err';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Aplicar';
+  }
+}
+
+function removeCoupon() {
+  appliedCoupon = null;
+  document.getElementById('couponInput').value = '';
+  document.getElementById('couponMsg').textContent = '';
+  document.getElementById('couponMsg').className = 'coupon-msg';
+  document.getElementById('couponEntry').style.display = 'block';
+  document.getElementById('couponApplied').style.display = 'none';
+  renderSummary();
 }
 
 function selectCurrency(c, sym, btn) {
@@ -430,6 +520,7 @@ async function handlePayment() {
           quantity: i.quantity,
         })),
         currency,
+        coupon_code: appliedCoupon ? appliedCoupon.code : undefined,
         shipping_address: {
           first_name: formData.firstName,
           last_name:  formData.lastName,
