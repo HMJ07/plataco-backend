@@ -125,7 +125,12 @@ CREATE TABLE orders (
   subtotal_eur        NUMERIC(10,2) NOT NULL,
   shipping_eur        NUMERIC(10,2) DEFAULT 0,
   tax_eur             NUMERIC(10,2) DEFAULT 0,
+  discount_eur        NUMERIC(10,2) DEFAULT 0,
   total_eur           NUMERIC(10,2) NOT NULL,
+
+  -- Cupón aplicado
+  coupon_id           UUID,                    -- FK a coupons (añadida tras CREATE TABLE coupons)
+  coupon_code         VARCHAR(50),
 
   -- Divisa del cliente
   currency            CHAR(3) DEFAULT 'EUR',
@@ -255,3 +260,38 @@ CREATE TRIGGER trg_users_updated_at    BEFORE UPDATE ON users    FOR EACH ROW EX
 CREATE TRIGGER trg_products_updated_at BEFORE UPDATE ON products FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER trg_orders_updated_at   BEFORE UPDATE ON orders   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER trg_payments_updated_at BEFORE UPDATE ON payments FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- ============================================================
+-- CUPONES DE DESCUENTO
+-- ============================================================
+CREATE TABLE coupons (
+  id                UUID         PRIMARY KEY DEFAULT uuid_generate_v4(),
+  code              VARCHAR(50)  UNIQUE NOT NULL,
+  description       VARCHAR(255),
+  discount_type     VARCHAR(20)  NOT NULL CHECK (discount_type IN ('percent','fixed')),
+  discount_value    NUMERIC(10,2) NOT NULL CHECK (discount_value > 0),
+  min_order_eur     NUMERIC(10,2) DEFAULT 0,
+  max_uses          INTEGER,
+  max_uses_per_user INTEGER      DEFAULT 1,
+  uses_count        INTEGER      DEFAULT 0,
+  valid_from        TIMESTAMPTZ  DEFAULT NOW(),
+  valid_until       TIMESTAMPTZ,
+  is_active         BOOLEAN      DEFAULT TRUE,
+  created_at        TIMESTAMPTZ  DEFAULT NOW()
+);
+
+-- FK de orders → coupons (orders se crea antes, por eso se añade aquí)
+ALTER TABLE orders ADD CONSTRAINT fk_orders_coupon FOREIGN KEY (coupon_id) REFERENCES coupons(id);
+
+-- Log de uso de cupones
+CREATE TABLE coupon_uses (
+  id           UUID         PRIMARY KEY DEFAULT uuid_generate_v4(),
+  coupon_id    UUID         REFERENCES coupons(id),
+  order_id     UUID         REFERENCES orders(id),
+  user_id      UUID         REFERENCES users(id) ON DELETE SET NULL,
+  discount_eur NUMERIC(10,2) NOT NULL,
+  used_at      TIMESTAMPTZ  DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_coupon_uses_coupon ON coupon_uses(coupon_id);
+CREATE INDEX IF NOT EXISTS idx_coupon_uses_user   ON coupon_uses(user_id);
