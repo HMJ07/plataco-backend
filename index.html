@@ -773,6 +773,26 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
   .search-bar{order:3;width:100%;margin:0!important;max-width:100%!important;padding:0.5rem 0}
   .search-input{width:100%}
 
+  /* Móvil: lupa en la barra superior, input oculto por defecto */
+  #searchBarWrapper{
+    order:2 !important;
+    flex:0 !important;
+    max-width:none !important;
+    margin:0 !important;
+    padding:0 !important;
+    position:static !important;
+  }
+  #searchBarWrapper.mobile-open{
+    order:3;
+    flex:1 0 100% !important;
+    width:100%;
+    padding:0.4rem 0 !important;
+  }
+  #searchInput{display:none;width:100%}
+  #searchBarWrapper.mobile-open #searchInput{display:block}
+  #searchSuggestions{left:0 !important;right:0 !important;top:calc(100% + 2px) !important}
+  #searchIconToggle{font-size:1.3rem;color:#ccc;padding:4px}
+
   /* Nav */
   nav{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   nav::-webkit-scrollbar{display:none}
@@ -1244,9 +1264,15 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
 <header>
   <div class="header-top">
     <div class="logo">PLATA<span>&amp;</span>CO</div>
-    <div class="search-bar" style="flex:1;max-width:400px;margin:0 3rem">
-      <span class="search-icon">⌕</span>
-      <input class="search-input" type="text" id="searchInput" placeholder="Buscar joyas..." oninput="handleSearch()">
+    <div class="search-bar" style="flex:1;max-width:400px;margin:0 3rem;position:relative" id="searchBarWrapper">
+      <span class="search-icon" id="searchIconToggle" onclick="toggleMobileSearch()" style="cursor:pointer">⌕</span>
+      <input class="search-input" type="text" id="searchInput" placeholder="Buscar joyas..." oninput="handleSearch()" onfocus="showSearchSuggestions()" onblur="hideSearchSuggestionsDelayed()" autocomplete="off">
+      <div id="searchSuggestions" style="display:none;position:absolute;top:100%;left:0;right:0;background:#1a1a1a;border:1px solid #333;border-top:none;border-radius:0 0 8px 8px;z-index:9999;overflow:hidden">
+        <div style="padding:8px 14px 4px;font-size:0.65rem;letter-spacing:0.1em;color:#666;text-transform:uppercase">Búsquedas frecuentes</div>
+        ${['Pulseras','Anillos','Pendientes','Collares','Circonita','Plata 925','Handmade'].map(t =>
+          `<div class="search-suggestion-item" onclick="applySearch('${t}')" style="padding:9px 14px;font-size:0.82rem;color:#ccc;cursor:pointer;letter-spacing:0.04em;transition:background 0.15s" onmouseenter="this.style.background='#2a2a2a'" onmouseleave="this.style.background=''">${t}</div>`
+        ).join('')}
+      </div>
     </div>
     <div class="header-actions">
       <div id="authHeaderBtn">
@@ -2499,6 +2525,28 @@ function filterCategory(cat,btn){
 }
 function applySort(sort,btn){ currentSort=sort; document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderProducts(); }
 function handleSearch(){searchTerm=document.getElementById('searchInput').value;renderProducts();}
+
+function showSearchSuggestions(){
+  const q = document.getElementById('searchInput').value;
+  if(!q) document.getElementById('searchSuggestions').style.display='block';
+}
+function hideSearchSuggestionsDelayed(){
+  setTimeout(()=>{ document.getElementById('searchSuggestions').style.display='none'; },200);
+}
+function applySearch(term){
+  const inp=document.getElementById('searchInput');
+  inp.value=term;
+  searchTerm=term;
+  renderProducts();
+  document.getElementById('searchSuggestions').style.display='none';
+}
+function toggleMobileSearch(){
+  if(window.innerWidth>700) return;
+  const wrapper=document.getElementById('searchBarWrapper');
+  const isOpen=wrapper.classList.toggle('mobile-open');
+  if(isOpen){ document.getElementById('searchInput').focus(); }
+  else{ document.getElementById('searchInput').value=''; searchTerm=''; renderProducts(); }
+}
 
 function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2800); }
 
