@@ -1,0 +1,423 @@
+<!-- ============================================================
+  RGPD — Fragmento para añadir a index.html justo antes de </body>
+  
+  Instrucciones:
+  1. Copia TODO este bloque y pégalo justo antes de </body> en index.html
+  2. Asegúrate de que el <style> del banner esté también (está incluido aquí)
+  3. Actualiza los datos en el bloque de CONFIGURACIÓN en el <script>
+============================================================ -->
+
+
+<!-- ── CSS del banner y modal de cookies ───────────────────────── -->
+<style>
+/* ── Banner de cookies ── */
+#cookieBanner {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 9999;
+  background: #1a1a1a;
+  color: #e8e0d0;
+  padding: 1.2rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.4);
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.25,0.8,0.25,1);
+  font-family: 'Jost', sans-serif;
+}
+#cookieBanner.visible { transform: translateY(0); }
+#cookieBanner p {
+  flex: 1;
+  font-size: 0.82rem;
+  line-height: 1.65;
+  margin: 0;
+  min-width: 220px;
+  color: #bbb;
+}
+#cookieBanner p a {
+  color: var(--gold, #c9a96e);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.cookie-btns {
+  display: flex;
+  gap: 0.7rem;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.cookie-btn {
+  padding: 0.55rem 1.3rem;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.cookie-btn-accept {
+  background: var(--gold, #c9a96e);
+  color: #1a1a1a;
+}
+.cookie-btn-accept:hover { background: #d4b87a; }
+.cookie-btn-reject {
+  background: transparent;
+  color: #888;
+  border: 1px solid #444;
+}
+.cookie-btn-reject:hover { border-color: #888; color: #ccc; }
+.cookie-btn-settings {
+  background: transparent;
+  color: #888;
+  border: 1px solid #444;
+}
+.cookie-btn-settings:hover { border-color: #888; color: #ccc; }
+
+/* ── Modal de política de privacidad / cookies ── */
+#privacyModal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0,0,0,0.75);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  backdrop-filter: blur(4px);
+}
+#privacyModal.open { display: flex; }
+.privacy-box {
+  background: #faf7f2;
+  max-width: 680px;
+  width: 100%;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 2.5rem 2.5rem 2rem;
+  position: relative;
+  font-family: 'Jost', sans-serif;
+  color: #2c1810;
+}
+.privacy-box h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.8rem;
+  font-weight: 400;
+  margin-bottom: 0.3rem;
+  color: #1a1a1a;
+}
+.privacy-box .privacy-updated {
+  font-size: 0.75rem;
+  color: #999;
+  letter-spacing: 0.1em;
+  margin-bottom: 1.8rem;
+}
+.privacy-box h3 {
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #888;
+  margin: 1.6rem 0 0.5rem;
+}
+.privacy-box p, .privacy-box li {
+  font-size: 0.87rem;
+  line-height: 1.8;
+  color: #555;
+}
+.privacy-box ul { padding-left: 1.2rem; margin: 0.4rem 0 0.8rem; }
+.privacy-box a { color: #c9a96e; }
+.privacy-close {
+  position: sticky;
+  top: 0;
+  float: right;
+  background: #1a1a1a;
+  color: #fff;
+  border: none;
+  width: 36px; height: 36px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  margin-left: 1rem;
+  flex-shrink: 0;
+}
+.privacy-close:hover { background: #c9a96e; color: #1a1a1a; }
+
+/* ── Panel de ajustes de cookies ── */
+.cookie-settings-panel {
+  display: none;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #333;
+  width: 100%;
+}
+.cookie-settings-panel.open { display: block; }
+.cookie-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+}
+.cookie-toggle-info strong {
+  font-size: 0.8rem;
+  color: #e8e0d0;
+  display: block;
+  margin-bottom: 2px;
+}
+.cookie-toggle-info span { font-size: 0.72rem; color: #777; }
+
+/* Toggle switch */
+.toggle-switch { position: relative; display: inline-block; width: 40px; height: 22px; flex-shrink: 0; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute; inset: 0;
+  background: #444; border-radius: 22px;
+  cursor: pointer; transition: background 0.2s;
+}
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 16px; height: 16px;
+  left: 3px; bottom: 3px;
+  background: #fff; border-radius: 50%;
+  transition: transform 0.2s;
+}
+.toggle-switch input:checked + .toggle-slider { background: #c9a96e; }
+.toggle-switch input:checked + .toggle-slider::before { transform: translateX(18px); }
+.toggle-switch input:disabled + .toggle-slider { cursor: not-allowed; opacity: 0.5; }
+
+@media (max-width: 600px) {
+  #cookieBanner { padding: 1rem; gap: 1rem; }
+  .privacy-box { padding: 1.5rem 1.2rem; }
+}
+</style>
+
+
+<!-- ── Banner de cookies ─────────────────────────────────────────── -->
+<div id="cookieBanner" role="dialog" aria-label="Aviso de cookies" aria-live="polite">
+  <p>
+    Usamos cookies técnicas necesarias para el funcionamiento de la tienda.
+    Con tu permiso, también usaríamos cookies analíticas para mejorar la experiencia.
+    Consulta nuestra <a onclick="openPrivacyModal('cookies')">Política de Cookies</a>
+    y <a onclick="openPrivacyModal('privacidad')">Política de Privacidad</a>.
+  </p>
+  <div class="cookie-btns">
+    <button class="cookie-btn cookie-btn-settings" onclick="toggleCookieSettings()">Ajustes</button>
+    <button class="cookie-btn cookie-btn-reject"  onclick="saveCookieChoice(false)">Solo necesarias</button>
+    <button class="cookie-btn cookie-btn-accept"  onclick="saveCookieChoice(true)">Aceptar todas</button>
+  </div>
+  <!-- Panel de ajustes (oculto por defecto) -->
+  <div class="cookie-settings-panel" id="cookieSettingsPanel">
+    <div class="cookie-toggle-row">
+      <div class="cookie-toggle-info">
+        <strong>Cookies técnicas / necesarias</strong>
+        <span>Carrito, sesión, preferencias. Imprescindibles para la tienda.</span>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" checked disabled>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="cookie-toggle-row">
+      <div class="cookie-toggle-info">
+        <strong>Cookies analíticas</strong>
+        <span>Nos ayudan a entender cómo se usa la tienda (actualmente no activas).</span>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggleAnalytics">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div style="margin-top:1rem; display:flex; gap:0.7rem; justify-content:flex-end;">
+      <button class="cookie-btn cookie-btn-accept" onclick="saveCustomCookieChoice()" style="padding:0.5rem 1.2rem;">
+        Guardar preferencias
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── Modal de Política de Privacidad y Cookies ─────────────────── -->
+<div id="privacyModal" onclick="handlePrivacyOverlayClick(event)" role="dialog" aria-modal="true" aria-label="Política de privacidad">
+  <div class="privacy-box">
+    <button class="privacy-close" onclick="closePrivacyModal()" aria-label="Cerrar">✕</button>
+
+    <h2 id="privacyModalTitle">Política de Privacidad</h2>
+    <p class="privacy-updated">Última actualización: mayo de 2025</p>
+
+    <!-- ─ SECCIÓN: PRIVACIDAD ───────────────────── -->
+    <div id="sectionPrivacidad">
+      <h3>1. Responsable del tratamiento</h3>
+      <p>
+        <strong>PLATACO</strong> — Joyería en Plata.<br>
+        Email de contacto: <a href="mailto:hola@plataco.com">hola@plataco.com</a><br>
+        <!-- IMPORTANTE: añade aquí tu NIF/CIF y dirección fiscal antes de publicar -->
+      </p>
+
+      <h3>2. Qué datos recogemos y para qué</h3>
+      <ul>
+        <li><strong>Datos de cuenta:</strong> nombre, apellidos, email y contraseña (cifrada con bcrypt). Finalidad: gestionar tu cuenta y tus pedidos.</li>
+        <li><strong>Datos de envío:</strong> dirección, ciudad, código postal, país y teléfono. Finalidad: gestionar el envío de tu pedido.</li>
+        <li><strong>Datos de pago:</strong> procesados directamente por Stripe. PLATACO no almacena datos de tarjeta; solo guardamos los últimos 4 dígitos y la marca de la tarjeta que Stripe nos devuelve.</li>
+        <li><strong>Historial de pedidos:</strong> para que puedas consultarlo en tu cuenta y para tramitar posibles devoluciones.</li>
+        <li><strong>Reseñas de productos:</strong> si escribes una valoración, tu nombre (o inicial del apellido) se muestra públicamente.</li>
+      </ul>
+
+      <h3>3. Base legal</h3>
+      <ul>
+        <li>Ejecución de contrato (Art. 6.1.b RGPD): datos necesarios para procesar y enviar tu pedido.</li>
+        <li>Interés legítimo (Art. 6.1.f RGPD): prevención de fraude y seguridad de la tienda.</li>
+        <li>Consentimiento (Art. 6.1.a RGPD): cookies analíticas, si las aceptas.</li>
+      </ul>
+
+      <h3>4. ¿Cuánto tiempo guardamos tus datos?</h3>
+      <p>Los datos de tu cuenta se conservan mientras tengas una cuenta activa. Los datos de pedidos se conservan 5 años por obligaciones fiscales (Ley 58/2003, General Tributaria). Puedes solicitar la supresión de tu cuenta en cualquier momento.</p>
+
+      <h3>5. Destinatarios y transferencias</h3>
+      <ul>
+        <li><strong>Stripe Inc.</strong> (procesador de pagos) — EE.UU., con cláusulas contractuales estándar de la UE.</li>
+        <li><strong>Resend Inc.</strong> (envío de emails transaccionales) — EE.UU., con cláusulas contractuales estándar de la UE.</li>
+        <li><strong>Cloudinary Inc.</strong> (almacenamiento de imágenes) — EE.UU., con cláusulas contractuales estándar de la UE.</li>
+        <li>No vendemos ni cedemos tus datos a terceros para publicidad.</li>
+      </ul>
+
+      <h3>6. Tus derechos</h3>
+      <p>Tienes derecho a acceder, rectificar, suprimir, limitar el tratamiento, portabilidad y oposición. Escribe a <a href="mailto:hola@plataco.com">hola@plataco.com</a> con el asunto "Derechos RGPD". También puedes reclamar ante la <a href="https://www.aepd.es" target="_blank" rel="noopener">AEPD</a>.</p>
+
+      <h3>7. Seguridad</h3>
+      <p>Todas las comunicaciones se realizan bajo HTTPS. Las contraseñas se almacenan con bcrypt (factor 12). Los tokens de sesión son JWT firmados con clave secreta.</p>
+    </div>
+
+    <!-- ─ SECCIÓN: COOKIES ───────────────────────── -->
+    <div id="sectionCookies">
+      <h3>Tipos de cookies que usamos</h3>
+
+      <p><strong>Cookies técnicas / necesarias</strong> — siempre activas</p>
+      <ul>
+        <li><code>plataco_token</code> — token de sesión JWT. Duración: 7 días. Necesario para mantener la sesión.</li>
+        <li><code>plataco_cart</code> — contenido del carrito. Duración: sesión. Necesario para el proceso de compra.</li>
+        <li><code>plataco_cookie_consent</code> — guarda tu preferencia sobre cookies. Duración: 365 días.</li>
+      </ul>
+
+      <p><strong>Cookies analíticas</strong> — solo si las aceptas</p>
+      <ul>
+        <li>Actualmente no tenemos analítica activa. Si en el futuro integramos Google Analytics u otro servicio, actualizaremos esta política y pediremos tu consentimiento de nuevo.</li>
+      </ul>
+
+      <p>Para retirar el consentimiento o cambiar tus preferencias, haz clic en <a onclick="closePrivacyModal(); setTimeout(() => showCookieBanner(), 300);">gestionar cookies</a>.</p>
+    </div>
+
+    <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e8e0d0; text-align: center;">
+      <button onclick="closePrivacyModal()"
+              style="background:#1a1a1a;color:#fff;border:none;padding:0.8rem 2.5rem;
+                     font-family:'Jost',sans-serif;font-size:0.8rem;letter-spacing:0.2em;
+                     text-transform:uppercase;cursor:pointer;">
+        Cerrar
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── Script RGPD ──────────────────────────────────────────────── -->
+<script>
+// ── CONFIGURACIÓN — ajusta esto ──────────────────────────────
+const COOKIE_CONSENT_KEY = 'plataco_cookie_consent';
+const CONSENT_VERSION    = 'v1'; // incrementa si cambias la política
+// ─────────────────────────────────────────────────────────────
+
+function getCookieConsent() {
+  try { return JSON.parse(localStorage.getItem(COOKIE_CONSENT_KEY)); } catch { return null; }
+}
+
+function setCookieConsent(analytics) {
+  const consent = { version: CONSENT_VERSION, analytics, date: new Date().toISOString() };
+  localStorage.setItem(COOKIE_CONSENT_KEY, JSON.stringify(consent));
+}
+
+function hideCookieBanner() {
+  const b = document.getElementById('cookieBanner');
+  b.classList.remove('visible');
+  setTimeout(() => b.style.display = 'none', 400);
+}
+
+function showCookieBanner() {
+  const b = document.getElementById('cookieBanner');
+  b.style.display = 'flex';
+  // Pequeño delay para que la animación sea visible
+  requestAnimationFrame(() => requestAnimationFrame(() => b.classList.add('visible')));
+}
+
+function saveCookieChoice(acceptAll) {
+  setCookieConsent(acceptAll);
+  hideCookieBanner();
+  if (acceptAll) initAnalytics();
+}
+
+function saveCustomCookieChoice() {
+  const analytics = document.getElementById('toggleAnalytics').checked;
+  setCookieConsent(analytics);
+  hideCookieBanner();
+  if (analytics) initAnalytics();
+}
+
+function toggleCookieSettings() {
+  document.getElementById('cookieSettingsPanel').classList.toggle('open');
+}
+
+// Llamar aquí si activas Google Analytics u otro tracker
+function initAnalytics() {
+  // ejemplo: gtag('consent', 'update', { analytics_storage: 'granted' });
+  console.log('[PLATACO] Cookies analíticas activadas');
+}
+
+// ── Modal de privacidad ──────────────────────────────────────
+function openPrivacyModal(section) {
+  const modal = document.getElementById('privacyModal');
+  const title = document.getElementById('privacyModalTitle');
+  const secPriv = document.getElementById('sectionPrivacidad');
+  const secCook = document.getElementById('sectionCookies');
+
+  if (section === 'cookies') {
+    title.textContent = 'Política de Cookies';
+    secPriv.style.display = 'none';
+    secCook.style.display = 'block';
+  } else {
+    title.textContent = 'Política de Privacidad';
+    secPriv.style.display = 'block';
+    secCook.style.display = 'block';
+  }
+
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePrivacyModal() {
+  document.getElementById('privacyModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function handlePrivacyOverlayClick(e) {
+  if (e.target === document.getElementById('privacyModal')) closePrivacyModal();
+}
+
+// Cerrar con Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closePrivacyModal();
+});
+
+// ── Inicialización ───────────────────────────────────────────
+(function initCookieConsent() {
+  const consent = getCookieConsent();
+
+  if (!consent || consent.version !== CONSENT_VERSION) {
+    // Sin consentimiento o versión antigua → mostrar banner
+    // Delay de 1.5s para que no aparezca de golpe al cargar la página
+    setTimeout(showCookieBanner, 1500);
+  } else if (consent.analytics) {
+    // Ya aceptó analytics → activarlas sin mostrar el banner
+    initAnalytics();
+  }
+})();
+</script>

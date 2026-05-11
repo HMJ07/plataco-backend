@@ -76,3 +76,18 @@ export const generalLimiter = createRateLimiter({
   max: 200,
   message: 'Demasiadas peticiones. Reduce la frecuencia.',
 });
+
+// Forgot password: 5 solicitudes / hora por IP (evitar spam de emails)
+export const forgotPasswordLimiter = createRateLimiter({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: 'Demasiadas solicitudes de recuperación. Espera una hora.',
+});
+
+// Reset password: 10 intentos / 15 min por IP (el token ya es de un solo uso,
+// esto añade una capa extra contra intentos de adivinación)
+export const resetPasswordLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: 'Demasiados intentos. Espera 15 minutos.',
+});

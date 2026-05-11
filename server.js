@@ -12,8 +12,9 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 
-import authRoutes     from './auth.js';
-import productRoutes  from './products.js';
+import authRoutes          from './auth.js';
+import passwordResetRoutes from './password_reset.js';
+import productRoutes       from './products.js';
 import orderRoutes    from './orders.js';
 import paymentRoutes  from './payments.js';
 import adminRoutes    from './admin.js';
@@ -56,6 +57,7 @@ app.use(express.json());
 
 // ── Rutas ──────────────────────────────────────────────────
 app.use('/api/auth',          authRoutes);
+app.use('/api/auth',          passwordResetRoutes);  // forgot-password + reset-password
 app.use('/api/auth/favorites', favoritesRoutes);
 app.use('/api/auth/google',    googleAuthRoutes);
 app.use('/api/products',      productRoutes);
