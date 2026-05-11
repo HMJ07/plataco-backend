@@ -4,13 +4,14 @@
 // ============================================================
 import { Router } from 'express';
 import { query } from './db.js';
+import { couponLimiter } from './rate_limit.js';
 
 const router = Router();
 
 // ── POST /api/coupons/validate ─────────────────────────────
 // Valida un cupón y devuelve el descuento calculado
 // Body: { code, cart_total_eur }
-router.post('/validate', async (req, res) => {
+router.post('/validate', couponLimiter, async (req, res) => {
   try {
     const { code, cart_total_eur } = req.body;
 

@@ -1,14 +1,15 @@
-// backend/routes/auth2.js
+// backend/routes/auth.js
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { query } from './db.js';
 import { requireAuth } from './middleware_auth.js';
+import { loginLimiter, registerLimiter } from './rate_limit.js';
 
 const router = Router();
 
 // ── POST /api/auth/register ────────────────────────────────
-router.post('/register', async (req, res) => {
+router.post('/register', registerLimiter, async (req, res) => {
   try {
     const { email, password, first_name, last_name } = req.body;
 
@@ -48,7 +49,7 @@ router.post('/register', async (req, res) => {
 });
 
 // ── POST /api/auth/login ───────────────────────────────────
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {

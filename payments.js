@@ -6,7 +6,6 @@ import { Router } from 'express';
 import Stripe from 'stripe';
 import { query, withTransaction } from './db.js';
 import { requireAuth } from './middleware_auth.js';
-import { sendOrderConfirmationEmail } from './email.js';
 import jwt from 'jsonwebtoken';
 
 const router = Router();
@@ -46,10 +45,16 @@ router.post('/create-intent', async (req, res) => {
       // Añadir precio extra de variante si hay
       if (item.variant_id) {
         const varResult = await query(
-          'SELECT price_extra FROM product_variants WHERE id=$1 AND product_id=$2',
+          'SELECT price_extra, stock FROM product_variants WHERE id=$1 AND product_id=$2',
           [item.variant_id, item.product_id]
         );
-        if (varResult.rows[0]) price_eur += parseFloat(varResult.rows[0].price_extra);
+        if (varResult.rows[0]) {
+          price_eur += parseFloat(varResult.rows[0].price_extra);
+          // ── CORRECCIÓN: verificar también el stock de la variante ──
+          if (varResult.rows[0].stock < item.quantity) {
+            return res.status(400).json({ error: `Stock insuficiente para la talla/variante seleccionada: ${product.name}` });
+          }
+        }
       }
 
       const subtotal = price_eur * item.quantity;
@@ -249,11 +254,21 @@ router.post('/confirm-order', (req, res, next) => {
           item.unit_price_eur, item.quantity, item.unit_price_eur * item.quantity,
         ]);
 
-        // Descontar stock
+        // Descontar stock del producto padre
         await client.query(
           'UPDATE products SET stock = stock - $1 WHERE id = $2',
           [item.quantity, item.product_id]
         );
+
+        // ── CORRECCIÓN: descontar también el stock de la variante ──
+        // Si no se hace aquí, una talla específica puede quedar en negativo
+        // aunque el stock general del producto sea 0.
+        if (item.variant_id) {
+          await client.query(
+            'UPDATE product_variants SET stock = stock - $1 WHERE id = $2',
+            [item.quantity, item.variant_id]
+          );
+        }
       }
 
       // 3. Registrar el pago
@@ -285,35 +300,9 @@ router.post('/confirm-order', (req, res, next) => {
       message: 'Pedido creado correctamente',
     });
 
-    // Enviar email de confirmación (después de responder para no bloquear)
-    // Prioridad: guest_email del body → email del JWT → email de la BD por user_id
-    (async () => {
-      try {
-        let emailAddress = guest_email || req.user?.email || null;
-
-        // Si hay user_id pero aún no tenemos email, buscarlo en la BD
-        if (!emailAddress && req.user?.id) {
-          const userRow = await query('SELECT email FROM users WHERE id=$1', [req.user.id]);
-          emailAddress = userRow.rows[0]?.email || null;
-        }
-
-        if (!emailAddress) {
-          console.warn('No se encontró email para confirmar pedido', order.id);
-          return;
-        }
-
-        const itemsForEmail = items.map(i => ({
-          product_name: i.product_name,
-          variant_name: i.variant_name || null,
-          quantity:     i.quantity,
-          subtotal_eur: i.unit_price_eur * i.quantity,
-        }));
-        await sendOrderConfirmationEmail(order, itemsForEmail, emailAddress);
-        console.log('Email confirmación enviado a ' + emailAddress + ' (pedido #' + order.id + ')');
-      } catch (e) {
-        console.error('Error enviando email confirmación:', e);
-      }
-    })();
+    // El email de confirmación lo envía el webhook de Stripe (payment_intent.succeeded)
+    // para garantizar que solo se envía UNA vez y solo cuando el pago está 100% confirmado.
+    // No lo enviamos aquí para evitar duplicados.
 
   } catch (err) {
     console.error('Error confirm-order:', err);
