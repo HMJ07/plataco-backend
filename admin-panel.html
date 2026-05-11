@@ -1131,6 +1131,20 @@ function productFormHTML(p = {}) {
           <input type="checkbox" id="pFeatured" ${p.is_featured ? 'checked' : ''}> Destacado
         </label>
       </div>
+      ${p.id ? `
+      <div style="border-top:1px solid var(--border);padding-top:14px">
+        <label style="font-size:0.78rem;font-weight:600;display:block;margin-bottom:10px">Imágenes del producto</label>
+        <div id="imgGallery" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+          <div style="color:var(--gray);font-size:0.8rem;padding:8px 0">Cargando imágenes…</div>
+        </div>
+        <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;background:var(--light);border:1px dashed var(--border);border-radius:8px;padding:10px 16px;font-size:0.82rem;color:var(--gray);transition:border-color 0.2s" onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor='var(--border)'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Subir fotos (máx. 10)
+          <input type="file" accept="image/*" multiple style="display:none" onchange="uploadProductImages('${p.id}', this)">
+        </label>
+        <p style="font-size:0.73rem;color:var(--gray);margin-top:6px">La primera imagen es la principal. Haz clic en 🗑 para eliminar.</p>
+      </div>
+      ` : ''}
       <div style="display:flex;justify-content:flex-end;gap:10px;padding-top:4px">
         <button class="btn btn-outline btn-sm" onclick="closeProductModal()">Cancelar</button>
         <button class="btn btn-sm" id="pSaveBtn" style="background:var(--accent);color:#fff" onclick="saveProduct('${p.id || ''}')">
@@ -1168,6 +1182,67 @@ async function openEditProductModal(id) {
   document.getElementById('productModalTitle').textContent = 'Editar producto';
   document.getElementById('productModalBody').innerHTML = productFormHTML(p);
   document.getElementById('productModal').classList.add('open');
+  // Cargar imágenes existentes
+  loadProductImages(id);
+}
+
+async function loadProductImages(productId) {
+  const gallery = document.getElementById('imgGallery');
+  if (!gallery) return;
+  try {
+    const imgs = await apiFetch('/api/admin/products/' + productId + '/images');
+    const list = Array.isArray(imgs) ? imgs : (imgs.images || []);
+    if (!list.length) {
+      gallery.innerHTML = '<div style="color:var(--gray);font-size:0.8rem;padding:8px 0">Sin imágenes todavía</div>';
+      return;
+    }
+    gallery.innerHTML = list.map((img, i) => `
+      <div style="position:relative;width:80px;flex-shrink:0" title="${i===0?'Imagen principal':''}">
+        <img src="${img.url_thumb || img.url}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid ${i===0?'var(--accent)':'var(--border)'}">
+        ${i===0 ? '<span style="position:absolute;top:3px;left:3px;background:var(--accent);color:#fff;font-size:0.6rem;padding:1px 5px;border-radius:4px;font-weight:700">PRINCIPAL</span>' : ''}
+        <button onclick="deleteProductImage('${productId}','${img.id}')" title="Eliminar" style="position:absolute;top:3px;right:3px;background:rgba(185,28,28,0.85);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:0.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">🗑</button>
+      </div>
+    `).join('');
+  } catch(e) {
+    gallery.innerHTML = '<div style="color:var(--danger);font-size:0.8rem">Error cargando imágenes</div>';
+  }
+}
+
+async function uploadProductImages(productId, input) {
+  if (!input.files.length) return;
+  const gallery = document.getElementById('imgGallery');
+  if (gallery) gallery.innerHTML += '<div style="color:var(--gray);font-size:0.8rem;padding:8px 0">Subiendo…</div>';
+  const baseUrl = API || localStorage.getItem('plataco_api') || '';
+  const fd = new FormData();
+  for (const f of input.files) fd.append('images', f);
+  try {
+    const res = await fetch(baseUrl + '/api/admin/products/' + productId + '/images', {
+      method: 'POST',
+      headers: TOKEN ? { Authorization: 'Bearer ' + TOKEN } : {},
+      body: fd,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error subiendo imagen');
+    toast('Imagen(es) subida(s) ✓', 'success');
+    loadProductImages(productId);
+    // Refrescar miniatura en la tabla
+    const r = await apiFetch('/api/admin/products').catch(()=>null);
+    if (r) allProducts = Array.isArray(r) ? r : (r.products || []);
+  } catch(e) {
+    toast('Error: ' + e.message, 'error');
+  }
+  input.value = '';
+}
+
+async function deleteProductImage(productId, imageId) {
+  if (!confirm('¿Eliminar esta imagen?')) return;
+  try {
+    await apiFetch('/api/admin/products/' + productId + '/images/' + imageId, 'DELETE');
+    toast('Imagen eliminada ✓', 'success');
+    loadProductImages(productId);
+  } catch(e) {
+    toast('Error: ' + e.message, 'error');
+  }
 }
 
 async function saveProduct(id) {
