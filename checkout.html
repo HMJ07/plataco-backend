@@ -535,6 +535,38 @@ async function handlePayment() {
     const intentData = await intentRes.json();
     if (!intentRes.ok) throw new Error(intentData.error || 'Error al iniciar el pago');
 
+    // ── Pedido gratuito (cupón del 100%) ──────────────────
+    // El total es 0€, no hay que pasar por Stripe
+    if (intentData.free_order) {
+      const confirmHeaders = { 'Content-Type': 'application/json' };
+      if (authToken) confirmHeaders['Authorization'] = 'Bearer ' + authToken;
+      const confirmRes = await fetch(`${API_URL}/payments/confirm-order`, {
+        method: 'POST',
+        headers: confirmHeaders,
+        body: JSON.stringify({
+          payment_intent_id: null,
+          free_order: true,
+          guest_email: formData.email,
+          shipping_address: {
+            first_name:  formData.firstName,
+            last_name:   formData.lastName,
+            address1:    formData.address1,
+            city:        formData.city,
+            postal_code: formData.postalCode,
+            country:     formData.country,
+            phone:       document.getElementById('phone').value.trim() || null,
+          },
+          // Pasamos los datos del intent porque no hay payment_intent_id de Stripe
+          free_order_meta: intentData,
+        }),
+      });
+      const confirmData = await confirmRes.json();
+      if (!confirmRes.ok) throw new Error(confirmData.error || 'Error al confirmar el pedido gratuito');
+      setLoading(false);
+      showSuccess(confirmData.order_id);
+      return;
+    }
+
     stripeClientSecret = intentData.client_secret;
     stripePaymentIntentId = intentData.payment_intent_id;
 
