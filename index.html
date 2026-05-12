@@ -248,7 +248,7 @@ h1,h2,h3,.price{font-family:'Cormorant Garamond',serif}
 @keyframes glimmer{0%,100%{opacity:0.3}50%{opacity:1}}
 @keyframes slideIn{from{transform:translateX(-20px);opacity:0}to{transform:translateX(0);opacity:1}}
 @keyframes pulse-ring{0%{transform:scale(0.8);opacity:1}100%{transform:scale(1.4);opacity:0}}
-@keyframes scroll-band{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@keyframes scroll-band{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
 @keyframes reveal{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0% 0 0)}}
 
 .fade-in{animation:fadeUp 0.7s ease both}
@@ -262,9 +262,10 @@ h1,h2,h3,.price{font-family:'Cormorant Garamond',serif}
 .marquee-strip{
   background:var(--gold);color:var(--dark);
   padding:0.5rem 0;overflow:hidden;white-space:nowrap;
+  display:flex;
 }
 .marquee-inner{
-  display:inline-block;
+  display:inline-flex;flex-shrink:0;
   animation:scroll-band 22s linear infinite;
 }
 .marquee-inner span{
@@ -334,7 +335,7 @@ nav{display:flex;gap:0;border-top:1px solid #111}
 ══════════════════════════════════════ */
 .hero{
   background:linear-gradient(150deg,#080808 0%,#111 50%,#0c0c0c 100%);
-  padding:5rem 2rem 4rem;
+  padding:3rem 2rem 3rem;
   text-align:center;position:relative;overflow:hidden;
   min-height:520px;display:flex;flex-direction:column;align-items:center;justify-content:center;
 }
@@ -357,13 +358,13 @@ nav{display:flex;gap:0;border-top:1px solid #111}
 
 /* Joya central animada (SVG) */
 .hero-jewel-wrap{
-  position:relative;margin-bottom:2rem;
+  position:relative;margin-bottom:1rem;
   display:inline-block;
 }
 .hero-jewel{
-  width:220px;height:200px;position:relative;
+  width:176px;height:160px;position:relative;
   animation:float 5s ease-in-out infinite;
-  filter:drop-shadow(0 24px 48px rgba(201,168,76,0.45));
+  filter:drop-shadow(0 20px 40px rgba(201,168,76,0.45));
 }
 .hero-jewel-ring{
   position:absolute;inset:-20px;border-radius:50%;
@@ -870,8 +871,8 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
   .cart-panel{width:100%;max-width:100%}
 
   /* Trust bar */
-  .trust-bar{padding:0 0.5rem}
-  .trust-item{padding:1rem 1.2rem}
+  .trust-bar{padding:0 0.5rem;flex-wrap:wrap}
+  .trust-item{padding:1rem 1.2rem;flex:1 1 auto;min-width:33%}
   .trust-num{font-size:1.5rem}
   .trust-item:not(:last-child)::after{display:none}
 }
@@ -1306,13 +1307,7 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
 
 <!-- MARQUEE BANNER -->
 <div class="marquee-strip">
-  <div class="marquee-inner">
-    <span>Envío gratuito en pedidos superiores a 80€</span>
-    <span>Plata 925 certificada</span>
-    <span>Oro 18k disponible</span>
-    <span>Envío internacional</span>
-    <span>Devolución 30 días</span>
-    <span>Grabado personalizado</span>
+  <div class="marquee-inner" id="marqueeInner">
     <span>Envío gratuito en pedidos superiores a 80€</span>
     <span>Plata 925 certificada</span>
     <span>Oro 18k disponible</span>
@@ -1321,6 +1316,14 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
     <span>Grabado personalizado</span>
   </div>
 </div>
+<script>
+(function(){
+  var inner = document.getElementById('marqueeInner');
+  var clone = inner.cloneNode(true);
+  clone.setAttribute('aria-hidden','true');
+  inner.parentNode.appendChild(clone);
+})();
+</script>
 
 <header>
   <div class="header-top">
@@ -1498,99 +1501,8 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
 </div>
 
 <!-- ══════════════════════════════════════
-   GUÍA DE CUIDADOS — POPUP + SECCIÓN
+   GUÍA DE CUIDADOS — POPUP (único)
 ══════════════════════════════════════ -->
-
-<!-- POPUP MODAL DE GUÍA DE CUIDADOS -->
-<div id="careGuideOverlay" style="
-  display:none;position:fixed;inset:0;z-index:3000;
-  background:rgba(0,0,0,0.88);
-  align-items:center;justify-content:center;
-  padding:1rem;overflow-y:auto;
-" onclick="if(event.target===this)closeCareGuide()">
-  <div style="
-    background:#0d0d0d;border:1px solid #1e1e1e;
-    width:100%;max-width:700px;position:relative;
-    padding:0;overflow:hidden;
-    animation:gfFadeUp 0.4s ease both;
-    max-height:90vh;overflow-y:auto;
-  ">
-    <!-- Cabecera del popup -->
-    <div style="
-      background:linear-gradient(135deg,#111 0%,#1a1a1a 100%);
-      padding:2.5rem 2.5rem 2rem;
-      border-bottom:1px solid #1e1e1e;
-      position:sticky;top:0;z-index:2;
-    ">
-      <button onclick="closeCareGuide()" style="
-        position:absolute;top:1.2rem;right:1.4rem;
-        background:none;border:none;color:#444;font-size:1.2rem;
-        cursor:pointer;transition:color 0.2s;line-height:1;
-      " onmouseover="this.style.color='white'" onmouseout="this.style.color='#444'">✕</button>
-      <p style="font-size:0.62rem;letter-spacing:0.45em;text-transform:uppercase;color:var(--gold);margin-bottom:0.6rem;">Plataco · Plata 925</p>
-      <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:300;color:white;line-height:1.15;margin-bottom:0.5rem;">
-        El arte de <em style="font-style:italic;color:#C8C8C8;">cuidar tu plata</em>
-      </h3>
-      <p style="color:#555;font-size:0.78rem;letter-spacing:0.06em;line-height:1.8;">
-        Una guía completa para que tus joyas brillen durante generaciones.
-      </p>
-    </div>
-
-    <!-- Contenido rápido dentro del popup -->
-    <div style="padding:2rem 2.5rem;">
-
-      <!-- 3 pilares rápidos -->
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem;">
-        <div style="background:#111;padding:1.4rem 1rem;border-left:2px solid var(--gold);">
-          <div style="font-size:1.4rem;margin-bottom:0.5rem;">🧴</div>
-          <p style="font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:white;margin-bottom:0.4rem;">Uso diario</p>
-          <p style="font-size:0.7rem;color:#555;line-height:1.7;">Retira las joyas antes de ducharte, hacer deporte o aplicar cremas.</p>
-        </div>
-        <div style="background:#111;padding:1.4rem 1rem;border-left:2px solid var(--gold);">
-          <div style="font-size:1.4rem;margin-bottom:0.5rem;">🪥</div>
-          <p style="font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:white;margin-bottom:0.4rem;">Limpieza</p>
-          <p style="font-size:0.7rem;color:#555;line-height:1.7;">Paño de microfibra semanal. Agua tibia y jabón neutro al mes.</p>
-        </div>
-        <div style="background:#111;padding:1.4rem 1rem;border-left:2px solid var(--gold);">
-          <div style="font-size:1.4rem;margin-bottom:0.5rem;">🗂️</div>
-          <p style="font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:white;margin-bottom:0.4rem;">Almacenamiento</p>
-          <p style="font-size:0.7rem;color:#555;line-height:1.7;">Cada pieza en su bolsita. Lejos del baño. Con sílice gel.</p>
-        </div>
-      </div>
-
-      <!-- Tip destacado -->
-      <div style="border:1px solid #1e1e1e;padding:1.4rem 1.6rem;margin-bottom:2rem;display:flex;gap:1rem;align-items:flex-start;">
-        <span style="color:var(--gold);font-size:1.1rem;flex-shrink:0;margin-top:0.1rem;">✦</span>
-        <div>
-          <p style="font-size:0.68rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:0.4rem;">Truco rápido</p>
-          <p style="font-size:0.82rem;color:#888;line-height:1.85;font-style:italic;">
-            Si tu joya se ha oscurecido, coloca papel de aluminio en un bol, añade agua caliente y sal gruesa, y sumerge la pieza durante 5 minutos. El proceso electroquímico disuelve la oxidación sin frotar.
-          </p>
-        </div>
-      </div>
-
-      <!-- CTA a la página completa -->
-      <div style="text-align:center;padding-top:0.5rem;">
-        <p style="font-size:0.7rem;color:#444;letter-spacing:0.1em;margin-bottom:1.2rem;">
-          Quiz personalizado · 24 consejos por tipo de joya · Mitos vs. Realidad
-        </p>
-        <a href="plataco-guia-cuidados.html" target="_blank" style="
-          display:inline-block;
-          background:var(--gold);color:var(--dark);
-          font-family:'Jost',sans-serif;font-size:0.7rem;
-          font-weight:400;letter-spacing:0.35em;text-transform:uppercase;
-          padding:0.9rem 2.4rem;text-decoration:none;
-          transition:opacity 0.2s;
-        " onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
-          Ver la guía completa &rarr;
-        </a>
-        <p style="margin-top:1rem;font-size:0.65rem;color:#333;letter-spacing:0.1em;">
-          O desplázate hacia abajo para ver el resumen en la página
-        </p>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- POPUP GUIA DE CUIDADOS -->
 <div id="careGuideOverlay" onclick="if(event.target===this)closeCareGuide()" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.88);align-items:center;justify-content:center;padding:1rem;overflow-y:auto;">
@@ -1639,10 +1551,32 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
     <div class="trust-label">Días devolución</div>
   </div>
   <div class="trust-item" style="cursor:pointer;" onclick="openCareGuide()">
-    <div class="trust-num" style="font-size:1rem;letter-spacing:0.08em;color:var(--gold);">✦</div>
-    <div class="trust-label" style="color:var(--gold);">Guía de cuidados</div>
+    <div class="trust-num" style="font-size:1.4rem;">✦</div>
+    <div class="trust-label">Guía de cuidados</div>
   </div>
 </div>
+<main>
+  <div id="sectionHeader" class="section-header">
+    <h2 class="section-title" id="sectionTitleEl">Toda la colección</h2>
+    <span class="section-count" id="sectionCount">18 piezas</span>
+    <div class="section-line"></div>
+  </div>
+
+  <!-- SUBCATEGORÍAS dinámicas -->
+  <div class="subcategory-bar" id="subcategoryBar">
+    <span class="subcat-label">Filtrar por:</span>
+    <!-- Se rellenan por JS según la categoría activa -->
+  </div>
+
+  <div class="filters" id="filtersBar">
+    <button class="filter-btn active" onclick="applySort('default',this)">Destacados</button>
+    <button class="filter-btn" onclick="applySort('price-asc',this)">Precio: menor</button>
+    <button class="filter-btn" onclick="applySort('price-desc',this)">Precio: mayor</button>
+    <button class="filter-btn" onclick="applySort('new',this)">Novedades</button>
+  </div>
+
+  <div class="product-grid" id="productGrid"></div>
+</main>
 
 <!-- GIFT FINDER IA -->
 <section id="giftFinder">
@@ -1800,28 +1734,6 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
   </div>
 </div>
 
-<main>
-  <div id="sectionHeader" class="section-header">
-    <h2 class="section-title" id="sectionTitleEl">Toda la colección</h2>
-    <span class="section-count" id="sectionCount">18 piezas</span>
-    <div class="section-line"></div>
-  </div>
-
-  <!-- SUBCATEGORÍAS dinámicas -->
-  <div class="subcategory-bar" id="subcategoryBar">
-    <span class="subcat-label">Filtrar por:</span>
-    <!-- Se rellenan por JS según la categoría activa -->
-  </div>
-
-  <div class="filters" id="filtersBar">
-    <button class="filter-btn active" onclick="applySort('default',this)">Destacados</button>
-    <button class="filter-btn" onclick="applySort('price-asc',this)">Precio: menor</button>
-    <button class="filter-btn" onclick="applySort('price-desc',this)">Precio: mayor</button>
-    <button class="filter-btn" onclick="applySort('new',this)">Novedades</button>
-  </div>
-
-  <div class="product-grid" id="productGrid"></div>
-</main>
 
 <!-- GUÍA DE CUIDADOS — SECCIÓN EN PÁGINA -->
 <section id="careguide-section" style="
@@ -3736,9 +3648,9 @@ document.addEventListener('keydown', function(e) {
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
       <p style="font-size:0.65rem;color:#2a2a2a;letter-spacing:0.12em;">© <span id="footerYear"></span> PLATACO — Todos los derechos reservados</p>
       <div style="display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;">
-        <a href="rgpd-fragment.html" style="font-size:0.65rem;color:#2a2a2a;letter-spacing:0.1em;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#555'" onmouseout="this.style.color='#2a2a2a'">Política de privacidad</a>
-        <a href="#" style="font-size:0.65rem;color:#2a2a2a;letter-spacing:0.1em;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#555'" onmouseout="this.style.color='#2a2a2a'">Aviso legal</a>
-        <a href="#" style="font-size:0.65rem;color:#2a2a2a;letter-spacing:0.1em;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#555'" onmouseout="this.style.color='#2a2a2a'">Cookies</a>
+        <a href="politica-privacidad.html" style="font-size:0.65rem;color:#2a2a2a;letter-spacing:0.1em;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#555'" onmouseout="this.style.color='#2a2a2a'">Política de privacidad</a>
+        <a href="aviso-legal.html" style="font-size:0.65rem;color:#2a2a2a;letter-spacing:0.1em;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#555'" onmouseout="this.style.color='#2a2a2a'">Aviso legal</a>
+        <a href="cookies.html" style="font-size:0.65rem;color:#2a2a2a;letter-spacing:0.1em;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#555'" onmouseout="this.style.color='#2a2a2a'">Cookies</a>
       </div>
       <p style="font-size:0.62rem;color:#1e1e1e;letter-spacing:0.06em;">Diseño artesanal · España</p>
     </div>
