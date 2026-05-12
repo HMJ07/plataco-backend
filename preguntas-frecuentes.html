@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preguntas Frecuentes — PLATACO</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --gold:#C9A84C;--gold-light:#e8d5b0;
+  --dark:#0a0a0a;--cream:#f8f5f0;--accent:#8a8a8a;
+}
+body{font-family:'Jost',sans-serif;background:var(--dark);color:#aaa;min-height:100vh}
+
+header{
+  background:var(--dark);border-bottom:1px solid #1a1a1a;
+  padding:1.2rem 3rem;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;letter-spacing:0.35em;color:#c0c0c0;text-decoration:none;}
+.logo span{font-style:italic;color:var(--gold);}
+.back-link{color:#555;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;text-decoration:none;display:flex;align-items:center;gap:0.5rem;transition:color 0.2s;}
+.back-link:hover{color:var(--gold);}
+
+.page-hero{
+  padding:5rem 3rem 4rem;text-align:center;
+  border-bottom:1px solid #1a1a1a;
+  position:relative;overflow:hidden;
+}
+.page-hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 50% at 50% 0%, rgba(201,168,76,0.07) 0%, transparent 70%);
+  pointer-events:none;
+}
+.page-eyebrow{font-size:0.62rem;letter-spacing:0.5em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;color:white;line-height:1.1;margin-bottom:1rem;}
+.page-meta{font-size:0.72rem;color:#3a3a3a;letter-spacing:0.1em;}
+
+.content-wrap{max-width:820px;margin:0 auto;padding:5rem 3rem;}
+
+/* Categorías */
+.cat-nav{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:3.5rem;}
+.cat-btn{
+  background:none;border:1px solid #1e1e1e;color:#444;
+  font-family:'Jost',sans-serif;font-size:0.65rem;letter-spacing:0.25em;
+  text-transform:uppercase;padding:0.5rem 1.1rem;cursor:pointer;transition:all 0.2s;
+}
+.cat-btn:hover,.cat-btn.active{border-color:var(--gold);color:var(--gold);}
+
+/* Sección FAQ */
+.faq-section{margin-bottom:4rem;display:none;}
+.faq-section.visible{display:block;}
+.section-label{
+  font-size:0.6rem;letter-spacing:0.45em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:1.5rem;padding-bottom:0.6rem;
+  border-bottom:1px solid #1a1a1a;
+}
+
+/* Accordion */
+.faq-item{border-bottom:1px solid #111;}
+.faq-question{
+  width:100%;background:none;border:none;color:#888;
+  font-family:'Jost',sans-serif;font-size:0.88rem;letter-spacing:0.04em;
+  padding:1.3rem 0;text-align:left;cursor:pointer;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  transition:color 0.2s;
+}
+.faq-question:hover{color:white;}
+.faq-question.open{color:white;}
+.faq-icon{
+  font-size:0.7rem;color:#333;flex-shrink:0;
+  transition:transform 0.25s,color 0.2s;
+}
+.faq-question.open .faq-icon{transform:rotate(45deg);color:var(--gold);}
+.faq-answer{
+  max-height:0;overflow:hidden;transition:max-height 0.35s ease;
+}
+.faq-answer-inner{
+  padding:0 0 1.5rem;font-size:0.82rem;color:#555;
+  line-height:1.95;letter-spacing:0.02em;
+}
+.faq-answer-inner strong{color:#888;}
+.faq-answer-inner a{color:var(--gold);text-decoration:none;}
+.faq-answer-inner a:hover{text-decoration:underline;}
+
+/* CTA final */
+.cta-block{
+  background:#111;border:1px solid #1e1e1e;padding:2.5rem 3rem;
+  text-align:center;margin-top:2rem;
+}
+.cta-block .cta-title{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;color:white;margin-bottom:0.5rem;}
+.cta-block p{font-size:0.8rem;color:#555;margin-bottom:1.5rem;}
+.cta-block a{
+  display:inline-block;background:var(--gold);color:#0a0a0a;
+  font-size:0.68rem;letter-spacing:0.25em;text-transform:uppercase;
+  padding:0.75rem 2rem;text-decoration:none;transition:opacity 0.2s;
+}
+.cta-block a:hover{opacity:0.85;}
+
+.footer-legal{border-top:1px solid #111;padding:2.5rem 3rem;text-align:center;}
+.footer-legal p{font-size:0.65rem;color:#222;letter-spacing:0.1em;}
+.footer-legal a{color:#333;text-decoration:none;transition:color 0.2s;}
+.footer-legal a:hover{color:#555;}
+.footer-links{display:flex;gap:2rem;justify-content:center;margin-top:0.8rem;flex-wrap:wrap;}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="logo">PLATA<span>&amp;</span>CO</a>
+  <a href="index.html" class="back-link">← Volver a la tienda</a>
+</header>
+
+<div class="page-hero">
+  <p class="page-eyebrow">Ayuda · FAQ</p>
+  <h1 class="page-title">Preguntas<br><em style="font-style:italic;color:#C8C8C8;">frecuentes</em></h1>
+  <p class="page-meta">Todo lo que necesitas saber antes de comprar</p>
+</div>
+
+<div class="content-wrap">
+
+  <!-- Navegación categorías -->
+  <div class="cat-nav">
+    <button class="cat-btn active" onclick="showCat('todas', this)">Todas</button>
+    <button class="cat-btn" onclick="showCat('materiales', this)">Materiales</button>
+    <button class="cat-btn" onclick="showCat('pedidos', this)">Pedidos</button>
+    <button class="cat-btn" onclick="showCat('envios', this)">Envíos</button>
+    <button class="cat-btn" onclick="showCat('devoluciones', this)">Devoluciones</button>
+    <button class="cat-btn" onclick="showCat('cuidados', this)">Cuidados</button>
+    <button class="cat-btn" onclick="showCat('tallas', this)">Tallas</button>
+  </div>
+
+  <!-- ── MATERIALES ── -->
+  <div class="faq-section visible" data-cat="materiales">
+    <p class="section-label">✦ Materiales y calidad</p>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        ¿De qué materiales están hechas las joyas de PLATACO?
+        <span class="faq-icon">✦</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">
+          Todas nuestras piezas están elaboradas en <strong>plata de ley 925</strong> — la más alta pureza comercial, con un 92,5 % de plata pura — o en <strong>oro 18 kilates</strong> (75 % de oro puro). Cada joya lleva el <strong>sello de contraste español</strong> que certifica su composición metálica.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        ¿Las joyas son aptas para pieles sensibles o alérgicas?
+        <span class="faq-icon">✦</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">
+          Sí. La plata 925 y el oro 18k son <strong>materiales hipoalergénicos</strong>. Sin embargo, si tienes hipersensibilidad al níquel, te recomendamos consultar la ficha técnica de cada pieza, ya que algunas aleaciones de plata pueden contener trazas mínimas. Escríbenos a <a href="mailto:hola@plataco.es">hola@plataco.es</a> y te asesoramos.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        ¿Qué significa "plata 925"?
+        <span class="faq-icon">✦</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">
+          El número 925 indica que la aleación contiene <strong>925 partes de plata pura por 1.000</strong>, es decir, un 92,5 %. El 7,5 % restante es generalmente cobre, lo que aporta dureza y resistencia sin comprometer el color ni la calidad de la pieza.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        ¿Las piezas llevan baño de rodio?
+        <span class="faq-icon">✦</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">
+          Algunas colecciones incluyen un <strong>baño de rodio</strong> para intensificar el brillo blanco y ralentizar la oxidación natural de la plata. Esto se indica expresamente en la descripción de cada producto. Las piezas sin baño desarrollan con el tiempo una pátina que muchos clientes consideran parte del carácter artesanal de la joya.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        ¿Usáis piedras naturales o sintéticas?
+        <span class="faq-icon">✦</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">
+          Trabajamos con <strong>piedras naturales semipreciosas</strong> (labradorita, ámbar, cuarzo, turquesa…) y, en colecciones específicas, con <strong>circonitas cúbicas de alta calidad</strong> con un nivel de transparencia equivalente al diamante. El tipo de piedra queda detallado en la ficha de cada pieza.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PEDIDOS ── -->
+  <div class="faq-section visible" data-cat="pedidos">
+    <p class="section-label">✦ Pedidos y pagos</p>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        ¿Qué métodos de pago aceptáis?
+        <span class="faq-icon">✦</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">
+          Aceptamos <strong>tarjeta de crédito y débito</strong> (Visa, Mastercard, American Express), <strong>Google Pay</strong> y <strong>Apple Pay</strong>. Todos los pagos se procesan a través de <strong>Stripe</strong>, plataforma líder en seguridad de pagos con cifrado SSL y autenticación 3D Secure.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        ¿Puedo modificar o cancelar mi pedido?
+        <span class="faq-icon">✦</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">
+          Puedes cancelar o modificar tu pedido <strong>dentro de las 2 horas siguientes</strong> a haberlo realizado, siempre que no haya entrado en preparación. Escríbenos a <a href="mailto:hola@plataco.es">hola@plataco.es</a> indicando tu número de pedido y gestionaremos el cambio sin coste. Pasado ese plazo, si el pedido ya está en camino, deberás iniciar una devolución cuando lo recibas.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        ¿Cómo sé que mi pedido se ha confirmado?
+        <span class="faq-icon">✦</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">
+          Recibirás un <strong>email de confirmación automático</strong> con el resumen de tu pedido y el número de referencia en los minutos posteriores a la compra. Si no lo recibes, revisa la carpeta de spam o escríbenos. También puedes consultar el estado desde <a href="cuenta.html">Mi cuenta</a>.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        ¿Puedo hacer un pedido como invitado (sin cuenta)?
+        <span class="faq-icon">✦</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">
+          Actualmente el proceso de compra requiere crear una cuenta gratuita, lo que te permite además hacer un <strong>seguimiento del pedido</strong>, gestionar devoluciones y guardar tus favoritos. El registro toma menos de un minuto.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        ¿Tenéis tarjetas regalo o vales descuento?
+        <span class="faq-icon">✦</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">
+          Sí. Contamos con <strong>códigos de descuento</strong> que enviamos periódicamente a suscriptores del newsletter y en campañas especiales. Si tienes un código, introdúcelo en el campo correspondiente durante el proceso de pago. Las tarjetas regalo físicas estarán disponibles próximamente.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ENVÍOS ── -->
+  <div class="faq-section visible" data-cat="envios">
+    <p class="section-label">✦ Envíos y plazos</p>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        ¿Cuánto tarda en llegar mi pedido?
+        <span class="faq-icon">✦</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">
+          Los pedidos se preparan y envían en <strong>1–2 días laborables</strong>. El plazo de entrega estimado es:<br><br>
+          · <strong>España Peninsular:</strong> 2–4 días laborables<br>
+          · <strong>Islas Baleares:</strong> 3–5 días laborables<br>
+          · <strong>Canarias, Ceuta y Melilla:</strong> 5–8 días laborables (posibles trámites aduaneros)<br>
+          · <strong>Europa (UE):</strong> 5–9 días laborables<br>
+          · <strong>Resto del mundo:</strong> 8–15 días laborables
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        ¿El envío tiene coste?
+        <span class="faq-icon">✦</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">
+          El <strong>envío es gratuito en pedidos iguales o superiores a 60 €</strong> dentro de España Peninsular. Para pedidos de menor importe, se aplica una tarifa de 3,95 €. Los envíos internacionales tienen su propio baremo de tarifas, que se muestra de forma detallada durante el proceso de pago según el destino.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        ¿Puedo hacer seguimiento de mi paquete?
+        <span class="faq-icon">✦</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">
+          Sí. Una vez enviado tu pedido, recibirás un <strong>email con el número de seguimiento</strong> y el enlace directo al portal de la transportista. También puedes consultarlo desde <a href="cuenta.html">Mi cuenta → Mis pedidos</a>.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        ¿Enviáis a todo el mundo?
+        <span class="faq-icon">✦</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">
+          Sí, realizamos envíos internacionales. Ten en cuenta que los pedidos destinados a países fuera de la Unión Europea pueden estar sujetos a <strong>aranceles o impuestos de importación</strong> que corren a cargo del destinatario. Te recomendamos consultar la normativa aduanera de tu país antes de realizar el pedido.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DEVOLUCIONES ── -->
+  <div class="faq-section visible" data-cat="devoluciones">
+    <p class="section-label">✦ Devoluciones y garantía</p>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        ¿Cuántos días tengo para devolver una joya?
+        <span class="faq-icon">✦</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">
+          Dispones de <strong>30 días naturales</strong> desde la recepción del pedido para solicitar una devolución o cambio, sin necesidad de justificación. La joya debe estar en su estado original, sin señales de uso y con el embalaje PLATACO intacto.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        ¿La devolución tiene coste?
+        <span class="faq-icon">✦</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">
+          Las devoluciones son <strong>completamente gratuitas</strong> dentro de España. En el caso de pedidos internacionales, los gastos de envío de retorno corren a cargo del cliente, salvo que la devolución se deba a un defecto de fabricación o error nuestro.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        ¿Cuándo recibiré el reembolso?
+        <span class="faq-icon">✦</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">
+          Una vez recibida y revisada la devolución, procesamos el reembolso en un plazo de <strong>3–5 días hábiles</strong>. El importe se abona en el mismo método de pago utilizado en la compra. Según tu entidad bancaria, puede tardar hasta 10 días en reflejarse.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        ¿Qué hago si recibo una pieza dañada o incorrecta?
+        <span class="faq-icon">✦</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">
+          Escríbenos a <a href="mailto:hola@plataco.es">hola@plataco.es</a> en las <strong>48 horas siguientes a la recepción</strong>, adjuntando fotos del producto y el embalaje. Gestionaremos el caso de forma prioritaria: reposición inmediata o reembolso completo, lo que prefieras.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        ¿Las joyas tienen garantía?
+        <span class="faq-icon">✦</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">
+          Sí. Todas las piezas tienen <strong>2 años de garantía legal</strong> conforme al Real Decreto Legislativo 1/2007. Esta garantía cubre defectos de fabricación, pero no el desgaste natural, oxidación por uso o daños accidentales. Para piezas con piedras, cubrimos la pérdida de engaste durante el primer año.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CUIDADOS ── -->
+  <div class="faq-section visible" data-cat="cuidados">
+    <p class="section-label">✦ Cuidados y mantenimiento</p>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        ¿Por qué se oxida la plata y cómo evitarlo?
+        <span class="faq-icon">✦</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">
+          La plata se oxida por reacción natural con el sulfuro de hidrógeno del aire, la humedad y los aceites de la piel. Para minimizarlo: <strong>guarda tus joyas en una bolsita hermética</strong> o en la caja PLATACO cuando no las uses, y <strong>evita el contacto con perfumes, colonias, cremas y productos de limpieza</strong>. Cuanto más la lleves puesta, menos se oscurecerá.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        ¿Cómo limpio una joya de plata en casa?
+        <span class="faq-icon">✦</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">
+          El método más sencillo: frota suavemente con un <strong>paño de microfibra o gamuza específica para plata</strong>. Para limpiezas más profundas, puedes usar agua tibia con unas gotas de jabón neutro y un cepillo de dientes de cerdas suaves, seguido de un aclarado con agua limpia y secado inmediato. Nunca uses lejía, amoniaco ni limpiahogar abrasivos. Consulta nuestra <a href="plataco-guia-cuidados.html" target="_blank">Guía de cuidados completa</a> para más consejos.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        ¿Puedo ducharme o nadar con las joyas?
+        <span class="faq-icon">✦</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">
+          Recomendamos <strong>retirar las joyas antes de ducharse, bañarse en la piscina o el mar</strong>. El cloro acelera la oxidación y puede dañar las piedras naturales y los baños de rodio. El agua salada también puede afectar al acabado a largo plazo.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        ¿Ofrecéis servicio de limpieza o restauración?
+        <span class="faq-icon">✦</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">
+          Sí. Ofrecemos un <strong>servicio de mantenimiento y restauración</strong> para piezas PLATACO: limpieza profesional, pulido y renovación del baño de rodio cuando proceda. Contacta con nosotros para solicitar presupuesto y condiciones.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TALLAS ── -->
+  <div class="faq-section visible" data-cat="tallas">
+    <p class="section-label">✦ Tallas y medidas</p>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        ¿Cómo sé qué talla de anillo necesito?
+        <span class="faq-icon">✦</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">
+          Puedes medirte en casa con dos métodos:<br><br>
+          <strong>1. Con hilo o papel:</strong> Rodea el dedo con un trozo de hilo o papel, marca donde se unen los extremos y mide esa longitud en milímetros. Esa es la circunferencia. Divide entre π (3,14) y obtendrás el diámetro interno en mm, que corresponde a tu talla española.<br><br>
+          <strong>2. Con un anillo existente:</strong> Mide el diámetro interno de un anillo que te quede bien. Consulta nuestra tabla de equivalencias en la ficha de producto. Si tienes dudas, escríbenos y te guiamos.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        ¿Puedo pedir un anillo en una talla personalizada?
+        <span class="faq-icon">✦</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">
+          Muchos de nuestros anillos están disponibles en <strong>tallas del 6 al 22 (diámetro interior en mm)</strong>. Si necesitas una talla fuera de rango o un ajuste muy específico, contáctanos para solicitar un <strong>pedido personalizado</strong>. El plazo de fabricación es de 10–15 días laborables adicionales.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        ¿Puedo cambiar la talla de un anillo tras la compra?
+        <span class="faq-icon">✦</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">
+          Sí, ofrecemos un <strong>servicio de tallaje</strong> para anillos lisos dentro de los 30 días posteriores a la compra. El ajuste tiene un coste de 15 € más los gastos de envío de ida y vuelta. Los anillos con pavé de piedras o diseños muy trabajados pueden no ser tallables; consúltanos antes de enviarlo.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        ¿Cómo mido la longitud de un collar o pulsera?
+        <span class="faq-icon">✦</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">
+          La longitud indicada en la ficha de producto es la longitud total de la cadena, medida desde el inicio hasta el cierre. Como referencia orientativa:<br><br>
+          · <strong>40 cm</strong> — Collar corto o gargantilla<br>
+          · <strong>45 cm</strong> — Longitud estándar (descansa sobre la clavícula)<br>
+          · <strong>50–55 cm</strong> — Longitud media (encima del escote)<br>
+          · <strong>60–70 cm</strong> — Largo (colgante visible)<br><br>
+          Para pulseras, la talla estándar es 17–19 cm con regulador. Si necesitas una longitud especial, indícalo en los comentarios del pedido.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-block">
+    <p class="cta-title">¿No encuentras lo que buscas?</p>
+    <p>Nuestro equipo está disponible de lunes a viernes de 9 h a 18 h para resolver cualquier duda personalizada.</p>
+    <a href="contacto.html">Contactar con nosotros</a>
+  </div>
+
+</div>
+
+<footer class="footer-legal">
+  <p>© <span id="footerYear"></span> PLATACO — Todos los derechos reservados</p>
+  <div class="footer-links">
+    <a href="politica-privacidad.html">Política de privacidad</a>
+    <a href="envios-devoluciones.html">Envíos y devoluciones</a>
+    <a href="contacto.html">Contacto</a>
+  </div>
+</footer>
+
+<script>
+document.getElementById('footerYear').textContent = new Date().getFullYear();
+
+function showCat(cat, btn) {
+  // Botones
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  // Secciones
+  document.querySelectorAll('.faq-section').forEach(sec => {
+    if (cat === 'todas' || sec.dataset.cat === cat) {
+      sec.classList.add('visible');
+    } else {
+      sec.classList.remove('visible');
+    }
+  });
+}
+
+function toggleFaq(btn) {
+  const answer = btn.nextElementSibling;
+  const isOpen = btn.classList.contains('open');
+
+  // Cierra todos
+  document.querySelectorAll('.faq-question.open').forEach(q => {
+    q.classList.remove('open');
+    q.nextElementSibling.style.maxHeight = null;
+  });
+
+  // Abre el pulsado si estaba cerrado
+  if (!isOpen) {
+    btn.classList.add('open');
+    answer.style.maxHeight = answer.scrollHeight + 'px';
+  }
+}
+</script>
+</body>
+</html>
