@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contacto — PLATACO</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --gold:#C9A84C;--gold-light:#e8d5b0;
+  --dark:#0a0a0a;--cream:#f8f5f0;--accent:#8a8a8a;
+}
+body{font-family:'Jost',sans-serif;background:var(--dark);color:#aaa;min-height:100vh}
+
+header{
+  background:var(--dark);border-bottom:1px solid #1a1a1a;
+  padding:1.2rem 3rem;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;letter-spacing:0.35em;color:#c0c0c0;text-decoration:none;}
+.logo span{font-style:italic;color:var(--gold);}
+.back-link{color:#555;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;text-decoration:none;display:flex;align-items:center;gap:0.5rem;transition:color 0.2s;}
+.back-link:hover{color:var(--gold);}
+
+.page-hero{
+  padding:5rem 3rem 4rem;text-align:center;
+  border-bottom:1px solid #1a1a1a;
+  position:relative;overflow:hidden;
+}
+.page-hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 50% at 50% 0%, rgba(201,168,76,0.07) 0%, transparent 70%);
+  pointer-events:none;
+}
+.page-eyebrow{font-size:0.62rem;letter-spacing:0.5em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;color:white;line-height:1.1;margin-bottom:1rem;}
+.page-meta{font-size:0.75rem;color:#3a3a3a;letter-spacing:0.1em;}
+
+.content-wrap{max-width:900px;margin:0 auto;padding:5rem 3rem;}
+
+/* Dos columnas */
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start;}
+@media(max-width:700px){.contact-grid{grid-template-columns:1fr;gap:3rem;}}
+
+/* Info lateral */
+.contact-info-block{display:flex;flex-direction:column;gap:2.5rem;}
+.info-item{}
+.info-label{font-size:0.6rem;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem;}
+.info-value{font-size:0.85rem;color:#777;line-height:1.8;}
+.info-value a{color:#777;text-decoration:none;transition:color 0.2s;}
+.info-value a:hover{color:var(--gold);}
+
+.horario-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.2rem 1.5rem;}
+.horario-grid span:nth-child(odd){color:#555;font-size:0.8rem;}
+.horario-grid span:nth-child(even){color:#777;font-size:0.8rem;text-align:right;}
+
+/* Formulario */
+.form-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;color:white;margin-bottom:0.3rem;}
+.form-sub{font-size:0.75rem;color:#3a3a3a;letter-spacing:0.05em;margin-bottom:2rem;}
+
+.form-group{margin-bottom:1.4rem;}
+label{display:block;font-size:0.6rem;letter-spacing:0.3em;text-transform:uppercase;color:#555;margin-bottom:0.5rem;}
+input[type="text"], input[type="email"], select, textarea{
+  width:100%;background:none;border:1px solid #1e1e1e;color:white;
+  font-family:'Jost',sans-serif;font-size:0.83rem;padding:0.75rem 1rem;outline:none;
+  letter-spacing:0.02em;transition:border-color 0.2s;
+}
+input[type="text"]:focus, input[type="email"]:focus, select:focus, textarea:focus{border-color:var(--gold);}
+select{appearance:none;background:#0f0f0f;cursor:pointer;}
+select option{background:#111;color:#aaa;}
+textarea{resize:vertical;min-height:130px;}
+
+.btn-submit{
+  width:100%;background:var(--gold);border:none;color:#0a0a0a;
+  padding:0.9rem 2rem;cursor:pointer;font-family:'Jost',sans-serif;
+  font-size:0.72rem;letter-spacing:0.3em;text-transform:uppercase;
+  transition:opacity 0.2s;margin-top:0.5rem;
+}
+.btn-submit:hover{opacity:0.85;}
+.btn-submit:disabled{opacity:0.5;cursor:not-allowed;}
+
+#formMsg{font-size:0.75rem;margin-top:0.8rem;letter-spacing:0.05em;min-height:1rem;}
+
+/* Mapa placeholder */
+.map-block{
+  margin-top:5rem;padding-top:4rem;border-top:1px solid #1a1a1a;
+}
+.map-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:300;color:white;margin-bottom:0.3rem;}
+.map-sub{font-size:0.72rem;color:#3a3a3a;letter-spacing:0.08em;margin-bottom:1.5rem;}
+.map-placeholder{
+  background:#111;border:1px solid #1a1a1a;height:220px;
+  display:flex;align-items:center;justify-content:center;
+}
+.map-placeholder p{font-size:0.7rem;color:#2a2a2a;letter-spacing:0.2em;text-transform:uppercase;}
+
+/* Redes */
+.social-row{display:flex;gap:1.2rem;margin-top:1rem;}
+.social-link{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;
+  color:#3a3a3a;text-decoration:none;transition:color 0.2s;
+}
+.social-link:hover{color:var(--gold);}
+
+.footer-legal{border-top:1px solid #111;padding:2.5rem 3rem;text-align:center;}
+.footer-legal p{font-size:0.65rem;color:#222;letter-spacing:0.1em;}
+.footer-legal a{color:#333;text-decoration:none;transition:color 0.2s;}
+.footer-legal a:hover{color:#555;}
+.footer-links{display:flex;gap:2rem;justify-content:center;margin-top:0.8rem;flex-wrap:wrap;}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="logo">PLATA<span>&amp;</span>CO</a>
+  <a href="index.html" class="back-link">← Volver a la tienda</a>
+</header>
+
+<div class="page-hero">
+  <p class="page-eyebrow">Atención al cliente · Contacto</p>
+  <h1 class="page-title">Estamos aquí<br><em style="font-style:italic;color:#C8C8C8;">para ayudarte</em></h1>
+  <p class="page-meta">Respondemos en menos de 24 h · Lunes a viernes</p>
+</div>
+
+<div class="content-wrap">
+
+  <div class="contact-grid">
+
+    <!-- Columna izquierda: información -->
+    <div class="contact-info-block">
+
+      <div class="info-item">
+        <p class="info-label">Correo electrónico</p>
+        <p class="info-value"><a href="mailto:hola@plataco.es">hola@plataco.es</a></p>
+      </div>
+
+      <div class="info-item">
+        <p class="info-label">Teléfono</p>
+        <p class="info-value">
+          <a href="tel:+34910000000">+34 910 000 000</a><br>
+          <span style="font-size:0.75rem;color:#3a3a3a;">Lunes a viernes, 9 h – 18 h (CET)</span>
+        </p>
+      </div>
+
+      <div class="info-item">
+        <p class="info-label">WhatsApp</p>
+        <p class="info-value"><a href="https://wa.me/34910000000" target="_blank">+34 910 000 000</a></p>
+      </div>
+
+      <div class="info-item">
+        <p class="info-label">Horario de atención</p>
+        <div class="horario-grid">
+          <span>Lunes – Viernes</span><span>9:00 – 18:00</span>
+          <span>Sábados</span><span>10:00 – 14:00</span>
+          <span>Domingos y festivos</span><span>Cerrado</span>
+        </div>
+      </div>
+
+      <div class="info-item">
+        <p class="info-label">Dirección</p>
+        <p class="info-value">
+          Calle de la Joyería, 12<br>
+          28001 Madrid, España
+        </p>
+      </div>
+
+      <div class="info-item">
+        <p class="info-label">Síguenos</p>
+        <div class="social-row">
+          <a href="#" class="social-link">✦ Instagram</a>
+          <a href="#" class="social-link">✦ Pinterest</a>
+          <a href="#" class="social-link">✦ TikTok</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Columna derecha: formulario -->
+    <div>
+      <p class="form-title">Envíanos un mensaje</p>
+      <p class="form-sub">Rellena el formulario y te contactamos en menos de 24 horas.</p>
+
+      <div class="form-group">
+        <label for="contactNombre">Nombre completo</label>
+        <input type="text" id="contactNombre" placeholder="Tu nombre">
+      </div>
+
+      <div class="form-group">
+        <label for="contactEmail">Correo electrónico</label>
+        <input type="email" id="contactEmail" placeholder="tu@email.com">
+      </div>
+
+      <div class="form-group">
+        <label for="contactAsunto">Asunto</label>
+        <select id="contactAsunto">
+          <option value="">— Selecciona un motivo —</option>
+          <option value="pedido">Consulta sobre mi pedido</option>
+          <option value="devolucion">Devolución o cambio</option>
+          <option value="talla">Consulta de talla / medida</option>
+          <option value="producto">Información sobre un producto</option>
+          <option value="personalizado">Pieza personalizada</option>
+          <option value="mayorista">Venta al por mayor</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="contactMensaje">Mensaje</label>
+        <textarea id="contactMensaje" placeholder="Cuéntanos en qué podemos ayudarte…"></textarea>
+      </div>
+
+      <button class="btn-submit" id="contactBtn" onclick="enviarContacto()">Enviar mensaje</button>
+      <p id="formMsg"></p>
+    </div>
+
+  </div>
+
+  <!-- Mapa -->
+  <div class="map-block">
+    <p class="map-title">Nuestra ubicación</p>
+    <p class="map-sub">Calle de la Joyería, 12 · 28001 Madrid</p>
+    <div class="map-placeholder">
+      <p>Mapa — próximamente</p>
+    </div>
+  </div>
+
+</div>
+
+<footer class="footer-legal">
+  <p>© <span id="footerYear"></span> PLATACO — Todos los derechos reservados</p>
+  <div class="footer-links">
+    <a href="politica-privacidad.html">Política de privacidad</a>
+    <a href="envios-devoluciones.html">Envíos y devoluciones</a>
+    <a href="preguntas-frecuentes.html">Preguntas frecuentes</a>
+  </div>
+</footer>
+
+<script>
+document.getElementById('footerYear').textContent = new Date().getFullYear();
+
+async function enviarContacto() {
+  const nombre  = document.getElementById('contactNombre').value.trim();
+  const email   = document.getElementById('contactEmail').value.trim();
+  const asunto  = document.getElementById('contactAsunto').value;
+  const mensaje = document.getElementById('contactMensaje').value.trim();
+  const btn     = document.getElementById('contactBtn');
+  const msg     = document.getElementById('formMsg');
+
+  if (!nombre || !email || !asunto || !mensaje) {
+    msg.style.color = '#c0392b';
+    msg.textContent = 'Por favor, rellena todos los campos.';
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    msg.style.color = '#c0392b';
+    msg.textContent = 'Introduce un correo electrónico válido.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Enviando…';
+  msg.style.color = '#555';
+  msg.textContent = '';
+
+  try {
+    const API = window.PLATACO_API || '';
+    const res = await fetch(`${API}/api/newsletter/contact`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nombre, email, asunto, mensaje }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      msg.style.color = '#c9a84c';
+      msg.textContent = '✦ Mensaje enviado. Te responderemos en menos de 24 h.';
+      document.getElementById('contactNombre').value = '';
+      document.getElementById('contactEmail').value = '';
+      document.getElementById('contactAsunto').value = '';
+      document.getElementById('contactMensaje').value = '';
+    } else {
+      msg.style.color = '#c0392b';
+      msg.textContent = data.error || 'Error al enviar. Inténtalo de nuevo.';
+    }
+  } catch {
+    msg.style.color = '#c0392b';
+    msg.textContent = 'Error de conexión. Escríbenos directamente a hola@plataco.es';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Enviar mensaje';
+  }
+}
+</script>
+</body>
+</html>
