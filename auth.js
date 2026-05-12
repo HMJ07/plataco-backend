@@ -8,6 +8,8 @@ import { loginLimiter, registerLimiter } from './rate_limit.js';
 
 const router = Router();
 
+const INTERNAL_ERROR = 'Error interno del servidor. Inténtalo de nuevo.';
+
 // ── POST /api/auth/register ────────────────────────────────
 router.post('/register', registerLimiter, async (req, res) => {
   try {
@@ -44,7 +46,8 @@ router.post('/register', registerLimiter, async (req, res) => {
 
     res.status(201).json({ token, user });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('register error:', err);
+    res.status(500).json({ error: INTERNAL_ERROR });
   }
 });
 
@@ -75,7 +78,8 @@ router.post('/login', loginLimiter, async (req, res) => {
     const { password_hash, ...userSafe } = user;
     res.json({ token, user: userSafe });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('login error:', err);
+    res.status(500).json({ error: INTERNAL_ERROR });
   }
 });
 
@@ -89,7 +93,8 @@ router.get('/me', requireAuth, async (req, res) => {
     if (!result.rows[0]) return res.status(404).json({ error: 'Usuario no encontrado' });
     res.json(result.rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('GET /me error:', err);
+    res.status(500).json({ error: INTERNAL_ERROR });
   }
 });
 
@@ -105,7 +110,8 @@ router.put('/me', requireAuth, async (req, res) => {
     );
     res.json(result.rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('PUT /me error:', err);
+    res.status(500).json({ error: INTERNAL_ERROR });
   }
 });
 

@@ -15,7 +15,7 @@
 import { Router }  from 'express';
 import bcrypt      from 'bcryptjs';
 import crypto      from 'crypto';
-import { query }   from './db.js';
+import { query, getClient } from './db.js';
 import { forgotPasswordLimiter, resetPasswordLimiter } from './rate_limit.js';
 
 const router = Router();
@@ -221,20 +221,23 @@ router.post('/reset-password', resetPasswordLimiter, async (req, res) => {
     const passwordHash = await bcrypt.hash(password, 12);
 
     // Actualizar contraseña e invalidar el token en una sola transacción
-    await query('BEGIN');
+    const client = await getClient();
     try {
-      await query(
+      await client.query('BEGIN');
+      await client.query(
         'UPDATE users SET password_hash = $1 WHERE id = $2',
         [passwordHash, tokenRow.user_id]
       );
-      await query(
+      await client.query(
         'UPDATE password_reset_tokens SET used_at = NOW() WHERE id = $1',
         [tokenRow.id]
       );
-      await query('COMMIT');
+      await client.query('COMMIT');
     } catch (err) {
-      await query('ROLLBACK');
+      await client.query('ROLLBACK');
       throw err;
+    } finally {
+      client.release();
     }
 
     console.log(`🔒 Contraseña restablecida para user ${tokenRow.user_id}`);
