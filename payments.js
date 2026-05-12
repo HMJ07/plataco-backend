@@ -41,6 +41,9 @@ router.post('/create-intent', async (req, res) => {
       }
 
       let price_eur = parseFloat(product.price_eur);
+      if (isNaN(price_eur) || price_eur <= 0) {
+        return res.status(400).json({ error: `El producto "${product.name}" no tiene un precio válido configurado en la base de datos.` });
+      }
 
       // Añadir precio extra de variante si hay
       if (item.variant_id) {
@@ -98,6 +101,32 @@ router.post('/create-intent', async (req, res) => {
     // Convertir a la divisa del cliente
     const rate = EXCHANGE_RATES[currency] || 1;
     const total_customer = Math.round(total_eur * rate * 100); // en centavos
+
+    // Si el total es 0 (descuento del 100%), no se necesita cobrar con Stripe
+    // En ese caso saltamos el PaymentIntent y confirmamos el pedido directamente
+    if (total_customer === 0) {
+      return res.json({
+        client_secret:              null,
+        payment_intent_id:          null,
+        free_order:                 true,   // ← el frontend usa esto para saltarse Stripe
+        total_eur:                  0,
+        shipping_eur,
+        discount_eur,
+        coupon:                     appliedCoupon,
+        total_customer_currency:    '0.00',
+        currency,
+        validated_items:            validatedItems,
+      });
+    }
+
+    // Stripe requiere un mínimo de 50 céntimos.
+    // Si llegamos aquí con menos de 50 es que hay un producto sin precio en BD,
+    // no un descuento (ese caso ya lo hemos capturado arriba con total === 0).
+    if (total_customer < 50) {
+      return res.status(400).json({
+        error: `El importe total (${(total_customer / 100).toFixed(2)} ${currency}) es inferior al mínimo permitido por Stripe (0.50 ${currency}). Revisa que los productos tengan precio configurado en la base de datos.`,
+      });
+    }
 
     // Crear PaymentIntent en Stripe
     // IMPORTANTE: Stripe limita cada campo de metadata a 500 chars.
@@ -166,8 +195,85 @@ router.post('/confirm-order', (req, res, next) => {
       payment_intent_id,
       shipping_address,
       guest_email,
+      free_order,
+      free_order_meta,
     } = req.body;
 
+    const user_id = req.user?.id || null;
+
+    // ── Pedido gratuito (cupón 100% descuento) ────────────
+    if (free_order) {
+      const meta = free_order_meta;
+      const items = meta.validated_items;
+      const total_eur    = parseFloat(meta.total_eur    ?? 0);
+      const shipping_eur = parseFloat(meta.shipping_eur ?? 0);
+      const discount_eur = parseFloat(meta.discount_eur ?? 0);
+      const subtotal_eur = +(shipping_eur === 0
+        ? discount_eur   // envío gratis + descuento total
+        : discount_eur - shipping_eur).toFixed(2);
+      const coupon_id    = meta.coupon?.id   || null;
+      const coupon_code  = meta.coupon?.code || null;
+
+      const order = await withTransaction(async (client) => {
+        const orderResult = await client.query(`
+          INSERT INTO orders (
+            user_id, guest_email, status,
+            subtotal_eur, shipping_eur, discount_eur, total_eur,
+            coupon_id, coupon_code,
+            currency, total_customer_currency, exchange_rate,
+            ship_first_name, ship_last_name, ship_address1, ship_address2,
+            ship_city, ship_state, ship_postal_code, ship_country, ship_phone
+          ) VALUES ($1,$2,'paid',$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
+          RETURNING *
+        `, [
+          user_id, guest_email || null,
+          subtotal_eur, shipping_eur, discount_eur, total_eur,
+          coupon_id, coupon_code,
+          meta.currency || 'EUR', 0, 1,
+          shipping_address.first_name, shipping_address.last_name,
+          shipping_address.address1, shipping_address.address2 || null,
+          shipping_address.city, shipping_address.state || null,
+          shipping_address.postal_code, shipping_address.country, shipping_address.phone || null,
+        ]);
+        const order = orderResult.rows[0];
+
+        for (const item of items) {
+          await client.query(`
+            INSERT INTO order_items (order_id, product_id, product_variant_id, product_name, variant_name, unit_price_eur, quantity, subtotal_eur)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+          `, [
+            order.id, item.product_id, item.variant_id || null,
+            item.product_name, item.variant_name || null,
+            item.unit_price_eur, item.quantity, item.unit_price_eur * item.quantity,
+          ]);
+          await client.query('UPDATE products SET stock = stock - $1 WHERE id = $2', [item.quantity, item.product_id]);
+          if (item.variant_id) {
+            await client.query('UPDATE product_variants SET stock = stock - $1 WHERE id = $2', [item.quantity, item.variant_id]);
+          }
+        }
+
+        // Registrar pago con importe 0
+        await client.query(`
+          INSERT INTO payments (order_id, stripe_payment_intent_id, stripe_charge_id, amount_eur, currency, status, payment_method)
+          VALUES ($1, NULL, NULL, 0, $2, 'succeeded', 'coupon_100')
+        `, [order.id, meta.currency || 'EUR']);
+
+        // Actualizar cupón
+        if (coupon_id && discount_eur > 0) {
+          await client.query(
+            `INSERT INTO coupon_uses (coupon_id, order_id, user_id, discount_eur) VALUES ($1,$2,$3,$4)`,
+            [coupon_id, order.id, user_id, discount_eur]
+          );
+          await client.query('UPDATE coupons SET uses_count = uses_count + 1 WHERE id = $1', [coupon_id]);
+        }
+
+        return order;
+      });
+
+      return res.json({ success: true, order_id: order.id, message: 'Pedido gratuito creado correctamente' });
+    }
+
+    // ── Pedido normal con Stripe ───────────────────────────
     // Verificar el pago con Stripe (no confiar en el cliente)
     const paymentIntent = await stripe.paymentIntents.retrieve(payment_intent_id);
 
@@ -216,7 +322,6 @@ router.post('/confirm-order', (req, res, next) => {
     const subtotal_eur = total_eur - shipping_eur + discount_eur;
     const coupon_id   = meta.coupon_id   || null;
     const coupon_code = meta.coupon_code || null;
-    const user_id = req.user?.id || null;
 
     // Crear pedido y pago en una transacción
     const order = await withTransaction(async (client) => {
