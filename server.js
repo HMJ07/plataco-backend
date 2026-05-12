@@ -24,6 +24,7 @@ import googleAuthRoutes from './google_auth.js';
 import reviewRoutes   from './reviews.js';
 import couponRoutes   from './coupons.js';
 import tryonRoutes    from './tryon.js';
+import newsletterRoutes from './newsletter.js';
 import { generalLimiter } from './rate_limit.js';
 
 dotenv.config();
@@ -68,6 +69,7 @@ app.use('/api/webhooks',      webhookRoutes);
 app.use('/api/reviews',       reviewRoutes);
 app.use('/api/coupons',       couponRoutes);
 app.use('/api/tryon',         tryonRoutes);
+app.use('/api/newsletter',    newsletterRoutes);
 
 // ── Health check ───────────────────────────────────────────
 app.get('/api/health', (req, res) => {
