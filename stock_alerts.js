@@ -11,7 +11,6 @@
 
 import { Router } from 'express';
 import { query }  from './db.js';
-import { sendEmail } from './email.js';
 
 const router = Router();
 
