@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
 <script>
   window.PLATACO_API     = 'https://plataco-backend-production.up.railway.app';
   window.PLATACO_API_URL = 'https://plataco-backend-production.up.railway.app/api';
 </script>
+<html lang="es">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="config.js"></script>
@@ -2869,6 +2869,8 @@ function toProductCard(apiProduct){
     specs:{Pureza:apiProduct.purity?`${apiProduct.purity}‰`:'925‰',Peso:apiProduct.weight_grams?`${apiProduct.weight_grams}g`:'N/D',Acabado:apiProduct.finish||'Estándar'},
     variantMap:variants.reduce((acc,v)=>{acc[v.name]=v.id;return acc;},{}),
     imageUrl:getProductImage(apiProduct),svg:null,
+    stock:apiProduct.stock??0,
+    stock_label:apiProduct.stock_label||'disponible',
   };
 }
 async function loadProductsFromApi(){
