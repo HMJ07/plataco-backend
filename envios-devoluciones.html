@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Envíos y Devoluciones — PLATACO</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --gold:#C9A84C;--gold-light:#e8d5b0;
+  --dark:#0a0a0a;--mid:#111;--border:#1a1a1a;--accent:#8a8a8a;
+}
+body{font-family:'Jost',sans-serif;background:var(--dark);color:#aaa;min-height:100vh}
+
+header{
+  background:var(--dark);border-bottom:1px solid var(--border);
+  padding:1.2rem 3rem;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;letter-spacing:0.35em;color:#c0c0c0;text-decoration:none;}
+.logo span{font-style:italic;color:var(--gold);}
+.back-link{color:#555;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;text-decoration:none;display:flex;align-items:center;gap:0.5rem;transition:color 0.2s;}
+.back-link:hover{color:var(--gold);}
+
+.page-hero{
+  padding:5rem 3rem 4rem;text-align:center;
+  border-bottom:1px solid var(--border);
+  position:relative;overflow:hidden;
+}
+.page-hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 50% at 50% 0%, rgba(201,168,76,0.07) 0%, transparent 70%);
+  pointer-events:none;
+}
+.page-eyebrow{font-size:0.62rem;letter-spacing:0.5em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;color:white;line-height:1.1;margin-bottom:1rem;}
+.page-meta{font-size:0.72rem;color:#3a3a3a;letter-spacing:0.1em;}
+
+/* Nav sticky */
+.section-nav{
+  position:sticky;top:57px;z-index:90;
+  background:rgba(10,10,10,0.97);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border);
+  padding:0 3rem;display:flex;gap:0;overflow-x:auto;
+}
+.nav-item{
+  font-size:0.62rem;letter-spacing:0.25em;text-transform:uppercase;
+  color:#333;text-decoration:none;padding:1rem 1.4rem;
+  border-bottom:1px solid transparent;white-space:nowrap;
+  transition:color 0.2s,border-color 0.2s;cursor:pointer;
+}
+.nav-item:hover,.nav-item.active{color:var(--gold);border-bottom-color:var(--gold);}
+
+.content-wrap{max-width:860px;margin:0 auto;padding:5rem 3rem;}
+
+/* Secciones */
+.section-block{margin-bottom:5rem;scroll-margin-top:110px;}
+.section-eyebrow{font-size:0.58rem;letter-spacing:0.45em;text-transform:uppercase;color:var(--gold);margin-bottom:0.6rem;}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:white;margin-bottom:2rem;}
+.section-divider{width:40px;height:1px;background:var(--gold);margin:1rem 0 2rem;opacity:0.4;}
+
+/* Tarjetas de envío */
+.shipping-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1px;background:var(--border);margin-bottom:2rem;}
+.shipping-card{background:var(--mid);padding:2rem;position:relative;overflow:hidden;}
+.shipping-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:0;transition:opacity 0.3s;
+}
+.shipping-card:hover::before{opacity:1;}
+.card-icon{font-size:1.2rem;margin-bottom:1rem;display:block;}
+.card-title{font-size:0.75rem;letter-spacing:0.2em;text-transform:uppercase;color:white;margin-bottom:0.4rem;}
+.card-price{font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--gold);margin-bottom:0.4rem;}
+.card-desc{font-size:0.78rem;color:#444;line-height:1.7;}
+.card-badge{
+  display:inline-block;font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;
+  color:#0a0a0a;background:var(--gold);padding:0.2rem 0.6rem;margin-top:0.5rem;
+}
+
+/* Tabla */
+.policy-table{width:100%;border-collapse:collapse;margin-bottom:2rem;}
+.policy-table th{
+  font-size:0.6rem;letter-spacing:0.3em;text-transform:uppercase;
+  color:#555;font-weight:400;text-align:left;padding:0.8rem 1rem;
+  border-bottom:1px solid var(--border);
+}
+.policy-table td{
+  font-size:0.82rem;color:#555;padding:1rem;
+  border-bottom:1px solid #0f0f0f;line-height:1.7;
+  vertical-align:top;
+}
+.policy-table tr:hover td{color:#777;}
+.policy-table .highlight{color:#888;}
+
+/* Steps */
+.steps-list{display:flex;flex-direction:column;gap:0;}
+.step-item{
+  display:flex;gap:2rem;padding:2rem 0;
+  border-bottom:1px solid #0f0f0f;align-items:flex-start;
+}
+.step-num{
+  font-family:'Cormorant Garamond',serif;font-size:2.5rem;
+  color:#1a1a1a;line-height:1;flex-shrink:0;width:2rem;text-align:center;
+  transition:color 0.3s;
+}
+.step-item:hover .step-num{color:var(--gold);}
+.step-body{}
+.step-title{font-size:0.78rem;letter-spacing:0.15em;text-transform:uppercase;color:white;margin-bottom:0.4rem;}
+.step-desc{font-size:0.82rem;color:#444;line-height:1.8;}
+
+/* Info boxes */
+.info-box{
+  background:#111;border:1px solid var(--border);padding:1.5rem 2rem;
+  margin-bottom:1.5rem;display:flex;gap:1.5rem;align-items:flex-start;
+}
+.info-box-icon{font-size:1rem;flex-shrink:0;margin-top:0.15rem;}
+.info-box-content{}
+.info-box-title{font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:white;margin-bottom:0.4rem;}
+.info-box-text{font-size:0.8rem;color:#444;line-height:1.8;}
+.info-box-text a{color:var(--gold);text-decoration:none;}
+.info-box-text a:hover{text-decoration:underline;}
+.info-box.warn .info-box-title{color:#c4a35a;}
+
+/* Prose */
+.prose{font-size:0.83rem;color:#444;line-height:2;margin-bottom:1.5rem;}
+.prose strong{color:#666;}
+.prose a{color:var(--gold);text-decoration:none;}
+.prose a:hover{text-decoration:underline;}
+
+/* CTA */
+.cta-block{
+  background:#111;border:1px solid #1e1e1e;padding:2.5rem 3rem;
+  text-align:center;margin-top:4rem;
+}
+.cta-block .cta-title{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;color:white;margin-bottom:0.5rem;}
+.cta-block p{font-size:0.8rem;color:#555;margin-bottom:1.5rem;}
+.cta-block a{
+  display:inline-block;background:var(--gold);color:#0a0a0a;
+  font-size:0.68rem;letter-spacing:0.25em;text-transform:uppercase;
+  padding:0.75rem 2rem;text-decoration:none;transition:opacity 0.2s;
+}
+.cta-block a:hover{opacity:0.85;}
+
+.footer-legal{border-top:1px solid #111;padding:2.5rem 3rem;text-align:center;}
+.footer-legal p{font-size:0.65rem;color:#222;letter-spacing:0.1em;}
+.footer-legal a{color:#333;text-decoration:none;transition:color 0.2s;}
+.footer-legal a:hover{color:#555;}
+.footer-links{display:flex;gap:2rem;justify-content:center;margin-top:0.8rem;flex-wrap:wrap;}
+
+@media(max-width:640px){
+  header{padding:1.2rem 1.5rem;}
+  .page-hero{padding:3.5rem 1.5rem 3rem;}
+  .page-title{font-size:2.2rem;}
+  .content-wrap{padding:3rem 1.5rem;}
+  .section-nav{padding:0 1.5rem;}
+  .step-item{gap:1.2rem;}
+  .cta-block{padding:2rem 1.5rem;}
+  .footer-legal{padding:2rem 1.5rem;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="logo">PLATA<span>&amp;</span>CO</a>
+  <a href="index.html" class="back-link">← Volver a la tienda</a>
+</header>
+
+<div class="page-hero">
+  <p class="page-eyebrow">Información · Logística</p>
+  <h1 class="page-title">Envíos y<br><em style="font-style:italic;color:#C8C8C8;">Devoluciones</em></h1>
+  <p class="page-meta">Todo sobre el envío, plazos y nuestra política de devolución</p>
+</div>
+
+<nav class="section-nav">
+  <a class="nav-item active" onclick="scrollTo('envios',this)">Envíos</a>
+  <a class="nav-item" onclick="scrollTo('plazos',this)">Plazos</a>
+  <a class="nav-item" onclick="scrollTo('devoluciones',this)">Devoluciones</a>
+  <a class="nav-item" onclick="scrollTo('cambios',this)">Cambios</a>
+  <a class="nav-item" onclick="scrollTo('incidencias',this)">Incidencias</a>
+</nav>
+
+<div class="content-wrap">
+
+  <!-- ENVÍOS -->
+  <div class="section-block" id="envios">
+    <p class="section-eyebrow">✦ Costes y zonas</p>
+    <h2 class="section-title">Tarifas de envío</h2>
+
+    <div class="shipping-cards">
+      <div class="shipping-card">
+        <span class="card-icon">📦</span>
+        <p class="card-title">España Peninsular</p>
+        <p class="card-price">3,95 €</p>
+        <p class="card-desc">Correos Express o MRW. Gratis en pedidos desde 60 €.</p>
+        <span class="card-badge">Gratis +60 €</span>
+      </div>
+      <div class="shipping-card">
+        <span class="card-icon">🏝️</span>
+        <p class="card-title">Baleares & Canarias</p>
+        <p class="card-price">5,95 €</p>
+        <p class="card-desc">Incluye documentación aduanera para Canarias (IGIC a cargo del destinatario).</p>
+      </div>
+      <div class="shipping-card">
+        <span class="card-icon">🌍</span>
+        <p class="card-title">Europa (UE)</p>
+        <p class="card-price">9,95 €</p>
+        <p class="card-desc">Entrega con número de seguimiento en 5–8 días laborables.</p>
+        <span class="card-badge">Gratis +120 €</span>
+      </div>
+      <div class="shipping-card">
+        <span class="card-icon">✈️</span>
+        <p class="card-title">Internacional</p>
+        <p class="card-price">Desde 14,95 €</p>
+        <p class="card-desc">EE.UU., UK, Latinoamérica y resto del mundo. Aranceles locales a cargo del destinatario.</p>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <span class="info-box-icon">✦</span>
+      <div class="info-box-content">
+        <p class="info-box-title">Envíos certificados y seguros</p>
+        <p class="info-box-text">Todos nuestros paquetes se envían con número de seguimiento. Recibirás un email con el enlace de seguimiento en cuanto tu pedido sea recogido por el transportista.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLAZOS -->
+  <div class="section-block" id="plazos">
+    <p class="section-eyebrow">✦ Tiempos de entrega</p>
+    <h2 class="section-title">Plazos estimados</h2>
+
+    <table class="policy-table">
+      <thead>
+        <tr>
+          <th>Destino</th>
+          <th>Preparación</th>
+          <th>Tránsito</th>
+          <th>Total estimado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="highlight">España Peninsular</td>
+          <td>1–2 días lab.</td>
+          <td>1–2 días lab.</td>
+          <td><strong style="color:#888;">2–4 días lab.</strong></td>
+        </tr>
+        <tr>
+          <td class="highlight">Baleares</td>
+          <td>1–2 días lab.</td>
+          <td>2–3 días lab.</td>
+          <td><strong style="color:#888;">3–5 días lab.</strong></td>
+        </tr>
+        <tr>
+          <td class="highlight">Canarias / Ceuta / Melilla</td>
+          <td>1–2 días lab.</td>
+          <td>4–7 días lab.</td>
+          <td><strong style="color:#888;">5–9 días lab.</strong></td>
+        </tr>
+        <tr>
+          <td class="highlight">Europa (UE)</td>
+          <td>1–2 días lab.</td>
+          <td>3–6 días lab.</td>
+          <td><strong style="color:#888;">4–8 días lab.</strong></td>
+        </tr>
+        <tr>
+          <td class="highlight">Internacional</td>
+          <td>1–2 días lab.</td>
+          <td>7–14 días lab.</td>
+          <td><strong style="color:#888;">8–16 días lab.</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="info-box warn">
+      <span class="info-box-icon">⚠</span>
+      <div class="info-box-content">
+        <p class="info-box-title">Piezas personalizadas o grabadas</p>
+        <p class="info-box-text">Los pedidos con grabado o fabricación bajo encargo tienen un plazo adicional de <strong>5–10 días laborables</strong> antes del envío. Se indica expresamente en la página del producto.</p>
+      </div>
+    </div>
+
+    <p class="prose">Los plazos son estimaciones y pueden verse afectados por picos de demanda (Navidad, San Valentín, Black Friday) o circunstancias del transportista ajenas a nosotros. Si tu pedido se retrasa significativamente, <a href="contacto.html">contacta con nosotros</a> y lo gestionamos.</p>
+  </div>
+
+  <!-- DEVOLUCIONES -->
+  <div class="section-block" id="devoluciones">
+    <p class="section-eyebrow">✦ Política de devolución</p>
+    <h2 class="section-title">Devoluciones sin coste</h2>
+
+    <p class="prose">Tienes <strong>30 días naturales</strong> desde la recepción del pedido para devolver cualquier artículo que no sea de tu agrado, sin necesidad de justificación. Reembolsamos el importe íntegro (excepto gastos de envío originales si no aplica envío gratuito).</p>
+
+    <div class="steps-list">
+      <div class="step-item">
+        <span class="step-num">1</span>
+        <div class="step-body">
+          <p class="step-title">Solicita la devolución</p>
+          <p class="step-desc">Escríbenos a <a href="mailto:hola@plataco.es" style="color:var(--gold);text-decoration:none;">hola@plataco.es</a> o mediante el formulario de contacto con tu número de pedido e indicando los artículos que deseas devolver. Te enviaremos las instrucciones en menos de 24 h.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <span class="step-num">2</span>
+        <div class="step-body">
+          <p class="step-title">Prepara el paquete</p>
+          <p class="step-desc">Devuelve la joya en su embalaje original (estuche y caja exterior) sin haber sido usada y con todas las etiquetas intactas. Incluye dentro una copia del albarán o tu número de pedido.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <span class="step-num">3</span>
+        <div class="step-body">
+          <p class="step-title">Envía el paquete</p>
+          <p class="step-desc">Utiliza el método de envío con seguimiento que prefieras. Los gastos de devolución corren a cargo del cliente salvo que el artículo tenga un defecto de fabricación, en cuyo caso enviamos una etiqueta prepagada.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <span class="step-num">4</span>
+        <div class="step-body">
+          <p class="step-title">Recibe el reembolso</p>
+          <p class="step-desc">En cuanto recibamos el artículo y verifiquemos su estado, procesaremos el reembolso en el mismo método de pago original. El plazo habitual es de <strong>3–5 días hábiles</strong> desde la recepción.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box warn" style="margin-top:2rem;">
+      <span class="info-box-icon">✗</span>
+      <div class="info-box-content">
+        <p class="info-box-title">Artículos no devolvibles</p>
+        <p class="info-box-text">Por motivos de higiene e higiene personal no se aceptan devoluciones de pendientes que hayan sido usados. Tampoco se aceptan piezas con grabados personalizados ni pedidos bajo encargo, salvo defecto de fabricación.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CAMBIOS -->
+  <div class="section-block" id="cambios">
+    <p class="section-eyebrow">✦ Cambios de talla o modelo</p>
+    <h2 class="section-title">Política de cambios</h2>
+
+    <p class="prose">Si necesitas cambiar la talla de un anillo o sustituir un artículo por otro, sigue el mismo proceso que una devolución e indica en tu email qué artículo deseas recibir a cambio. El cambio no tiene coste adicional si el nuevo artículo tiene el mismo precio; si es más caro, se cobra la diferencia.</p>
+
+    <table class="policy-table">
+      <thead>
+        <tr>
+          <th>Tipo de cambio</th>
+          <th>Plazo</th>
+          <th>Coste</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="highlight">Talla de anillo (liso)</td>
+          <td>30 días desde recepción</td>
+          <td>15 € + envío ida y vuelta</td>
+        </tr>
+        <tr>
+          <td class="highlight">Modelo por modelo equivalente</td>
+          <td>30 días desde recepción</td>
+          <td>Solo gastos de envío</td>
+        </tr>
+        <tr>
+          <td class="highlight">Talla de anillo (pavé / trabajado)</td>
+          <td>Consultar disponibilidad</td>
+          <td>Presupuesto previo</td>
+        </tr>
+        <tr>
+          <td class="highlight">Longitud de collar o pulsera</td>
+          <td>30 días desde recepción</td>
+          <td>Desde 8 € según pieza</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- INCIDENCIAS -->
+  <div class="section-block" id="incidencias">
+    <p class="section-eyebrow">✦ Problemas y reclamaciones</p>
+    <h2 class="section-title">Artículo dañado o incorrecto</h2>
+
+    <p class="prose">Si recibes un artículo con defecto de fabricación, dañado en el transporte o diferente al que pediste, escríbenos dentro de las <strong>48 horas siguientes</strong> a la recepción adjuntando fotografías. Nos hacemos cargo de todo: te enviamos la etiqueta de recogida prepagada y te reponemos el artículo o te reembolsamos sin ningún coste adicional.</p>
+
+    <div class="info-box">
+      <span class="info-box-icon">📷</span>
+      <div class="info-box-content">
+        <p class="info-box-title">Fotos necesarias para gestionar la incidencia</p>
+        <p class="info-box-text">Fotografía del artículo mostrando el defecto, fotografía del embalaje exterior (para incidencias de transporte) y una foto del albarán o número de pedido. Envíalas a <a href="mailto:hola@plataco.es">hola@plataco.es</a></p>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <span class="info-box-icon">⏱</span>
+      <div class="info-box-content">
+        <p class="info-box-title">Tiempos de resolución</p>
+        <p class="info-box-text">Respondemos en menos de 24 h laborables. La reposición o reembolso se gestiona en un plazo máximo de 7 días laborables desde la devolución del artículo defectuoso.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-block">
+    <p class="cta-title">¿Tienes alguna duda sobre tu pedido?</p>
+    <p>Nuestro equipo de atención al cliente está disponible de lunes a viernes de 9 h a 18 h.</p>
+    <a href="contacto.html">Contactar con nosotros</a>
+  </div>
+
+</div>
+
+<footer class="footer-legal">
+  <p>© <span id="footerYear"></span> PLATACO — Todos los derechos reservados</p>
+  <div class="footer-links">
+    <a href="politica-privacidad.html">Política de privacidad</a>
+    <a href="preguntas-frecuentes.html">Preguntas frecuentes</a>
+    <a href="contacto.html">Contacto</a>
+  </div>
+</footer>
+
+<script>
+document.getElementById('footerYear').textContent = new Date().getFullYear();
+
+function scrollTo(id, el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+}
+
+// Highlight nav on scroll
+const sections = ['envios','plazos','devoluciones','cambios','incidencias'];
+const navItems = document.querySelectorAll('.nav-item');
+window.addEventListener('scroll', () => {
+  let current = sections[0];
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && window.scrollY >= el.offsetTop - 130) current = id;
+  });
+  navItems.forEach((n, i) => {
+    n.classList.toggle('active', sections[i] === current);
+  });
+}, { passive: true });
+</script>
+</body>
+</html>
