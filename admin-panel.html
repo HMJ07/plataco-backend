@@ -740,10 +740,11 @@ async function loadOrders() {
   tbody.innerHTML = '<tr class="loading-row"><td colspan="8">Cargando pedidos…</td></tr>';
 
   try {
-    let url = '/api/admin/orders?page=1&limit=200';
+    let url = '/api/admin/orders?page=1&limit=500';
     if (status) url += '&status=' + status;
     const data = await apiFetch(url, 'GET');
-    allOrders = Array.isArray(data) ? data : [];
+    // backend devuelve {orders, total} o array legacy
+    allOrders = Array.isArray(data) ? data : (data.orders || []);
     renderOrders();
   } catch(e) {
     tbody.innerHTML = `<tr class="loading-row"><td colspan="8" style="color:var(--danger)">Error: ${e.message}</td></tr>`;
