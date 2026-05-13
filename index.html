@@ -2283,7 +2283,7 @@ function renderProducts(){
       </div>
       <div class="card-bottom">
         <p class="card-price">${convertPrice(p.price)}</p>
-        <button class="add-quick" onclick="event.stopPropagation();addToCart(products.find(x=>x.id==='${p.id}'),null,1)" title="Añadir al carrito">+</button>
+        <button class="add-quick" onclick="event.stopPropagation();quickAdd('${p.id}')" title="Añadir al carrito">+</button>
       </div>
     </div>`;
   }).join('');
@@ -2522,6 +2522,18 @@ function escapeHtml(str){
 }
 
 // ── CART ──────────────────────────────────────────────────
+function quickAdd(productId){
+  const product = products.find(x => x.id === productId);
+  if(!product) return;
+  if(product.sizes && product.sizes.length > 0){
+    // Tiene tallas — abrir modal para que el usuario elija
+    openModal(productId);
+    showToast('Selecciona una talla para continuar');
+  } else {
+    // Sin tallas — añadir directamente
+    addToCart(product, null, 1);
+  }
+}
 function addToCart(product,size,qty){
   const existing=cart.find(i=>i.id===product.id&&i.size===size);
   if(existing)existing.qty+=qty;
