@@ -264,7 +264,7 @@ async function enviarContacto() {
   msg.textContent = '';
 
   try {
-    const API = window.PLATACO_API || '';
+    const API = window.PLATACO_API || 'https://plataco-backend-production.up.railway.app/';
     const res = await fetch(`${API}/api/newsletter/contact`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
