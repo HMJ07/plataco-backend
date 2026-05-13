@@ -241,12 +241,20 @@ router.put('/products/:id/images/:imageId', async (req, res) => {
 // ── GET /api/admin/orders ──────────────────────────────────
 router.get('/orders', async (req, res) => {
   try {
-    const { status, page = 1 } = req.query;
-    const limit = 20;
-    const offset = (page - 1) * limit;
+    const { status, page = 1, limit: limitParam = 20 } = req.query;
+    const limit  = Math.min(Math.max(parseInt(limitParam) || 20, 1), 500); // entre 1 y 500
+    const offset = (parseInt(page) - 1) * limit;
     const params = [limit, offset];
     let where = '';
     if (status) { params.unshift(status); where = `WHERE o.status=$1`; }
+
+    // Conteo total para paginación correcta
+    const countParams = status ? [status] : [];
+    const countWhere  = status ? `WHERE o.status=$1` : '';
+    const countResult = await query(
+      `SELECT COUNT(*) FROM orders o ${countWhere}`, countParams
+    );
+    const total = parseInt(countResult.rows[0].count);
 
     const result = await query(`
       SELECT o.id, o.status, o.total_eur, o.currency, o.created_at,
@@ -260,7 +268,7 @@ router.get('/orders', async (req, res) => {
       ORDER BY o.created_at DESC
       LIMIT $${params.length-1} OFFSET $${params.length}
     `, params);
-    res.json(result.rows);
+    res.json({ orders: result.rows, total, page: parseInt(page), limit });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
