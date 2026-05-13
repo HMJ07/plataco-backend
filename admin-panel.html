@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PLATACO — Panel de Administración</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root {
     --bg: #f5f4f2;
@@ -61,7 +62,20 @@
     cursor:pointer; font-size:0.75rem; width:100%; text-align:left;
     transition:background 0.15s;
   }
-  .logout-btn:hover { background:rgba(255,255,255,0.15); color:#fff; }
+  .period-btn.active { background:var(--dark); color:#fff; border-color:var(--dark); }
+  .change-up   { color:var(--success); font-weight:600; }
+  .change-down { color:var(--danger);  font-weight:600; }
+  .top-product-row {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 16px; border-bottom:1px solid #f3f0eb; font-size:0.85rem;
+  }
+  .top-product-row:last-child { border-bottom:none; }
+  .top-product-rank { font-size:1rem; margin-right:10px; width:24px; text-align:center; }
+  .top-product-name { flex:1; font-weight:500; }
+  .top-product-units { color:var(--gray); font-size:0.78rem; margin-right:10px; }
+  .top-product-rev   { font-weight:700; color:var(--accent); }
+
+
 
   /* ── Main ── */
   .main { margin-left:240px; flex:1; padding:0; min-height:100vh; }
@@ -314,28 +328,60 @@
   <div class="content">
 
     <div id="dashboardPage" class="page active">
+      <!-- KPI cards row -->
       <div class="stats-grid" id="statsGrid">
-        <div class="stat-card accent"><div class="stat-label">Pedidos pagados</div><div class="stat-value" id="statOrders">—</div><div class="stat-sub">total acumulado</div></div>
-        <div class="stat-card accent"><div class="stat-label">Ingresos (€)</div><div class="stat-value" id="statRevenue">—</div><div class="stat-sub">pedidos completados</div></div>
-        <div class="stat-card"><div class="stat-label">Productos activos</div><div class="stat-value" id="statProducts">—</div><div class="stat-sub">en catálogo</div></div>
-        <div class="stat-card"><div class="stat-label">Clientes</div><div class="stat-value" id="statCustomers">—</div><div class="stat-sub">registrados</div></div>
+        <div class="stat-card accent"><div class="stat-label">Pedidos pagados</div><div class="stat-value" id="statOrders">—</div><div class="stat-sub" id="statOrdersChange">total acumulado</div></div>
+        <div class="stat-card accent"><div class="stat-label">Ingresos (€)</div><div class="stat-value" id="statRevenue">—</div><div class="stat-sub" id="statRevenueChange">pedidos completados</div></div>
+        <div class="stat-card"><div class="stat-label">Ticket medio</div><div class="stat-value" id="statAvgTicket">—</div><div class="stat-sub" id="statPeriodLabel">últimos 30 días</div></div>
+        <div class="stat-card"><div class="stat-label">Clientes registrados</div><div class="stat-value" id="statCustomers">—</div><div class="stat-sub">total acumulado</div></div>
       </div>
 
-      <div class="card">
+      <!-- Analytics section -->
+      <div class="card" style="margin-bottom:20px">
         <div class="card-header">
-          <h3>Últimos pedidos</h3>
-          <button class="btn btn-outline btn-sm" onclick="showPage('orders')">Ver todos →</button>
+          <h3>📈 Ventas y pedidos</h3>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="btn btn-outline btn-sm period-btn active" onclick="changePeriod(7)"  id="btn7d">7 días</button>
+            <button class="btn btn-outline btn-sm period-btn"        onclick="changePeriod(30)" id="btn30d">30 días</button>
+            <button class="btn btn-outline btn-sm period-btn"        onclick="changePeriod(90)" id="btn90d">90 días</button>
+          </div>
         </div>
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th><th>Cliente</th><th>Estado</th><th>Total</th><th>Fecha</th><th></th>
-            </tr>
-          </thead>
-          <tbody id="recentOrdersBody">
-            <tr class="loading-row"><td colspan="6">Cargando…</td></tr>
-          </tbody>
-        </table>
+        <div style="padding:24px;position:relative;min-height:260px" id="chartContainer">
+          <canvas id="salesChart" height="220"></canvas>
+        </div>
+      </div>
+
+      <!-- Bottom row: donut + top products + recent orders -->
+      <div style="display:grid;grid-template-columns:220px 1fr 1fr;gap:16px;margin-bottom:20px">
+
+        <!-- Donut estado pedidos -->
+        <div class="card" style="padding:18px">
+          <div style="font-size:0.72rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px">Estados (periodo)</div>
+          <canvas id="statusDonut" width="180" height="180"></canvas>
+          <div id="donutLegend" style="margin-top:12px;font-size:0.75rem;line-height:1.8"></div>
+        </div>
+
+        <!-- Top productos -->
+        <div class="card">
+          <div class="card-header"><h3>🏆 Top productos</h3></div>
+          <div style="padding:0 4px" id="topProductsList">
+            <div style="padding:20px;color:var(--gray);font-size:0.85rem">Cargando…</div>
+          </div>
+        </div>
+
+        <!-- Últimos pedidos -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Últimos pedidos</h3>
+            <button class="btn btn-outline btn-sm" onclick="showPage('orders')">Ver todos →</button>
+          </div>
+          <table>
+            <thead><tr><th>Cliente</th><th>Estado</th><th>Total</th></tr></thead>
+            <tbody id="recentOrdersBody">
+              <tr class="loading-row"><td colspan="3">Cargando…</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -670,6 +716,7 @@ function showPage(name) {
     const txt = n.textContent.toLowerCase().trim();
     if (name === 'coupons' ? txt.includes('cupones') : txt.includes(name)) n.classList.add('active');
   });
+  if (name === 'dashboard') loadDashboard();
   if (name === 'orders') loadOrders();
   if (name === 'products') loadProducts();
   if (name === 'reviews') { loadReviews(); initEditStarPicker(); }
@@ -702,30 +749,170 @@ function shortId(id) {
   return id ? '…' + id.slice(-8) : '—';
 }
 
-// ── Dashboard ─────────────────────────────────────────────
+// ── Dashboard & Analytics ─────────────────────────────────
+let salesChartInstance  = null;
+let statusChartInstance = null;
+let currentPeriod = 30;
+
+function changePeriod(days) {
+  currentPeriod = days;
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn' + days + 'd').classList.add('active');
+  loadDashboard();
+}
+
 async function loadDashboard() {
   try {
-    const data = await apiFetch('/api/admin/dashboard', 'GET');
-    document.getElementById('statOrders').textContent    = data.stats.total_orders;
-    document.getElementById('statRevenue').textContent   = parseFloat(data.stats.total_revenue).toFixed(2) + ' €';
-    document.getElementById('statProducts').textContent  = data.stats.active_products;
-    document.getElementById('statCustomers').textContent = data.stats.total_customers;
+    const [base, analytics] = await Promise.all([
+      apiFetch('/api/admin/dashboard', 'GET'),
+      apiFetch(`/api/admin/analytics?period=${currentPeriod}`, 'GET'),
+    ]);
 
+    // ── KPI cards ──
+    document.getElementById('statOrders').textContent   = base.stats.total_orders;
+    document.getElementById('statRevenue').textContent  = parseFloat(base.stats.total_revenue).toFixed(2) + ' €';
+    document.getElementById('statCustomers').textContent = base.stats.total_customers;
+    document.getElementById('statAvgTicket').textContent = analytics.avg_ticket + ' €';
+    document.getElementById('statPeriodLabel').textContent = `últimos ${analytics.period} días`;
+
+    // Variación vs periodo anterior
+    const prevOrders  = parseInt(analytics.prev_period?.orders  || 0);
+    const prevRevenue = parseFloat(analytics.prev_period?.revenue || 0);
+    const curOrders   = analytics.sales_by_day.reduce((s, d) => s + parseInt(d.orders), 0);
+    const curRevenue  = analytics.sales_by_day.reduce((s, d) => s + parseFloat(d.revenue), 0);
+
+    function pctChange(cur, prev) {
+      if (prev === 0) return cur > 0 ? '<span class="change-up">↑ nuevo</span>' : '—';
+      const pct = ((cur - prev) / prev * 100).toFixed(1);
+      return pct >= 0
+        ? `<span class="change-up">↑ ${pct}%</span> vs periodo anterior`
+        : `<span class="change-down">↓ ${Math.abs(pct)}%</span> vs periodo anterior`;
+    }
+    document.getElementById('statOrdersChange').innerHTML  = pctChange(curOrders, prevOrders);
+    document.getElementById('statRevenueChange').innerHTML = pctChange(curRevenue, prevRevenue);
+
+    // ── Line chart: ventas y pedidos por día ──
+    const labels   = analytics.sales_by_day.map(d => {
+      const date = new Date(d.day);
+      return date.toLocaleDateString('es-ES', { day:'numeric', month:'short' });
+    });
+    const revenues = analytics.sales_by_day.map(d => parseFloat(d.revenue));
+    const orders   = analytics.sales_by_day.map(d => parseInt(d.orders));
+
+    if (salesChartInstance) salesChartInstance.destroy();
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    salesChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Ingresos (€)',
+            data: revenues,
+            borderColor: '#8b7355',
+            backgroundColor: 'rgba(139,115,85,0.08)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 3,
+            pointHoverRadius: 6,
+            yAxisID: 'yRevenue',
+          },
+          {
+            label: 'Pedidos',
+            data: orders,
+            borderColor: '#4f7ac7',
+            backgroundColor: 'rgba(79,122,199,0.06)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 3,
+            pointHoverRadius: 6,
+            yAxisID: 'yOrders',
+            borderDash: [4, 3],
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { position: 'top', labels: { font: { size: 12 }, usePointStyle: true } },
+          tooltip: {
+            callbacks: {
+              label: ctx => ctx.dataset.yAxisID === 'yRevenue'
+                ? ` ${ctx.parsed.y.toFixed(2)} €`
+                : ` ${ctx.parsed.y} pedidos`,
+            },
+          },
+        },
+        scales: {
+          x:        { grid: { color: '#f0ede8' }, ticks: { font: { size: 11 }, maxTicksLimit: 10 } },
+          yRevenue: { position: 'left',  grid: { color: '#f0ede8' }, ticks: { callback: v => v + ' €', font: { size: 11 } } },
+          yOrders:  { position: 'right', grid: { display: false },   ticks: { stepSize: 1, font: { size: 11 } } },
+        },
+      },
+    });
+
+    // ── Donut: estados ──
+    const statusColors = {
+      paid:'#2d7d46', processing:'#1d4ed8', shipped:'#6d28d9',
+      delivered:'#166534', pending:'#b45309', cancelled:'#b91c1c', refunded:'#374151',
+    };
+    const statusLabelsEs = {
+      paid:'Pagado', processing:'En proceso', shipped:'Enviado',
+      delivered:'Entregado', pending:'Pendiente', cancelled:'Cancelado', refunded:'Reembolsado',
+    };
+    const dLabels  = analytics.status_dist.map(s => statusLabelsEs[s.status] || s.status);
+    const dData    = analytics.status_dist.map(s => parseInt(s.count));
+    const dColors  = analytics.status_dist.map(s => statusColors[s.status] || '#9ca3af');
+
+    if (statusChartInstance) statusChartInstance.destroy();
+    const dCtx = document.getElementById('statusDonut').getContext('2d');
+    statusChartInstance = new Chart(dCtx, {
+      type: 'doughnut',
+      data: { labels: dLabels, datasets: [{ data: dData, backgroundColor: dColors, borderWidth: 2, borderColor: '#fff' }] },
+      options: {
+        responsive: false,
+        plugins: { legend: { display: false } },
+        cutout: '65%',
+      },
+    });
+    const totalDist = dData.reduce((a, b) => a + b, 0);
+    document.getElementById('donutLegend').innerHTML = dLabels.map((l, i) =>
+      `<div style="display:flex;align-items:center;gap:6px">
+        <span style="width:10px;height:10px;border-radius:50%;background:${dColors[i]};flex-shrink:0"></span>
+        ${l} <span style="color:var(--gray);margin-left:auto">${dData[i]}</span>
+      </div>`
+    ).join('');
+
+    // ── Top productos ──
+    const medals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+    const topEl  = document.getElementById('topProductsList');
+    if (!analytics.top_products?.length) {
+      topEl.innerHTML = '<div style="padding:20px;color:var(--gray);font-size:0.85rem">Sin datos todavía</div>';
+    } else {
+      topEl.innerHTML = analytics.top_products.map((p, i) => `
+        <div class="top-product-row">
+          <span class="top-product-rank">${medals[i] || (i+1)}</span>
+          <span class="top-product-name">${p.name}</span>
+          <span class="top-product-units">${p.units_sold} ud.</span>
+          <span class="top-product-rev">${parseFloat(p.revenue).toFixed(2)} €</span>
+        </div>
+      `).join('');
+    }
+
+    // ── Últimos pedidos (tabla compacta) ──
     const tbody = document.getElementById('recentOrdersBody');
-    if (!data.recent_orders?.length) {
-      tbody.innerHTML = '<tr><td colspan="6" class="empty">No hay pedidos todavía.</td></tr>';
+    if (!base.recent_orders?.length) {
+      tbody.innerHTML = '<tr><td colspan="3" class="empty">No hay pedidos todavía.</td></tr>';
       return;
     }
-    tbody.innerHTML = data.recent_orders.map(o => {
+    tbody.innerHTML = base.recent_orders.slice(0, 7).map(o => {
       const name = o.first_name ? `${o.first_name} ${o.last_name || ''}`.trim() : (o.guest_email || '—');
-      const email = o.email || o.guest_email || '—';
       return `<tr class="clickable" onclick="openOrder('${o.id}')">
-        <td class="mono chip">${shortId(o.id)}</td>
-        <td>${name}<br><small style="color:var(--gray)">${email}</small></td>
+        <td>${name}<br><small style="color:var(--gray);font-size:0.75rem">${fmtDate(o.created_at)}</small></td>
         <td>${statusBadge(o.status)}</td>
         <td><strong>${fmtMoney(o.total_eur)}</strong></td>
-        <td style="color:var(--gray);font-size:0.8rem">${fmtDate(o.created_at)}</td>
-        <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openOrder('${o.id}')">Ver →</button></td>
       </tr>`;
     }).join('');
   } catch(e) {

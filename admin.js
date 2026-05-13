@@ -518,4 +518,80 @@ router.delete('/coupons/:id', async (req, res) => {
   }
 });
 
+// ── GET /api/admin/analytics?period=7|30|90 ───────────────
+// Datos para la gráfica de ventas tipo Google Analytics
+router.get('/analytics', async (req, res) => {
+  try {
+    const period = parseInt(req.query.period) || 30;
+    const validPeriods = [7, 30, 90];
+    const days = validPeriods.includes(period) ? period : 30;
+
+    // Ingresos y pedidos agrupados por día
+    const salesByDay = await query(`
+      SELECT
+        DATE(created_at AT TIME ZONE 'Europe/Madrid') AS day,
+        COUNT(*) FILTER (WHERE status IN ('paid','processing','shipped','delivered')) AS orders,
+        COALESCE(SUM(total_eur) FILTER (WHERE status IN ('paid','processing','shipped','delivered')), 0) AS revenue
+      FROM orders
+      WHERE created_at >= NOW() - INTERVAL '${days} days'
+      GROUP BY day
+      ORDER BY day ASC
+    `);
+
+    // Ticket medio global del periodo
+    const avgTicket = await query(`
+      SELECT COALESCE(AVG(total_eur), 0) AS avg
+      FROM orders
+      WHERE status IN ('paid','processing','shipped','delivered')
+        AND created_at >= NOW() - INTERVAL '${days} days'
+    `);
+
+    // Distribución de estados (para donut)
+    const statusDist = await query(`
+      SELECT status, COUNT(*) AS count
+      FROM orders
+      WHERE created_at >= NOW() - INTERVAL '${days} days'
+      GROUP BY status
+      ORDER BY count DESC
+    `);
+
+    // Top 5 productos más vendidos en el periodo
+    const topProducts = await query(`
+      SELECT
+        p.name,
+        SUM(oi.quantity) AS units_sold,
+        SUM(oi.quantity * oi.unit_price_eur) AS revenue
+      FROM order_items oi
+      JOIN products p ON p.id = oi.product_id
+      JOIN orders o ON o.id = oi.order_id
+      WHERE o.status IN ('paid','processing','shipped','delivered')
+        AND o.created_at >= NOW() - INTERVAL '${days} days'
+      GROUP BY p.id, p.name
+      ORDER BY units_sold DESC
+      LIMIT 5
+    `);
+
+    // Pedidos y revenue del periodo ANTERIOR (para comparativa %)
+    const prevPeriod = await query(`
+      SELECT
+        COUNT(*) FILTER (WHERE status IN ('paid','processing','shipped','delivered')) AS orders,
+        COALESCE(SUM(total_eur) FILTER (WHERE status IN ('paid','processing','shipped','delivered')), 0) AS revenue
+      FROM orders
+      WHERE created_at >= NOW() - INTERVAL '${days * 2} days'
+        AND created_at <  NOW() - INTERVAL '${days} days'
+    `);
+
+    res.json({
+      period: days,
+      sales_by_day:  salesByDay.rows,
+      avg_ticket:    parseFloat(avgTicket.rows[0].avg).toFixed(2),
+      status_dist:   statusDist.rows,
+      top_products:  topProducts.rows,
+      prev_period:   prevPeriod.rows[0],
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;
