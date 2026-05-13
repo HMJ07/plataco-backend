@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { query } from './db.js';
 import { requireAdmin } from './middleware_auth.js';
 import { upload, uploadToCloudinary, deleteFromCloudinary } from './cloudinary.js';
+import { triggerStockAlerts } from './stock_alerts.js';
 
 const router = Router();
 router.use(requireAdmin); // Todas las rutas requieren rol admin
@@ -92,11 +93,25 @@ router.post('/products', async (req, res) => {
 router.put('/products/:id', async (req, res) => {
   try {
     const { name, description, material, price_eur, stock, badge, is_active, is_featured } = req.body;
+
+    // Obtener stock anterior para detectar reposición
+    const prev = await query(`SELECT stock, slug FROM products WHERE id=$1`, [req.params.id]);
+    const prevStock = prev.rows[0]?.stock ?? 0;
+    const slug      = prev.rows[0]?.slug;
+
     const result = await query(`
       UPDATE products SET name=$1, description=$2, material=$3, price_eur=$4,
         stock=$5, badge=$6, is_active=$7, is_featured=$8
       WHERE id=$9 RETURNING *
     `, [name, description, material, price_eur, stock, badge, is_active, is_featured, req.params.id]);
+
+    // Si el producto pasa de sin stock a con stock, enviar alertas
+    if (prevStock === 0 && stock > 0) {
+      triggerStockAlerts(req.params.id, name, slug).catch(err =>
+        console.error('Error en triggerStockAlerts:', err.message)
+      );
+    }
+
     res.json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });

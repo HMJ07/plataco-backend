@@ -25,6 +25,8 @@ import reviewRoutes   from './reviews.js';
 import couponRoutes   from './coupons.js';
 import tryonRoutes    from './tryon.js';
 import newsletterRoutes from './newsletter.js';
+import abandonedCartRoutes, { startAbandonedCartJob } from './abandoned_cart.js';
+import stockAlertRoutes   from './stock_alerts.js';
 import { generalLimiter } from './rate_limit.js';
 
 dotenv.config();
@@ -70,6 +72,8 @@ app.use('/api/reviews',       reviewRoutes);
 app.use('/api/coupons',       couponRoutes);
 app.use('/api/tryon',         tryonRoutes);
 app.use('/api/newsletter',    newsletterRoutes);
+app.use('/api/abandoned-cart', abandonedCartRoutes);
+app.use('/api/stock-alerts',   stockAlertRoutes);
 
 // ── Health check ───────────────────────────────────────────
 app.get('/api/health', (req, res) => {
@@ -93,6 +97,7 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`🚀 Servidor PLATACO corriendo en http://localhost:${PORT}`);
+  startAbandonedCartJob(); // 🛒 Inicia el job de carrito abandonado (cada 30 min)
 });
 
 export default app;

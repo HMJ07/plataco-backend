@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Guía de Tallas — PLATACO</title>
+  <style>
+    /* ── Variables de marca ── */
+    :root {
+      --gold:    #d4a843;
+      --dark:    #2c1810;
+      --cream:   #faf7f2;
+      --warm:    #f0e8d6;
+      --text:    #4a3728;
+      --muted:   #8b6914;
+      --success: #27a85f;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--cream);
+      font-family: 'Georgia', serif;
+      color: var(--dark);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: var(--dark);
+      padding: 20px;
+      text-align: center;
+    }
+    .header h1 {
+      color: var(--gold);
+      font-size: 22px;
+      letter-spacing: 4px;
+      font-weight: normal;
+    }
+    .header p {
+      color: #c9a96e;
+      font-size: 11px;
+      letter-spacing: 2px;
+      margin-top: 4px;
+    }
+
+    /* ── Layout principal ── */
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 32px 16px 48px;
+    }
+
+    .page-title {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .page-title h2 {
+      font-size: 28px;
+      color: var(--dark);
+      margin-bottom: 8px;
+    }
+    .page-title p {
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ── Tabs de método ── */
+    .method-tabs {
+      display: flex;
+      gap: 0;
+      border: 2px solid var(--warm);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+    .method-tab {
+      flex: 1;
+      padding: 14px 16px;
+      background: #fff;
+      border: none;
+      cursor: pointer;
+      font-family: 'Georgia', serif;
+      font-size: 14px;
+      color: var(--text);
+      transition: background 0.2s, color 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .method-tab + .method-tab {
+      border-left: 2px solid var(--warm);
+    }
+    .method-tab.active {
+      background: var(--dark);
+      color: var(--gold);
+    }
+
+    /* ── Panels ── */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ── Card ── */
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 2px 12px rgba(44,24,16,0.07);
+      margin-bottom: 20px;
+    }
+    .card h3 {
+      font-size: 17px;
+      margin-bottom: 16px;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ── Método 1: Regla imprimible ── */
+    .print-ruler {
+      border: 2px dashed var(--gold);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      background: var(--cream);
+    }
+    .ruler-visual {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 16px auto;
+      position: relative;
+    }
+    .ruler-bar {
+      height: 28px;
+      background: var(--dark);
+      border-radius: 4px;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .ruler-tick {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: var(--gold);
+    }
+    .ruler-tick-label {
+      position: absolute;
+      top: 100%;
+      margin-top: 4px;
+      transform: translateX(-50%);
+      font-size: 10px;
+      color: var(--text);
+      white-space: nowrap;
+    }
+    .print-note {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-top: 12px;
+    }
+    .btn-print {
+      display: inline-block;
+      background: var(--gold);
+      color: #fff;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-family: 'Georgia', serif;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 16px;
+      transition: opacity 0.2s;
+    }
+    .btn-print:hover { opacity: 0.88; }
+
+    /* ── Método 2: Medir anillo existente ── */
+    .slider-section {
+      text-align: center;
+    }
+    .slider-label {
+      font-size: 15px;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+    .diameter-display {
+      font-size: 48px;
+      font-weight: bold;
+      color: var(--gold);
+      margin: 8px 0;
+    }
+    .diameter-display span {
+      font-size: 20px;
+      color: var(--muted);
+    }
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--warm);
+      outline: none;
+      margin: 12px 0;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--gold);
+      cursor: pointer;
+      border: 3px solid #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--gold);
+      cursor: pointer;
+      border: 3px solid #fff;
+    }
+
+    /* ── Método 3: Circunferencia ── */
+    .circunferencia-steps {
+      list-style: none;
+      counter-reset: step;
+    }
+    .circunferencia-steps li {
+      counter-increment: step;
+      padding: 10px 0 10px 44px;
+      position: relative;
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.6;
+      border-bottom: 1px solid var(--warm);
+    }
+    .circunferencia-steps li:last-child { border-bottom: none; }
+    .circunferencia-steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 10px;
+      width: 28px;
+      height: 28px;
+      background: var(--dark);
+      color: var(--gold);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: bold;
+    }
+    .input-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+      align-items: center;
+    }
+    .input-group input[type=number] {
+      flex: 1;
+      padding: 10px 14px;
+      border: 2px solid var(--warm);
+      border-radius: 8px;
+      font-family: 'Georgia', serif;
+      font-size: 16px;
+      color: var(--dark);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-group input[type=number]:focus {
+      border-color: var(--gold);
+    }
+    .btn-calc {
+      background: var(--dark);
+      color: var(--gold);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-family: 'Georgia', serif;
+      font-size: 14px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.2s;
+    }
+    .btn-calc:hover { opacity: 0.85; }
+
+    /* ── Resultado ── */
+    .result-box {
+      background: var(--dark);
+      border-radius: 16px;
+      padding: 28px;
+      text-align: center;
+      margin-top: 20px;
+      transition: all 0.3s ease;
+    }
+    .result-box .result-label {
+      font-size: 12px;
+      color: #c9a96e;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .result-box .result-size {
+      font-size: 72px;
+      font-weight: bold;
+      color: var(--gold);
+      line-height: 1;
+      margin: 4px 0;
+    }
+    .result-box .result-mm {
+      font-size: 16px;
+      color: #c9a96e;
+      margin-bottom: 12px;
+    }
+    .result-box .result-note {
+      font-size: 13px;
+      color: #c9a96e;
+      line-height: 1.6;
+    }
+
+    /* ── Tabla de tallas ── */
+    .size-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .size-table thead tr {
+      background: var(--dark);
+      color: var(--gold);
+    }
+    .size-table th {
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: normal;
+      letter-spacing: 1px;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+    .size-table tbody tr:nth-child(even) {
+      background: var(--cream);
+    }
+    .size-table td {
+      padding: 10px 14px;
+      color: var(--text);
+      border-bottom: 1px solid var(--warm);
+    }
+    .size-table tr.highlighted {
+      background: #fffbf0 !important;
+      outline: 2px solid var(--gold);
+    }
+    .size-table td:first-child {
+      font-weight: bold;
+      color: var(--dark);
+      font-size: 16px;
+    }
+
+    /* ── Tips ── */
+    .tips-box {
+      background: #fffbf0;
+      border: 1px solid var(--gold);
+      border-radius: 12px;
+      padding: 20px 24px;
+    }
+    .tips-box h4 {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .tips-box ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .tips-box ul li {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.5;
+      padding-left: 20px;
+      position: relative;
+    }
+    .tips-box ul li::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: var(--gold);
+    }
+
+    @media print {
+      body { background: #fff; }
+      .method-tabs, .panel:not(.active), .tips-box, .result-box { display: none !important; }
+      .print-ruler { border: 2px solid #000; }
+    }
+
+    @media (max-width: 520px) {
+      .method-tab { font-size: 12px; padding: 12px 8px; }
+      .result-box .result-size { font-size: 56px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>PLATACO</h1>
+    <p>JOYERÍA EN PLATA</p>
+  </div>
+
+  <div class="container">
+
+    <div class="page-title">
+      <h2>🪄 Guía de tallas de anillo</h2>
+      <p>Encuentra tu talla exacta en 3 métodos distintos.<br>
+         Sin necesidad de ir a una joyería.</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="method-tabs">
+      <button class="method-tab active" onclick="setTab(0)">
+        📏 Anillo existente
+      </button>
+      <button class="method-tab" onclick="setTab(1)">
+        🧵 Con hilo/papel
+      </button>
+      <button class="method-tab" onclick="setTab(2)">
+        📋 Tabla de tallas
+      </button>
+    </div>
+
+    <!-- Panel 0: Medir anillo con slider -->
+    <div class="panel active" id="panel-0">
+      <div class="card">
+        <h3>📏 Mide el diámetro de un anillo que ya te quede bien</h3>
+        <div class="slider-section">
+          <p class="slider-label">Ajusta el diámetro interior de tu anillo:</p>
+          <div class="diameter-display" id="diameterDisplay">16.0 <span>mm</span></div>
+          <input type="range" id="diamSlider" min="140" max="230" value="160"
+                 oninput="updateFromSlider()" step="1">
+          <p style="font-size:12px;color:var(--muted);margin-top:4px;">
+            ← 14.0 mm (talla 6) &nbsp;&nbsp;&nbsp; 23.0 mm (talla 23) →
+          </p>
+        </div>
+      </div>
+
+      <div class="result-box" id="result0">
+        <div class="result-label">Tu talla PLATACO</div>
+        <div class="result-size" id="r0size">—</div>
+        <div class="result-mm" id="r0mm"></div>
+        <div class="result-note" id="r0note">Mueve el slider para ver tu talla</div>
+      </div>
+
+      <div class="card" style="margin-top:20px;">
+        <h3>💡 Cómo medir el diámetro</h3>
+        <ol style="padding-left:20px;color:var(--text);font-size:14px;line-height:2;">
+          <li>Coloca el anillo sobre una regla.</li>
+          <li>Mide de borde interior a borde interior (el diámetro, no la circunferencia).</li>
+          <li>Ajusta el slider con el valor obtenido.</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- Panel 1: Circunferencia con hilo -->
+    <div class="panel" id="panel-1">
+      <div class="card">
+        <h3>🧵 Mide la circunferencia de tu dedo</h3>
+        <ul class="circunferencia-steps">
+          <li>Corta una tira de papel o hilo de unos 10 cm.</li>
+          <li>Envuélvela alrededor de la base del dedo donde quieras llevar el anillo.</li>
+          <li>Marca el punto donde se juntan los extremos con un bolígrafo.</li>
+          <li>Estira el papel/hilo sobre una regla y mide la longitud en mm.</li>
+        </ul>
+        <div class="input-group" style="margin-top:20px;">
+          <input type="number" id="circumInput" placeholder="ej: 52" min="40" max="80" step="0.5">
+          <span style="font-size:14px;color:var(--muted);">mm</span>
+          <button class="btn-calc" onclick="calcFromCircumference()">Calcular talla</button>
+        </div>
+      </div>
+
+      <div class="result-box" id="result1" style="display:none;">
+        <div class="result-label">Tu talla PLATACO</div>
+        <div class="result-size" id="r1size">—</div>
+        <div class="result-mm" id="r1mm"></div>
+        <div class="result-note" id="r1note"></div>
+      </div>
+    </div>
+
+    <!-- Panel 2: Tabla de tallas -->
+    <div class="panel" id="panel-2">
+      <div class="card" style="padding:0;overflow:hidden;">
+        <table class="size-table" id="sizeTable">
+          <thead>
+            <tr>
+              <th>Talla ES</th>
+              <th>Diámetro (mm)</th>
+              <th>Circunferencia (mm)</th>
+              <th>Equivalente EU</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tips generales -->
+    <div class="tips-box">
+      <h4>💡 Consejos para acertar con la talla</h4>
+      <ul>
+        <li>Mide por la noche o al final del día: los dedos se hinchan durante el día.</li>
+        <li>En tiempo de calor, los dedos suelen ser más gordos.</li>
+        <li>Si estás entre dos tallas, elige la más grande.</li>
+        <li>Los anillos anchos (más de 6 mm) se llevan media talla más.</li>
+        <li>¿Dudas? Escríbenos y te ayudamos antes de comprar.</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <script>
+    // ── Tabla de tallas española ──────────────────────────
+    // Talla ES = diámetro interior en mm (sistema numérico español)
+    const SIZES = [
+      { es:  6, diam: 14.0, circ: 44.0, eu: 44 },
+      { es:  7, diam: 14.3, circ: 45.0, eu: 45 },
+      { es:  8, diam: 14.6, circ: 46.0, eu: 46 },
+      { es:  9, diam: 15.0, circ: 47.1, eu: 47 },
+      { es: 10, diam: 15.3, circ: 48.1, eu: 48 },
+      { es: 11, diam: 15.6, circ: 49.0, eu: 49 },
+      { es: 12, diam: 16.0, circ: 50.3, eu: 50 },
+      { es: 13, diam: 16.3, circ: 51.2, eu: 51 },
+      { es: 14, diam: 16.6, circ: 52.1, eu: 52 },
+      { es: 15, diam: 17.0, circ: 53.4, eu: 53 },
+      { es: 16, diam: 17.3, circ: 54.4, eu: 54 },
+      { es: 17, diam: 17.6, circ: 55.3, eu: 55 },
+      { es: 18, diam: 18.0, circ: 56.5, eu: 57 },
+      { es: 19, diam: 18.5, circ: 58.1, eu: 58 },
+      { es: 20, diam: 18.8, circ: 59.1, eu: 59 },
+      { es: 21, diam: 19.1, circ: 60.0, eu: 60 },
+      { es: 22, diam: 19.5, circ: 61.3, eu: 61 },
+      { es: 23, diam: 20.0, circ: 62.8, eu: 63 },
+    ];
+
+    // ── Poblar tabla ──────────────────────────────────────
+    const tbody = document.getElementById('tableBody');
+    SIZES.forEach(s => {
+      const tr = document.createElement('tr');
+      tr.id = `row-${s.es}`;
+      tr.innerHTML = `
+        <td>${s.es}</td>
+        <td>${s.diam.toFixed(1)} mm</td>
+        <td>${s.circ.toFixed(1)} mm</td>
+        <td>${s.eu}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // ── Tabs ──────────────────────────────────────────────
+    const tabs   = document.querySelectorAll('.method-tab');
+    const panels = document.querySelectorAll('.panel');
+
+    function setTab(i) {
+      tabs.forEach((t, idx) => t.classList.toggle('active', idx === i));
+      panels.forEach((p, idx) => p.classList.toggle('active', idx === i));
+    }
+
+    // ── Helpers ───────────────────────────────────────────
+    function closestSize(diam) {
+      let best = SIZES[0];
+      let bestDiff = Math.abs(diam - best.diam);
+      for (const s of SIZES) {
+        const diff = Math.abs(diam - s.diam);
+        if (diff < bestDiff) { best = s; bestDiff = diff; }
+      }
+      return best;
+    }
+
+    function showResult(panel, size, extraNote) {
+      const r = document.getElementById(`result${panel}`);
+      r.style.display = 'block';
+      document.getElementById(`r${panel}size`).textContent = size.es;
+      document.getElementById(`r${panel}mm`).textContent =
+        `Ø ${size.diam.toFixed(1)} mm · ${size.circ.toFixed(1)} mm circunferencia`;
+      document.getElementById(`r${panel}note`).textContent =
+        extraNote || 'Si estás entre dos tallas, elige la más grande.';
+    }
+
+    // ── Panel 0: Slider ───────────────────────────────────
+    function updateFromSlider() {
+      const raw = parseInt(document.getElementById('diamSlider').value);
+      const diam = raw / 10;
+      document.getElementById('diameterDisplay').innerHTML =
+        `${diam.toFixed(1)} <span>mm</span>`;
+      const size = closestSize(diam);
+      showResult(0, size);
+      highlightTableRow(size.es);
+    }
+    updateFromSlider(); // inicializar
+
+    // ── Panel 1: Circunferencia ───────────────────────────
+    function calcFromCircumference() {
+      const circ = parseFloat(document.getElementById('circumInput').value);
+      if (isNaN(circ) || circ < 40 || circ > 80) {
+        alert('Introduce una circunferencia entre 40 y 80 mm.');
+        return;
+      }
+      // diam = circ / π
+      const diam = circ / Math.PI;
+      const size = closestSize(diam);
+      showResult(1, size, `Circunferencia medida: ${circ.toFixed(1)} mm`);
+      highlightTableRow(size.es);
+    }
+
+    // ── Highlight tabla ───────────────────────────────────
+    function highlightTableRow(sizeEs) {
+      document.querySelectorAll('.size-table tr.highlighted')
+        .forEach(r => r.classList.remove('highlighted'));
+      const row = document.getElementById(`row-${sizeEs}`);
+      if (row) row.classList.add('highlighted');
+    }
+
+    // ── Print ─────────────────────────────────────────────
+    function printRuler() { window.print(); }
+  </script>
+
+</body>
+</html>
