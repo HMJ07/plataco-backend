@@ -9,6 +9,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="config.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.js" crossorigin="anonymous"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -3172,64 +3173,146 @@ function applySgSize() {
   }
 }
 // ── PROBADOR VIRTUAL IA ─────────────────────────────────────
-function openTryOn(product){
-  if(!product) return;
+// MediaPipe Hands detecta landmarks de la mano en la foto del usuario.
+// Según la categoría del producto se elige el punto de anclaje correcto:
+//   anillos   → nudillo del dedo medio (landmark 9)
+//   pulseras  → muñeca (landmark 0)
+//   pendientes→ zona superior de la foto (sin landmark de mano)
+//   collares  → zona superior-central (sin landmark de mano)
+
+let tryonProduct      = null;
+let tryonPhotoFile    = null;
+let tryonPhotoDataURL = null;
+let tryonDragging     = false, tryonResizing = false, tryonRotating = false;
+let tryonDragStart    = {}, tryonResizeStart = {}, tryonRotateStart = {};
+let tryonJewelState   = {x:50, y:50, w:120, opacity:0.92, rotation:0};
+
+// Escala canvas↔pantalla guardada mientras el panel es visible
+let tryonCanvasScaleX = 1, tryonCanvasScaleY = 1;
+let tryonCanvasOffsetX = 0, tryonCanvasOffsetY = 0;
+
+// Landmarks detectados por MediaPipe (coordenadas normalizadas 0-1)
+let tryonHandLandmarks = null;
+
+// ── MediaPipe Hands (inicialización lazy) ──────────────────
+let mpHands = null;
+function getTryonHands() {
+  if (mpHands) return mpHands;
+  if (typeof Hands === 'undefined') return null;
+  mpHands = new Hands({locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/${f}`});
+  mpHands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+  mpHands.onResults(results => {
+    tryonHandLandmarks = results.multiHandLandmarks?.[0] || null;
+  });
+  return mpHands;
+}
+
+// ── Detectar landmarks de la mano en una imagen ────────────
+async function tryonDetectHand(imageElement) {
+  const hands = getTryonHands();
+  if (!hands) return null;
+  try {
+    await hands.send({ image: imageElement });
+    return tryonHandLandmarks;
+  } catch(e) {
+    return null;
+  }
+}
+
+// ── Mapa categoría → landmark index ───────────────────────
+// MediaPipe Hands: 0=muñeca, 9=nudillo medio, 13=nudillo anular, 5=nudillo índice
+function tryonGetAnchor(category, landmarks, canvasW, canvasH) {
+  const cat = (category || '').toLowerCase();
+
+  if (landmarks) {
+    let lmIndex = 9; // nudillo dedo medio por defecto (anillos)
+    if (cat.includes('pulsera'))   lmIndex = 0;  // muñeca
+    if (cat.includes('anillo'))    lmIndex = 9;  // nudillo medio
+    if (cat.includes('pendiente')) lmIndex = null;
+    if (cat.includes('collar'))    lmIndex = null;
+
+    if (lmIndex !== null && landmarks[lmIndex]) {
+      const lm = landmarks[lmIndex];
+      return { x: lm.x * canvasW, y: lm.y * canvasH, fromLandmark: true };
+    }
+  }
+
+  // Fallback sin detección: centrar según tipo
+  if (cat.includes('collar') || cat.includes('pendiente')) {
+    return { x: canvasW * 0.5, y: canvasH * 0.22, fromLandmark: false };
+  }
+  // anillos, pulseras, genérico → centro de la imagen
+  return { x: canvasW * 0.5, y: canvasH * 0.55, fromLandmark: false };
+}
+
+// ── Tamaño automático según categoría ─────────────────────
+function tryonAutoSize(category, canvasW) {
+  const cat = (category || '').toLowerCase();
+  if (cat.includes('anillo'))    return Math.round(canvasW * 0.12);
+  if (cat.includes('pulsera'))   return Math.round(canvasW * 0.28);
+  if (cat.includes('collar'))    return Math.round(canvasW * 0.35);
+  if (cat.includes('pendiente')) return Math.round(canvasW * 0.10);
+  return Math.round(canvasW * 0.20);
+}
+
+// ── openTryOn ─────────────────────────────────────────────
+function openTryOn(product) {
+  if (!product) return;
   tryonProduct = product;
   document.getElementById('tryonProductName').textContent = product.name;
   const jewImg = document.getElementById('tryonJewelImg');
   jewImg.src = product.imageUrl || '';
   jewImg.style.display = product.imageUrl ? 'block' : 'none';
-  // Reset state
   tryonPhotoFile = null; tryonPhotoDataURL = null;
-  tryonJewelState = {x:50,y:50,w:120,opacity:0.92,rotation:0};
-  document.getElementById('tryonResult').style.display='none';
-  document.getElementById('tryonAiLoading').style.display='none';
+  tryonHandLandmarks = null;
+  tryonJewelState = {x:50, y:50, w:120, opacity:0.92, rotation:0};
+  document.getElementById('tryonResult').style.display = 'none';
+  document.getElementById('tryonAiLoading').style.display = 'none';
   tryonGoTo(1);
   document.getElementById('tryonOverlay').classList.add('open');
-  document.body.style.overflow='hidden';
+  document.body.style.overflow = 'hidden';
 }
 
-function closeTryOn(){
+function closeTryOn() {
   document.getElementById('tryonOverlay').classList.remove('open');
-  document.body.style.overflow='';
+  document.body.style.overflow = '';
 }
 
-function handleTryonOverlayClick(e){
-  if(e.target === document.getElementById('tryonOverlay')) closeTryOn();
+function handleTryonOverlayClick(e) {
+  if (e.target === document.getElementById('tryonOverlay')) closeTryOn();
 }
 
-function tryonGoTo(step){
-  [1,2,3].forEach(i=>{
-    document.getElementById('tryonPanel'+i).classList.remove('active');
-    const dot = document.getElementById('tryonDot'+i);
+function tryonGoTo(step) {
+  [1,2,3].forEach(i => {
+    document.getElementById('tryonPanel' + i).classList.remove('active');
+    const dot = document.getElementById('tryonDot' + i);
     dot.classList.remove('active','done');
-    if(i < step) dot.classList.add('done');
-    else if(i === step) dot.classList.add('active');
-    const line = document.getElementById('tryonStepLine'+i);
-    if(line) line.classList.toggle('done', i < step);
+    if (i < step) dot.classList.add('done');
+    else if (i === step) dot.classList.add('active');
+    const line = document.getElementById('tryonStepLine' + i);
+    if (line) line.classList.toggle('done', i < step);
   });
-  // Para paso 3: guardar transform mientras panel 2 aún es visible, luego analizar
-  if(step === 3) {
-    tryonSaveCanvasTransform(); // panel 2 aún visible → BoundingClientRect correcto
+  if (step === 3) {
+    tryonSaveCanvasTransform();
     tryonAnalyzeWithAI();
-    return; // la función se encarga de activar panel 3 al terminar
+    return;
   }
-  document.getElementById('tryonPanel'+step).classList.add('active');
-  if(step === 2) tryonRenderCanvas();
+  document.getElementById('tryonPanel' + step).classList.add('active');
+  if (step === 2) tryonRenderCanvas();
 }
 
-function handleTryonDrop(e){
+function handleTryonDrop(e) {
   e.preventDefault();
   const file = e.dataTransfer.files[0];
-  if(file && file.type.startsWith('image/')) tryonLoadFile(file);
+  if (file && file.type.startsWith('image/')) tryonLoadFile(file);
 }
 
-function handleTryonFile(e){
+function handleTryonFile(e) {
   const file = e.target.files[0];
-  if(file) tryonLoadFile(file);
+  if (file) tryonLoadFile(file);
 }
 
-function tryonLoadFile(file){
+function tryonLoadFile(file) {
   tryonPhotoFile = file;
   const reader = new FileReader();
   reader.onload = ev => {
@@ -3239,11 +3322,7 @@ function tryonLoadFile(file){
   reader.readAsDataURL(file);
 }
 
-// Escala y offset canvas↔pantalla, calculados mientras panel 2 es visible
-// Se leen aquí y se reutilizan en tryonAnalyzeWithAI (cuando el panel ya puede estar oculto)
-let tryonCanvasScaleX = 1, tryonCanvasScaleY = 1;
-let tryonCanvasOffsetX = 0, tryonCanvasOffsetY = 0;
-
+// ── Guardar escala canvas↔pantalla mientras el panel es visible ──
 function tryonSaveCanvasTransform() {
   const canvas = document.getElementById('tryonCanvas');
   const wrap   = document.getElementById('tryonCanvasWrap');
@@ -3257,129 +3336,147 @@ function tryonSaveCanvasTransform() {
   }
 }
 
-function tryonRenderCanvas(){
+// ── Renderizar canvas con foto + autoposicionar joya ──────
+async function tryonRenderCanvas() {
   const canvas = document.getElementById('tryonCanvas');
-  const ctx = canvas.getContext('2d');
-  const wrap = document.getElementById('tryonCanvasWrap');
+  const ctx    = canvas.getContext('2d');
+  const wrap   = document.getElementById('tryonCanvasWrap');
+  const hint   = document.getElementById('tryonCanvasHint');
+
   const img = new Image();
-  img.onload = () => {
-    const maxW = Math.min(wrap.clientWidth - 2, 580);
+  img.onload = async () => {
+    const maxW  = Math.min(wrap.clientWidth - 2, 580);
     const scale = maxW / img.width;
-    canvas.width = img.width * scale;
+    canvas.width  = img.width  * scale;
     canvas.height = img.height * scale;
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    // Position jewel overlay
-    tryonPositionJewel();
-    // Guardar transform ahora que el canvas está renderizado y visible
+
+    // Autoposicionar joya con MediaPipe
+    if (hint) hint.textContent = '🔍 Detectando posición de la joya…';
+
+    let landmarks = null;
+    const cat = (tryonProduct?.category || '').toLowerCase();
+    const needsHand = cat.includes('anillo') || cat.includes('pulsera');
+
+    if (needsHand) {
+      landmarks = await tryonDetectHand(img);
+      tryonHandLandmarks = landmarks;
+    }
+
+    const autoSize   = tryonAutoSize(tryonProduct?.category, canvas.width);
+    const anchor     = tryonGetAnchor(tryonProduct?.category, landmarks, canvas.width, canvas.height);
+
+    // Convertir coordenadas del canvas a coordenadas del overlay (pantalla)
     tryonSaveCanvasTransform();
+    const screenX = anchor.x / tryonCanvasScaleX + tryonCanvasOffsetX - autoSize / 2;
+    const screenY = anchor.y / tryonCanvasScaleY + tryonCanvasOffsetY - autoSize / 2;
+
+    tryonJewelState = { x: screenX, y: screenY, w: autoSize, opacity: 0.92, rotation: 0 };
+    tryonPositionJewel();
+
+    if (hint) {
+      hint.textContent = anchor.fromLandmark
+        ? '✦ Joya posicionada automáticamente · Arrastra para ajustar · ↻ para rotar'
+        : 'Posición estimada · Arrastra la joya hasta el lugar correcto · ↻ para rotar';
+    }
   };
   img.src = tryonPhotoDataURL;
 }
 
-function tryonPositionJewel(){
-  const canvas = document.getElementById('tryonCanvas');
+function tryonPositionJewel() {
   const overlay = document.getElementById('tryonJewelOverlay');
-  const jewImg = document.getElementById('tryonJewelImg');
+  const jewImg  = document.getElementById('tryonJewelImg');
   const s = tryonJewelState;
-  overlay.style.left = s.x + 'px';
-  overlay.style.top = s.y + 'px';
-  overlay.style.width = s.w + 'px';
-  jewImg.style.width = s.w + 'px';
-  jewImg.style.opacity = s.opacity;
+  overlay.style.left      = s.x + 'px';
+  overlay.style.top       = s.y + 'px';
+  overlay.style.width     = s.w + 'px';
+  jewImg.style.width      = s.w + 'px';
+  jewImg.style.opacity    = s.opacity;
   overlay.style.transform = `rotate(${s.rotation}deg)`;
 }
 
-function tryonAdjust(type, delta){
-  if(type === 'size'){
+function tryonAdjust(type, delta) {
+  if (type === 'size') {
     tryonJewelState.w = Math.max(40, Math.min(300, tryonJewelState.w + delta));
-  } else if(type === 'opacity'){
+  } else if (type === 'opacity') {
     tryonJewelState.opacity = Math.max(0.2, Math.min(1, tryonJewelState.opacity + delta));
   }
   tryonPositionJewel();
 }
 
-function tryonReset(){
-  const canvas = document.getElementById('tryonCanvas');
-  tryonJewelState = {x: canvas.width/2 - 60, y: canvas.height/2 - 60, w:120, opacity:0.92, rotation:0};
-  tryonPositionJewel();
+function tryonReset() {
+  // Re-detectar y reposicionar desde cero
+  tryonRenderCanvas();
 }
 
-// Drag / resize / rotate interactions
-document.addEventListener('DOMContentLoaded', ()=>{
-  const overlay = document.getElementById('tryonJewelOverlay');
+// ── Drag / resize / rotate interactions ───────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const overlay      = document.getElementById('tryonJewelOverlay');
   const resizeHandle = document.getElementById('tryonResizeHandle');
   const rotateHandle = document.getElementById('tryonRotateHandle');
-  if(!overlay) return;
+  if (!overlay) return;
 
-  function getCenter(el){
+  function getCenter(el) {
     const r = el.getBoundingClientRect();
-    return {x: r.left + r.width/2, y: r.top + r.height/2};
+    return { x: r.left + r.width/2, y: r.top + r.height/2 };
   }
 
-  overlay.addEventListener('pointerdown', e=>{
-    if(e.target === resizeHandle || e.target === rotateHandle) return;
-    tryonDragging = true;
-    tryonDragStart = {x: e.clientX - tryonJewelState.x, y: e.clientY - tryonJewelState.y};
+  overlay.addEventListener('pointerdown', e => {
+    if (e.target === resizeHandle || e.target === rotateHandle) return;
+    tryonDragging  = true;
+    tryonDragStart = { x: e.clientX - tryonJewelState.x, y: e.clientY - tryonJewelState.y };
     overlay.setPointerCapture(e.pointerId);
     e.stopPropagation();
   });
 
-  resizeHandle.addEventListener('pointerdown', e=>{
-    tryonResizing = true;
-    tryonResizeStart = {w: tryonJewelState.w, mx: e.clientX, my: e.clientY};
+  resizeHandle.addEventListener('pointerdown', e => {
+    tryonResizing    = true;
+    tryonResizeStart = { w: tryonJewelState.w, mx: e.clientX, my: e.clientY };
     resizeHandle.setPointerCapture(e.pointerId);
     e.stopPropagation();
   });
 
-  rotateHandle.addEventListener('pointerdown', e=>{
-    tryonRotating = true;
-    const center = getCenter(overlay);
-    tryonRotateStart = {
-      angle: tryonJewelState.rotation,
-      mx: e.clientX, my: e.clientY,
-      cx: center.x, cy: center.y
-    };
+  rotateHandle.addEventListener('pointerdown', e => {
+    tryonRotating    = true;
+    const center     = getCenter(overlay);
+    tryonRotateStart = { angle: tryonJewelState.rotation, mx: e.clientX, my: e.clientY, cx: center.x, cy: center.y };
     rotateHandle.setPointerCapture(e.pointerId);
     e.stopPropagation();
   });
 
-  document.addEventListener('pointermove', e=>{
-    if(tryonDragging){
+  document.addEventListener('pointermove', e => {
+    if (tryonDragging) {
       tryonJewelState.x = e.clientX - tryonDragStart.x;
       tryonJewelState.y = e.clientY - tryonDragStart.y;
       tryonPositionJewel();
-    } else if(tryonResizing){
+    } else if (tryonResizing) {
       const dx = e.clientX - tryonResizeStart.mx;
       const dy = e.clientY - tryonResizeStart.my;
-      tryonJewelState.w = Math.max(40, tryonResizeStart.w + Math.max(dx,dy));
+      tryonJewelState.w = Math.max(40, tryonResizeStart.w + Math.max(dx, dy));
       tryonPositionJewel();
-    } else if(tryonRotating){
+    } else if (tryonRotating) {
       const dx = e.clientX - tryonRotateStart.cx;
       const dy = e.clientY - tryonRotateStart.cy;
-      const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+      const angle      = Math.atan2(dy, dx) * 180 / Math.PI;
       const startAngle = Math.atan2(tryonRotateStart.my - tryonRotateStart.cy, tryonRotateStart.mx - tryonRotateStart.cx) * 180 / Math.PI;
       tryonJewelState.rotation = tryonRotateStart.angle + (angle - startAngle);
       tryonPositionJewel();
     }
   });
 
-  document.addEventListener('pointerup', ()=>{
-    if(tryonDragging || tryonResizing || tryonRotating) tryonSaveCanvasTransform();
+  document.addEventListener('pointerup', () => {
+    if (tryonDragging || tryonResizing || tryonRotating) tryonSaveCanvasTransform();
     tryonDragging = false; tryonResizing = false; tryonRotating = false;
   });
 });
 
-async function tryonAnalyzeWithAI(){
-  // Activar panel 3 (con spinner) antes de hacer nada
+// ── Analizar y componer imagen final ──────────────────────
+async function tryonAnalyzeWithAI() {
   document.getElementById('tryonPanel3').classList.add('active');
-  document.getElementById('tryonAiLoading').style.display='flex';
-  document.getElementById('tryonResult').style.display='none';
-
-  // Pequeña pausa para que el DOM se actualice y el spinner sea visible
+  document.getElementById('tryonAiLoading').style.display = 'flex';
+  document.getElementById('tryonResult').style.display    = 'none';
   await new Promise(r => setTimeout(r, 50));
 
-  // Render composite image on result canvas
-  // Usamos el srcCanvas (panel 2 ya puede estar oculto, pero el canvas retiene sus píxeles)
   const srcCanvas = document.getElementById('tryonCanvas');
   const resCanvas = document.getElementById('tryonResultCanvas');
   resCanvas.width  = srcCanvas.width;
@@ -3387,57 +3484,49 @@ async function tryonAnalyzeWithAI(){
   const ctx = resCanvas.getContext('2d');
   ctx.drawImage(srcCanvas, 0, 0);
 
-  // Dibujar la joya encima usando la escala guardada ANTES de ocultar el panel 2
+  // Dibujar la joya usando la escala guardada antes de ocultar panel 2
   const jewelImg = document.getElementById('tryonJewelImg');
-  if(jewelImg.src && jewelImg.complete){
-    // tryonCanvasScaleX/Y y tryonCanvasOffsetX/Y se guardaron en tryonSaveCanvasTransform()
-    // mientras el panel 2 aún era visible — los valores son fiables
+  if (jewelImg.src && jewelImg.complete) {
     const ox = (tryonJewelState.x - tryonCanvasOffsetX) * tryonCanvasScaleX;
     const oy = (tryonJewelState.y - tryonCanvasOffsetY) * tryonCanvasScaleY;
     const ow = tryonJewelState.w * tryonCanvasScaleX;
     const oh = ow * (jewelImg.naturalHeight / jewelImg.naturalWidth);
     ctx.save();
     ctx.globalAlpha = tryonJewelState.opacity;
-    const cx = ox + ow/2, cy = oy + oh/2;
-    ctx.translate(cx, cy);
+    ctx.translate(ox + ow/2, oy + oh/2);
     ctx.rotate(tryonJewelState.rotation * Math.PI / 180);
     ctx.drawImage(jewelImg, -ow/2, -oh/2, ow, oh);
     ctx.restore();
   }
 
-  // Recortar zona de la joya para mostrar solo la joya con contexto corporal
-  const jx = (tryonJewelState.x - tryonCanvasOffsetX) * tryonCanvasScaleX;
-  const jy = (tryonJewelState.y - tryonCanvasOffsetY) * tryonCanvasScaleY;
-  const jw = tryonJewelState.w * tryonCanvasScaleX;
-  const jewelImg2 = document.getElementById('tryonJewelImg');
-  const jh = jw * ((jewelImg2.naturalHeight || jw) / (jewelImg2.naturalWidth || jw));
+  // Recortar zona centrada en la joya con contexto corporal
+  const jx  = (tryonJewelState.x - tryonCanvasOffsetX) * tryonCanvasScaleX;
+  const jy  = (tryonJewelState.y - tryonCanvasOffsetY) * tryonCanvasScaleY;
+  const jw  = tryonJewelState.w * tryonCanvasScaleX;
+  const jh  = jw * ((jewelImg.naturalHeight || jw) / (jewelImg.naturalWidth || jw));
+  const pad = jw * 2.0;
 
-  const padX = jw * 1.8;
-  const padY = jh * 1.8;
-  const cropX = Math.max(0, jx - padX);
-  const cropY = Math.max(0, jy - padY);
-  const cropW = Math.min(resCanvas.width  - cropX, jw + padX * 2);
-  const cropH = Math.min(resCanvas.height - cropY, jh + padY * 2);
+  const cropX = Math.max(0, jx - pad);
+  const cropY = Math.max(0, jy - pad);
+  const cropW = Math.min(resCanvas.width  - cropX, jw + pad * 2);
+  const cropH = Math.min(resCanvas.height - cropY, jh + pad * 2);
 
   const cropCanvas = document.createElement('canvas');
-  const safeCropW = cropW > 10 ? cropW : resCanvas.width;
-  const safeCropH = cropH > 10 ? cropH : resCanvas.height;
-  const safeCropX = safeCropW === resCanvas.width  ? 0 : cropX;
-  const safeCropY = safeCropH === resCanvas.height ? 0 : cropY;
+  const safeCropW  = cropW > 10 ? cropW : resCanvas.width;
+  const safeCropH  = cropH > 10 ? cropH : resCanvas.height;
+  const safeCropX  = safeCropW === resCanvas.width  ? 0 : cropX;
+  const safeCropY  = safeCropH === resCanvas.height ? 0 : cropY;
   cropCanvas.width  = safeCropW;
   cropCanvas.height = safeCropH;
   cropCanvas.getContext('2d').drawImage(resCanvas, safeCropX, safeCropY, safeCropW, safeCropH, 0, 0, safeCropW, safeCropH);
 
-  // Mostrar el recorte en el canvas de resultado
   resCanvas.width  = safeCropW;
   resCanvas.height = safeCropH;
   resCanvas.getContext('2d').drawImage(cropCanvas, 0, 0);
 
-  const p = tryonProduct;
-
-  // Análisis local de imagen (sin API de pago)
+  // Opinión del estilista
   try {
-    const opinion = tryonGenerateLocalOpinion(cropCanvas, p);
+    const opinion = tryonGenerateLocalOpinion(cropCanvas, tryonProduct);
     document.getElementById('tryonAiOpinion').innerHTML =
       `<strong style="color:var(--gold);font-style:normal;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;">✦ Opinión de tu estilista</strong><br><br>${opinion}`;
   } catch(e) {
@@ -3445,32 +3534,28 @@ async function tryonAnalyzeWithAI(){
       `<strong style="color:var(--gold);font-style:normal;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;">✦ Vista previa lista</strong><br><br>La joya luce perfecta. Pulsa "Añadir al carrito" para hacerla tuya.`;
   }
 
-  document.getElementById('tryonAiLoading').style.display='none';
-  document.getElementById('tryonResult').style.display='block';
+  document.getElementById('tryonAiLoading').style.display = 'none';
+  document.getElementById('tryonResult').style.display    = 'block';
 }
 
-function tryonAddToCart(){
-  if(!tryonProduct) return;
+function tryonAddToCart() {
+  if (!tryonProduct) return;
   addToCart(tryonProduct, null, 1);
   closeTryOn();
 }
 
-function tryonDownload(){
+function tryonDownload() {
   const canvas = document.getElementById('tryonResultCanvas');
-  const link = document.createElement('a');
-  link.download = `plataco-${tryonProduct?.name||'joya'}.jpg`;
+  const link   = document.createElement('a');
+  link.download = `plataco-${tryonProduct?.name || 'joya'}.jpg`;
   link.href = canvas.toDataURL('image/jpeg', 0.9);
   link.click();
 }
 
-// ── Motor de análisis local (sin API de pago) ─────────────────────────────
-// Analiza el canvas de la zona de la joya usando pixels reales:
-// tono de piel, luminosidad, contraste → construye la opinión personalizada
+// ── Motor de análisis local ───────────────────────────────
 function tryonGenerateLocalOpinion(canvas, product) {
   const ctx = canvas.getContext('2d');
   const w = canvas.width, h = canvas.height;
-
-  // Samplear píxeles del canvas (evitar bordes negros)
   const margin = Math.floor(Math.min(w, h) * 0.1);
   const imageData = ctx.getImageData(margin, margin, w - margin * 2, h - margin * 2);
   const d = imageData.data;
@@ -3777,7 +3862,7 @@ document.addEventListener('keydown', function(e) {
         <input type="file" id="tryonFileInput" accept="image/*" capture="environment" style="display:none" onchange="handleTryonFile(event)">
         <div class="tryon-upload-icon">📷</div>
         <p class="tryon-upload-title">Sube tu foto</p>
-        <p class="tryon-upload-hint">Mano · Muñeca · Cuello · Oreja<br>Toca para hacer una foto o subir imagen</p>
+        <p class="tryon-upload-hint">Mano · Muñeca · Cuello · Oreja<br>La IA detectará automáticamente dónde colocar la joya</p>
       </div>
       <div class="tryon-tips">
         <div class="tryon-tip"><span>✦</span> Buena iluminación</div>
@@ -3798,7 +3883,7 @@ document.addEventListener('keydown', function(e) {
           </div>
         </div>
       </div>
-      <p class="tryon-canvas-hint">Arrastra la joya · Esquina inferior para redimensionar · ↻ para rotar</p>
+      <p class="tryon-canvas-hint" id="tryonCanvasHint">Joya posicionada automáticamente · Arrastra para ajustar · Esquina para redimensionar · ↻ para rotar</p>
       <div class="tryon-controls">
         <button class="tryon-ctrl-btn" onclick="tryonAdjust('size',-10)">− Tamaño</button>
         <button class="tryon-ctrl-btn" onclick="tryonAdjust('size',10)">+ Tamaño</button>
