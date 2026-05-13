@@ -2221,7 +2221,7 @@ function getMaterialTag(material){
 function renderProducts(){
   let list=[...products];
   if(currentFilter!=='all') list=list.filter(p=>p.category===currentFilter);
-  if(searchTerm) list=list.filter(p=>p.name.toLowerCase().includes(searchTerm.toLowerCase())||p.desc.toLowerCase().includes(searchTerm.toLowerCase()));
+  if(searchTerm) list=smartSearch(list, searchTerm);
 
   // Apply subcategory filter (simplified: novedades = isNew, oro/dorados = name/material includes oro, plateados/plata = default)
   if(currentSubcat==='novedades') list=list.filter(p=>p.isNew);
@@ -2496,33 +2496,212 @@ function filterCategory(cat,btn){
   renderProducts();
 }
 function applySort(sort,btn){ currentSort=sort; document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderProducts(); }
-function handleSearch(){searchTerm=document.getElementById('searchInput').value;renderProducts();}
+function handleSearch(){
+  searchTerm=document.getElementById('searchInput').value;
+  renderProducts();
+  renderSearchSuggestions(searchTerm);
+}
 
-const COMMON_SEARCHES = ['Pulseras','Anillos','Pendientes','Collares','Circonita','Plata 925','Handmade'];
+// ═══════════════════════════════════════════════════════════════
+// SMART SEARCH ENGINE — PLATACO
+// ═══════════════════════════════════════════════════════════════
 
-function buildSuggestions() {
+// Sinónimos y aliases semánticos
+const SEARCH_ALIASES = {
+  // materiales
+  'plata':       ['plata','925','sterling','silver','plateado','plateada'],
+  'oro':         ['oro','gold','dorado','dorada','chapado','bañado en oro','18k','14k'],
+  'oro rosa':    ['oro rosa','rose gold','rosado','rosada','pink gold'],
+  'circonita':   ['circonita','zirconia','cz','piedra','gema','crystal'],
+  // categorías
+  'anillo':      ['anillo','anillos','ring','sortija','sello','apilable','medio dedo','infinito'],
+  'collar':      ['collar','collares','necklace','cadena','gargantilla','choker','colgante','pendant'],
+  'pulsera':     ['pulsera','pulseras','bracelet','esclava','bangle','charm','tejida'],
+  'pendiente':   ['pendiente','pendientes','earring','earrings','aro','aros','lagrima','ear cuff','earcuff'],
+  'broche':      ['broche','broches','clip','brooches'],
+  // atributos
+  'nuevo':       ['nuevo','nueva','new','novedad','novedades','reciente'],
+  'oferta':      ['oferta','sale','descuento','rebaja'],
+  'bestseller':  ['bestseller','best seller','más vendido','popular','tendencia'],
+  'minimalista': ['minimalista','minimal','simple','sencillo','fino','delicado'],
+  'grabado':     ['grabado','personalizado','personalizable','custom','nombre'],
+  'circonitas':  ['circonita','zirconia','piedra','brillante','cristal'],
+  'barato':      ['barato','económico','asequible','precio bajo'],
+  'regalo':      ['regalo','gift','presente','san valentín','cumpleaños','navidad'],
+};
+
+// Stopwords en español
+const STOPWORDS = new Set(['de','la','el','los','las','un','una','unos','unas','y','o','en','con','para','por','que','es','son','se','del']);
+
+function tokenize(text) {
+  return (text || '').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // quitar tildes
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter(t => t.length > 1 && !STOPWORDS.has(t));
+}
+
+function expandTokens(tokens) {
+  const expanded = new Set(tokens);
+  for (const token of tokens) {
+    for (const [key, synonyms] of Object.entries(SEARCH_ALIASES)) {
+      if (synonyms.some(s => s.includes(token) || token.includes(s.split(' ')[0]))) {
+        synonyms.forEach(s => s.split(' ').forEach(w => expanded.add(w)));
+        expanded.add(key);
+      }
+    }
+  }
+  return [...expanded];
+}
+
+function scoreProduct(product, queryTokens, expandedTokens) {
+  let score = 0;
+  const name     = tokenize(product.name);
+  const desc     = tokenize(product.desc || '');
+  const material = tokenize(product.material || '');
+  const category = tokenize(product.category || '');
+  const badge    = tokenize(product.badge || '');
+  const specs    = tokenize(Object.values(product.specs || {}).join(' '));
+  const allText  = [...name, ...desc, ...material, ...category, ...badge, ...specs];
+
+  for (const qt of queryTokens) {
+    // Coincidencia exacta en nombre → máxima puntuación
+    if (name.some(w => w === qt))          score += 100;
+    else if (name.some(w => w.startsWith(qt) || qt.startsWith(w))) score += 60;
+    // Material exacto
+    if (material.some(w => w === qt || w.includes(qt))) score += 80;
+    // Categoría exacta
+    if (category.some(w => w === qt || w.includes(qt))) score += 70;
+    // Badge (new, sale, bestseller)
+    if (badge.some(w => w === qt || w.includes(qt))) score += 50;
+    // Descripción
+    if (desc.some(w => w === qt))          score += 30;
+    if (desc.some(w => w.includes(qt)))    score += 15;
+    // Specs
+    if (specs.some(w => w.includes(qt)))   score += 20;
+  }
+
+  // Bonus por tokens expandidos (sinónimos)
+  for (const et of expandedTokens) {
+    if (!queryTokens.includes(et)) {
+      if (allText.some(w => w.includes(et))) score += 10;
+    }
+  }
+
+  // Bonus isNew
+  if (product.isNew && expandedTokens.some(t => ['nuevo','nueva','new','novedad'].includes(t))) score += 40;
+
+  return score;
+}
+
+function smartSearch(list, term) {
+  if (!term || !term.trim()) return list;
+  const queryTokens   = tokenize(term);
+  const expandedTokens = expandTokens(queryTokens);
+
+  const scored = list.map(p => ({
+    product: p,
+    score: scoreProduct(p, queryTokens, expandedTokens),
+  })).filter(x => x.score > 0);
+
+  scored.sort((a, b) => b.score - a.score);
+  return scored.map(x => x.product);
+}
+
+// ── Sugerencias dinámicas ────────────────────────────────────
+
+const QUICK_SEARCHES = [
+  { label:'✦ Novedades',    term:'nuevo' },
+  { label:'○ Plata 925',    term:'plata' },
+  { label:'◈ Oro',          term:'oro' },
+  { label:'◎ Anillos',      term:'anillo' },
+  { label:'⌀ Collares',     term:'collar' },
+  { label:'◇ Pendientes',   term:'pendiente' },
+  { label:'◉ Bestsellers',  term:'bestseller' },
+  { label:'✧ Circonitas',   term:'circonita' },
+  { label:'⬡ Pulseras',     term:'pulsera' },
+  { label:'↓ Ofertas',      term:'oferta' },
+];
+
+function renderSearchSuggestions(query) {
   const box = document.getElementById('searchSuggestions');
-  if (box.dataset.built) return;
-  COMMON_SEARCHES.forEach(t => {
+  box.innerHTML = '';
+
+  if (!query || query.length < 1) {
+    // Mostrar búsquedas rápidas
+    const header = document.createElement('div');
+    header.style.cssText = 'padding:8px 14px 4px;font-size:0.58rem;letter-spacing:0.25em;text-transform:uppercase;color:#444;';
+    header.textContent = 'Búsquedas frecuentes';
+    box.appendChild(header);
+
+    QUICK_SEARCHES.forEach(({ label, term }) => {
+      const d = document.createElement('div');
+      d.style.cssText = 'padding:8px 14px;font-size:0.8rem;color:#888;cursor:pointer;letter-spacing:0.04em;transition:all 0.15s;display:flex;align-items:center;gap:8px;';
+      d.innerHTML = `<span style="color:#444;font-size:0.7rem;">${label.split(' ')[0]}</span><span>${label.split(' ').slice(1).join(' ')}</span>`;
+      d.addEventListener('mouseenter', () => { d.style.background='#1e1e1e'; d.style.color='#fff'; });
+      d.addEventListener('mouseleave', () => { d.style.background=''; d.style.color='#888'; });
+      d.addEventListener('mousedown', () => applySearch(term));
+      box.appendChild(d);
+    });
+    box.style.display = 'block';
+    return;
+  }
+
+  // Sugerencias dinámicas desde productos
+  const queryTokens    = tokenize(query);
+  const expandedTokens = expandTokens(queryTokens);
+  const scored = products.map(p => ({
+    p,
+    score: scoreProduct(p, queryTokens, expandedTokens),
+  })).filter(x => x.score > 0).sort((a,b) => b.score - a.score).slice(0, 6);
+
+  if (!scored.length) {
     const d = document.createElement('div');
-    d.className = 'search-suggestion-item';
-    d.textContent = t;
-    d.style.cssText = 'padding:9px 14px;font-size:0.82rem;color:#ccc;cursor:pointer;letter-spacing:0.04em;transition:background 0.15s';
-    d.addEventListener('mouseenter', () => d.style.background = '#2a2a2a');
-    d.addEventListener('mouseleave', () => d.style.background = '');
-    d.addEventListener('mousedown', () => applySearch(t));
+    d.style.cssText = 'padding:12px 14px;font-size:0.78rem;color:#444;';
+    d.textContent = 'Sin resultados para "' + query + '"';
+    box.appendChild(d);
+    box.style.display = 'block';
+    return;
+  }
+
+  const header = document.createElement('div');
+  header.style.cssText = 'padding:8px 14px 4px;font-size:0.58rem;letter-spacing:0.25em;text-transform:uppercase;color:#444;';
+  header.textContent = scored.length + ' resultado' + (scored.length !== 1 ? 's' : '');
+  box.appendChild(header);
+
+  scored.forEach(({ p }) => {
+    const d = document.createElement('div');
+    d.style.cssText = 'padding:9px 14px;font-size:0.8rem;color:#888;cursor:pointer;display:flex;align-items:center;gap:10px;transition:all 0.15s;border-bottom:1px solid #111;';
+
+    const img = p.imageUrl
+      ? `<img src="${p.imageUrl}" style="width:32px;height:32px;object-fit:cover;border-radius:2px;opacity:0.7;" onerror="this.style.display='none'">`
+      : `<span style="width:32px;height:32px;background:#1a1a1a;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:#555;">✦</span>`;
+
+    const materialTag = p.material ? `<span style="font-size:0.65rem;color:#555;letter-spacing:0.1em;">${p.material}</span>` : '';
+    const badgeTag = p.badge ? `<span style="font-size:0.6rem;background:#C9A84C;color:#000;padding:1px 5px;margin-left:4px;">${p.badge}</span>` : '';
+
+    d.innerHTML = `${img}<div style="flex:1;min-width:0;"><div style="color:#ccc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}${badgeTag}</div><div>${materialTag}</div></div><span style="font-size:0.78rem;color:#C9A84C;white-space:nowrap;">${convertPrice(p.price)}</span>`;
+
+    d.addEventListener('mouseenter', () => d.style.background='#1a1a1a');
+    d.addEventListener('mouseleave', () => d.style.background='');
+    d.addEventListener('mousedown', () => {
+      applySearch(p.name);
+      // También abrir el producto directamente
+      const full = products.find(x => x.id === p.id);
+      if (full) setTimeout(() => openProduct(full), 100);
+    });
     box.appendChild(d);
   });
-  box.dataset.built = '1';
+
+  box.style.display = 'block';
 }
 
 function showSearchSuggestions(){
-  buildSuggestions();
   const q = document.getElementById('searchInput').value;
-  if(!q) document.getElementById('searchSuggestions').style.display='block';
+  renderSearchSuggestions(q);
 }
 function hideSearchSuggestionsDelayed(){
-  setTimeout(()=>{ document.getElementById('searchSuggestions').style.display='none'; },200);
+  setTimeout(()=>{ document.getElementById('searchSuggestions').style.display='none'; },220);
 }
 function applySearch(term){
   const inp=document.getElementById('searchInput');
@@ -3678,7 +3857,7 @@ async function subscribeNewsletter() {
   msg.textContent = 'Enviando…';
 
   try {
-    const API = window.PLATACO_API || 'https://plataco-backend-production.up.railway.app';
+    const API = window.PLATACO_API || '';
     const res = await fetch(`${API}/api/newsletter/subscribe`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -3711,6 +3890,6 @@ window.addEventListener('scroll',function(){
   if(window.scrollY>400){btn.classList.add('visible');}else{btn.classList.remove('visible');}
 });
 </script>
-<script src="cookies.js"></script>
+
 </body>
 </html>
