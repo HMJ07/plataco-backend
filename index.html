@@ -729,6 +729,14 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
 .stock-badge.pocas{background:#fff3cd;color:#856404;border:1px solid #ffc107}
 .stock-badge.bajo{background:#e8f4e8;color:#3a7a3a;border:1px solid #7ab87a}
 .stock-badge.agotado{background:#f8d7da;color:#842029;border:1px solid #f5c2c7}
+.stock-alert-form{margin:1rem 0;padding:1rem;background:#faf7f2;border:1px solid #e8e0d0;border-radius:4px}
+.stock-alert-form p{margin:0 0 0.6rem;font-size:0.75rem;letter-spacing:0.05em;color:#666}
+.stock-alert-form .alert-input-row{display:flex;gap:0.5rem}
+.stock-alert-form input[type="email"]{flex:1;border:1px solid #ccc;padding:0.55rem 0.75rem;font-family:'Jost',sans-serif;font-size:0.78rem;outline:none;transition:border-color 0.2s}
+.stock-alert-form input[type="email"]:focus{border-color:var(--gold)}
+.stock-alert-form button{background:var(--dark);color:#fff;border:none;padding:0.55rem 1rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;white-space:nowrap;transition:background 0.2s}
+.stock-alert-form button:hover{background:var(--gold);color:var(--dark)}
+.stock-alert-form .alert-msg{font-size:0.75rem;margin-top:0.5rem;display:none}
 .heart-icon{font-size:1rem;transition:transform 0.2s}
 .wishlist-btn:hover .heart-icon{transform:scale(1.2)}
 .modal-close{position:absolute;top:1rem;right:1rem;background:white;border:none;width:36px;height:36px;cursor:pointer;font-size:1.2rem;z-index:10;display:flex;align-items:center;justify-content:center;transition:background 0.2s}
@@ -1827,8 +1835,16 @@ main{max-width:1400px;margin:0 auto;padding:3rem 2rem}
       </div>
       <div class="modal-divider"></div>
       <div id="modalStockBadge"></div>
+      <div id="modalStockAlertForm" class="stock-alert-form" style="display:none">
+        <p>🔔 Avísame cuando vuelva a haber stock</p>
+        <div class="alert-input-row">
+          <input type="email" id="stockAlertEmail" placeholder="tu@email.com" autocomplete="email">
+          <button onclick="submitStockAlert()">Avisar</button>
+        </div>
+        <div class="alert-msg" id="stockAlertMsg"></div>
+      </div>
       <div id="modalSpecs" style="margin-bottom:1.5rem"></div>
-      <button class="add-cart-btn" onclick="addFromModal()">Añadir al carrito</button>
+      <button class="add-cart-btn" id="modalAddCartBtn" onclick="addFromModal()">Añadir al carrito</button>
       <button class="wishlist-btn" id="modalWishlistBtn" onclick="toggleFavorite()"><span class="heart-icon">♡</span> <span id="wishlistBtnText">Añadir a favoritos</span></button>
       <button class="tryon-modal-btn" onclick="openTryOn(currentProduct)">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
@@ -2322,16 +2338,30 @@ function openModal(id){
   document.getElementById('modalDesc').textContent=currentProduct.desc||'';
   document.getElementById('modalSpecs').innerHTML=Object.entries(currentProduct.specs||{}).map(([k,v])=>`<div class="spec-row"><span class="spec-label">${k}</span><span class="spec-value">${v}</span></div>`).join('');
   updateWishlistBtn();
-  // Stock badge
+  // Stock badge + formulario aviso
   const stockBadge = document.getElementById('modalStockBadge');
+  const alertForm  = document.getElementById('modalStockAlertForm');
+  const addCartBtn = document.getElementById('modalAddCartBtn');
+  const alertMsg   = document.getElementById('stockAlertMsg');
+  document.getElementById('stockAlertEmail').value = '';
+  alertMsg.style.display = 'none';
+  alertMsg.textContent = '';
   if(currentProduct.stock_label === 'pocas_unidades'){
     stockBadge.innerHTML = `<span class="stock-badge pocas">⚠ Solo quedan ${currentProduct.stock} unidades</span>`;
+    alertForm.style.display = 'none';
+    addCartBtn.style.display = '';
   } else if(currentProduct.stock_label === 'sin_stock'){
     stockBadge.innerHTML = `<span class="stock-badge agotado">Sin stock</span>`;
+    alertForm.style.display = 'block';
+    addCartBtn.style.display = 'none';
   } else if(currentProduct.stock_label === 'stock_bajo'){
     stockBadge.innerHTML = `<span class="stock-badge bajo">Pocas unidades disponibles</span>`;
+    alertForm.style.display = 'none';
+    addCartBtn.style.display = '';
   } else {
     stockBadge.innerHTML = '';
+    alertForm.style.display = 'none';
+    addCartBtn.style.display = '';
   }
   // Cargar reseñas
   loadReviews(currentProduct.slug);
@@ -2340,6 +2370,37 @@ function openModal(id){
 }
 function closeModal(){ document.getElementById('modalOverlay').style.display='none'; document.body.style.overflow=''; currentProduct=null; reviewPickerRating=0; }
 function handleModalClick(e){if(e.target===document.getElementById('modalOverlay'))closeModal();}
+
+async function submitStockAlert(){
+  if(!currentProduct) return;
+  const emailInput = document.getElementById('stockAlertEmail');
+  const msgEl      = document.getElementById('stockAlertMsg');
+  const email = emailInput.value.trim();
+  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    msgEl.style.display='block'; msgEl.style.color='#842029';
+    msgEl.textContent='Por favor introduce un email válido.'; return;
+  }
+  msgEl.style.display='none';
+  try {
+    const r = await fetch(`${API_URL}/stock-alerts`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ product_id: currentProduct.id, email })
+    });
+    const data = await r.json();
+    if(r.ok){
+      msgEl.style.display='block'; msgEl.style.color='#3a7a3a';
+      msgEl.textContent='✔ ¡Listo! Te avisaremos cuando vuelva a haber stock.';
+      emailInput.value='';
+    } else {
+      msgEl.style.display='block'; msgEl.style.color='#842029';
+      msgEl.textContent = data.error || 'Error al registrar el aviso.';
+    }
+  } catch(err){
+    msgEl.style.display='block'; msgEl.style.color='#842029';
+    msgEl.textContent='Error de conexión. Inténtalo de nuevo.';
+  }
+}
 function selectSize(size,btn){ selectedSize=size; document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('selected')); btn.classList.add('selected'); }
 function updateModalPrice(){ document.getElementById('modalPrice').textContent=convertPrice(currentProduct.price); document.getElementById('modalQty').textContent=currentQty; document.getElementById('modalSubtotal').textContent=convertPrice(currentProduct.price*currentQty); }
 function changeQty(delta){currentQty=Math.max(1,currentQty+delta);updateModalPrice();}
