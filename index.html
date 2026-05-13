@@ -3208,8 +3208,9 @@ function tryonGoTo(step){
     const line = document.getElementById('tryonStepLine'+i);
     if(line) line.classList.toggle('done', i < step);
   });
-  // Para paso 3: capturar canvas mientras panel 2 aún es visible, luego cambiar
+  // Para paso 3: guardar transform mientras panel 2 aún es visible, luego analizar
   if(step === 3) {
+    tryonSaveCanvasTransform(); // panel 2 aún visible → BoundingClientRect correcto
     tryonAnalyzeWithAI();
     return; // la función se encarga de activar panel 3 al terminar
   }
@@ -3238,6 +3239,24 @@ function tryonLoadFile(file){
   reader.readAsDataURL(file);
 }
 
+// Escala y offset canvas↔pantalla, calculados mientras panel 2 es visible
+// Se leen aquí y se reutilizan en tryonAnalyzeWithAI (cuando el panel ya puede estar oculto)
+let tryonCanvasScaleX = 1, tryonCanvasScaleY = 1;
+let tryonCanvasOffsetX = 0, tryonCanvasOffsetY = 0;
+
+function tryonSaveCanvasTransform() {
+  const canvas = document.getElementById('tryonCanvas');
+  const wrap   = document.getElementById('tryonCanvasWrap');
+  const canvasRect = canvas.getBoundingClientRect();
+  const wrapRect   = wrap.getBoundingClientRect();
+  if (canvasRect.width > 0 && canvasRect.height > 0) {
+    tryonCanvasScaleX  = canvas.width  / canvasRect.width;
+    tryonCanvasScaleY  = canvas.height / canvasRect.height;
+    tryonCanvasOffsetX = canvasRect.left - wrapRect.left;
+    tryonCanvasOffsetY = canvasRect.top  - wrapRect.top;
+  }
+}
+
 function tryonRenderCanvas(){
   const canvas = document.getElementById('tryonCanvas');
   const ctx = canvas.getContext('2d');
@@ -3251,6 +3270,8 @@ function tryonRenderCanvas(){
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     // Position jewel overlay
     tryonPositionJewel();
+    // Guardar transform ahora que el canvas está renderizado y visible
+    tryonSaveCanvasTransform();
   };
   img.src = tryonPhotoDataURL;
 }
@@ -3343,6 +3364,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   });
 
   document.addEventListener('pointerup', ()=>{
+    if(tryonDragging || tryonResizing || tryonRotating) tryonSaveCanvasTransform();
     tryonDragging = false; tryonResizing = false; tryonRotating = false;
   });
 });
@@ -3357,23 +3379,22 @@ async function tryonAnalyzeWithAI(){
   await new Promise(r => setTimeout(r, 50));
 
   // Render composite image on result canvas
+  // Usamos el srcCanvas (panel 2 ya puede estar oculto, pero el canvas retiene sus píxeles)
   const srcCanvas = document.getElementById('tryonCanvas');
   const resCanvas = document.getElementById('tryonResultCanvas');
-  resCanvas.width = srcCanvas.width;
+  resCanvas.width  = srcCanvas.width;
   resCanvas.height = srcCanvas.height;
   const ctx = resCanvas.getContext('2d');
   ctx.drawImage(srcCanvas, 0, 0);
 
-  // Draw jewel on result canvas
+  // Dibujar la joya encima usando la escala guardada ANTES de ocultar el panel 2
   const jewelImg = document.getElementById('tryonJewelImg');
   if(jewelImg.src && jewelImg.complete){
-    const canvasRect = srcCanvas.getBoundingClientRect();
-    const wrapRect = document.getElementById('tryonCanvasWrap').getBoundingClientRect();
-    const scaleX = srcCanvas.width / canvasRect.width;
-    const scaleY = srcCanvas.height / canvasRect.height;
-    const ox = (tryonJewelState.x - (canvasRect.left - wrapRect.left)) * scaleX;
-    const oy = (tryonJewelState.y - (canvasRect.top - wrapRect.top)) * scaleY;
-    const ow = tryonJewelState.w * scaleX;
+    // tryonCanvasScaleX/Y y tryonCanvasOffsetX/Y se guardaron en tryonSaveCanvasTransform()
+    // mientras el panel 2 aún era visible — los valores son fiables
+    const ox = (tryonJewelState.x - tryonCanvasOffsetX) * tryonCanvasScaleX;
+    const oy = (tryonJewelState.y - tryonCanvasOffsetY) * tryonCanvasScaleY;
+    const ow = tryonJewelState.w * tryonCanvasScaleX;
     const oh = ow * (jewelImg.naturalHeight / jewelImg.naturalWidth);
     ctx.save();
     ctx.globalAlpha = tryonJewelState.opacity;
@@ -3384,44 +3405,37 @@ async function tryonAnalyzeWithAI(){
     ctx.restore();
   }
 
-  // ── Recortar zona de la joya para mostrar solo la joya, no toda la foto ──
+  // Recortar zona de la joya para mostrar solo la joya con contexto corporal
+  const jx = (tryonJewelState.x - tryonCanvasOffsetX) * tryonCanvasScaleX;
+  const jy = (tryonJewelState.y - tryonCanvasOffsetY) * tryonCanvasScaleY;
+  const jw = tryonJewelState.w * tryonCanvasScaleX;
   const jewelImg2 = document.getElementById('tryonJewelImg');
-  const canvasRect2 = srcCanvas.getBoundingClientRect();
-  const wrapRect2 = document.getElementById('tryonCanvasWrap').getBoundingClientRect();
-  const scaleX2 = srcCanvas.width / canvasRect2.width;
-  const scaleY2 = srcCanvas.height / canvasRect2.height;
-  const jx = (tryonJewelState.x - (canvasRect2.left - wrapRect2.left)) * scaleX2;
-  const jy = (tryonJewelState.y - (canvasRect2.top - wrapRect2.top)) * scaleY2;
-  const jw = tryonJewelState.w * scaleX2;
   const jh = jw * ((jewelImg2.naturalHeight || jw) / (jewelImg2.naturalWidth || jw));
 
-  // Zona de recorte: centrada en la joya, padding del 80% extra para dar contexto corporal
   const padX = jw * 1.8;
   const padY = jh * 1.8;
   const cropX = Math.max(0, jx - padX);
   const cropY = Math.max(0, jy - padY);
-  const cropW = Math.min(resCanvas.width - cropX, jw + padX * 2);
+  const cropW = Math.min(resCanvas.width  - cropX, jw + padX * 2);
   const cropH = Math.min(resCanvas.height - cropY, jh + padY * 2);
 
-  // Dibujar recorte en un canvas auxiliar
   const cropCanvas = document.createElement('canvas');
-  // Seguridad: si las dimensiones son 0 (panel oculto), usar canvas completo
-  const safeCropW = cropW > 0 ? cropW : resCanvas.width;
-  const safeCropH = cropH > 0 ? cropH : resCanvas.height;
-  const safeCropX = safeCropW === resCanvas.width ? 0 : cropX;
+  const safeCropW = cropW > 10 ? cropW : resCanvas.width;
+  const safeCropH = cropH > 10 ? cropH : resCanvas.height;
+  const safeCropX = safeCropW === resCanvas.width  ? 0 : cropX;
   const safeCropY = safeCropH === resCanvas.height ? 0 : cropY;
-  cropCanvas.width = safeCropW;
+  cropCanvas.width  = safeCropW;
   cropCanvas.height = safeCropH;
   cropCanvas.getContext('2d').drawImage(resCanvas, safeCropX, safeCropY, safeCropW, safeCropH, 0, 0, safeCropW, safeCropH);
 
-  // Mostrar el recorte en el canvas de resultado (en vez de la foto completa)
-  resCanvas.width = safeCropW;
+  // Mostrar el recorte en el canvas de resultado
+  resCanvas.width  = safeCropW;
   resCanvas.height = safeCropH;
   resCanvas.getContext('2d').drawImage(cropCanvas, 0, 0);
 
   const p = tryonProduct;
 
-  // ── Análisis local de imagen (sin API de pago) ──────────────
+  // Análisis local de imagen (sin API de pago)
   try {
     const opinion = tryonGenerateLocalOpinion(cropCanvas, p);
     document.getElementById('tryonAiOpinion').innerHTML =
