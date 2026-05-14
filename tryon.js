@@ -1,20 +1,18 @@
 // backend/tryon.js
 // ============================================================
-// Probador Virtual IA — sin dependencias nuevas, solo Gemini
+// Probador Virtual IA — Gemini 2.0 Flash Image Generation
 //
 //  POST /api/tryon/compose
 //    1. Descarga la imagen de la joya (server-side, sin CORS)
-//    2. Llama a Gemini 2.5 Flash Image para quitar el fondo
-//       → devuelve la joya sola sobre fondo blanco/transparente
-//    3. Llama a Gemini 2.5 Flash Image para componer la imagen
-//       final: persona + joya limpia → foto realista
-//    4. Pide opinión del estilista a Gemini 2.0 Flash (texto)
+//    2. Un único prompt a Gemini para componer persona + joya
+//       de forma realista (sin pasos intermedios que fallan)
+//    3. Opinión del estilista con Gemini 2.0 Flash (texto)
 //    Devuelve: { image_base64, image_mime, opinion }
 //
 //  POST /api/tryon/analyze — solo opinión (compatibilidad)
 //    Devuelve: { opinion }
 //
-// Solo requiere GEMINI_API_KEY en .env — sin deps nuevas.
+// Solo requiere GEMINI_API_KEY en .env
 // ============================================================
 
 import { Router } from 'express';
@@ -87,6 +85,50 @@ function fallbackOpinion(productName, material) {
   return `${name} luce de forma excepcional, aportando un toque de distinción y feminidad. ${tone} Perfecta tanto para una ocasión especial como para elevar un look cotidiano.`;
 }
 
+// ── Construir prompt de composición según categoría ───────
+function buildComposePrompt(name, mat, cat) {
+  const catLower = (cat || '').toLowerCase();
+
+  let placementInstruction = '';
+  if (catLower.includes('anillo')) {
+    placementInstruction =
+      'Place the ring on one of the person\'s fingers. ' +
+      'Scale it to fit naturally on the finger, matching the finger\'s angle and lighting.';
+  } else if (catLower.includes('pulsera')) {
+    placementInstruction =
+      'Place the bracelet around the person\'s wrist. ' +
+      'Wrap it naturally around the wrist, matching its curve, angle, and the photo\'s lighting.';
+  } else if (catLower.includes('collar') || catLower.includes('gargantilla')) {
+    placementInstruction =
+      'Place the necklace around the person\'s neck, resting naturally on the chest/décolletage. ' +
+      'Follow the natural curve of the neckline and match the lighting.';
+  } else if (catLower.includes('pendiente')) {
+    placementInstruction =
+      'Place the earring(s) on the person\'s ear(s), positioned naturally on the earlobe. ' +
+      'Match the angle of the head, scale, and lighting.';
+  } else {
+    placementInstruction =
+      'Identify the most appropriate body part for this jewelry and place it there naturally.';
+  }
+
+  return (
+    'You are an expert photo editor specializing in jewelry try-on.\n\n' +
+    'You are given TWO images:\n' +
+    '- IMAGE 1: A photo of a person (this is the base photo — do NOT alter the person, their pose, skin, clothing, or background in any way).\n' +
+    '- IMAGE 2: A product photo of a jewelry piece.\n\n' +
+    `JEWELRY: "${name}" made of ${mat || 'metal'}.\n\n` +
+    'YOUR TASK:\n' +
+    `${placementInstruction}\n\n` +
+    'STRICT RULES:\n' +
+    '1. IGNORE the background of IMAGE 2 completely — extract only the jewelry itself, removing any black, white or colored background.\n' +
+    '2. Do NOT paste the jewelry as a flat rectangle or stamp on top of the photo. Integrate it realistically with correct perspective, scale, curvature, and shadows.\n' +
+    '3. The jewelry must look like it is physically ON and touching the person\'s body, not floating or overlaid.\n' +
+    '4. Preserve every detail of the person exactly: face, skin tone, hair, clothes, background.\n' +
+    '5. Match the lighting and color temperature of IMAGE 1.\n' +
+    '6. Output ONE photorealistic image. No text, no borders, no watermarks.'
+  );
+}
+
 // ══════════════════════════════════════════════════════════
 // POST /api/tryon/compose
 // Body: { user_image_base64, jewel_url, product_name, material, category }
@@ -104,16 +146,8 @@ router.post('/compose', async (req, res) => {
   if (!user_image_base64) return res.status(400).json({ error: 'user_image_base64 es obligatorio' });
   if (!jewel_url)         return res.status(400).json({ error: 'jewel_url es obligatorio' });
 
-  const cat  = (category || '').toLowerCase();
   const name = product_name || 'la joya';
   const mat  = material     || '';
-
-  const placement =
-    cat.includes('anillo')                                ? 'en el dedo de la mano' :
-    cat.includes('pulsera')                               ? 'en la muñeca'          :
-    cat.includes('collar') || cat.includes('gargantilla') ? 'en el cuello / escote' :
-    cat.includes('pendiente')                             ? 'en la oreja'           :
-    'en el lugar apropiado del cuerpo';
 
   // ── Paso 1: Descargar imagen de la joya ───────────────────
   let jewelBase64, jewelMime;
@@ -121,70 +155,36 @@ router.post('/compose', async (req, res) => {
     const downloaded = await fetchImageAsBase64(jewel_url);
     jewelBase64 = downloaded.base64;
     jewelMime   = downloaded.mime;
+    console.log('tryon/compose — joya descargada, mime:', jewelMime);
   } catch (err) {
     console.error('tryon/compose — descarga joya:', err.message);
     return res.status(400).json({ error: `No se pudo obtener la imagen de la joya: ${err.message}` });
   }
 
-  // ── Paso 2: Quitar fondo de la joya con Gemini ────────────
-  // Le pedimos que devuelva solo la joya sobre fondo blanco puro,
-  // sin packaging, sin sombras, sin nada más.
-  let jewelCleanBase64 = jewelBase64;
-  let jewelCleanMime   = jewelMime;
-  try {
-    const bgData = await callGemini({
-      parts: [
-        { text:
-          'You are a professional photo editor.\n' +
-          'Remove the background from this jewelry product image completely.\n' +
-          'Output ONLY the jewelry piece itself on a pure white background.\n' +
-          'Remove any packaging, boxes, surfaces, shadows, or other elements.\n' +
-          'Keep the jewelry sharp and detailed. Output a clean product photo.'
-        },
-        { inline_data: { mime_type: jewelMime, data: jewelBase64 } },
-      ],
-      expectImage: true,
-    });
-    const parsed = parseGeminiResponse(bgData);
-    if (parsed.imageBase64) {
-      jewelCleanBase64 = parsed.imageBase64;
-      jewelCleanMime   = parsed.imageMime;
-      console.log('tryon/compose — fondo eliminado con Gemini');
-    } else {
-      console.warn('tryon/compose — Gemini no devolvió imagen en paso de recorte, usando original');
-    }
-  } catch (err) {
-    console.warn('tryon/compose — error quitando fondo, usando imagen original:', err.message);
-  }
-
-  // ── Paso 3: Componer imagen final con Gemini ─────────────
+  // ── Paso 2: Composición directa en un solo prompt ─────────
   let composedBase64 = null;
   let composedMime   = 'image/png';
   try {
+    const prompt = buildComposePrompt(name, mat, category);
+    console.log('tryon/compose — enviando a Gemini...');
+
     const composeData = await callGemini({
       parts: [
-        { text:
-          'You are a professional jewelry photo retoucher.\n\n' +
-          'TASK: Edit the FIRST image (person photo) so the person is wearing the jewelry from the SECOND image.\n\n' +
-          `The SECOND image shows only the jewelry "${name}" (${mat}) on a white background — place it ${placement} as it would naturally appear when worn.\n\n` +
-          'Rules:\n' +
-          '- Keep the person\'s face, skin tone, clothing, pose and background EXACTLY as they are. Do not alter them.\n' +
-          '- Integrate the jewelry naturally: correct size, angle, lighting and shadows matching the photo.\n' +
-          '- The result must look like a real photo, not a montage.\n' +
-          '- Output a single photorealistic image. No text, no watermarks, no borders.'
-        },
-        { inline_data: { mime_type: 'image/jpeg',      data: user_image_base64 } },
-        { inline_data: { mime_type: jewelCleanMime,    data: jewelCleanBase64  } },
+        { text: prompt },
+        { inline_data: { mime_type: 'image/jpeg', data: user_image_base64 } },
+        { inline_data: { mime_type: jewelMime,    data: jewelBase64 } },
       ],
       expectImage: true,
     });
+
     const parsed   = parseGeminiResponse(composeData);
     composedBase64 = parsed.imageBase64;
     composedMime   = parsed.imageMime;
 
     if (!composedBase64) {
-      console.error('tryon/compose — SIN IMAGEN. Texto Gemini:', parsed.text);
-      console.error('tryon/compose — Raw candidates:', JSON.stringify(composeData?.candidates?.[0]?.finishReason));
+      const finishReason = composeData?.candidates?.[0]?.finishReason;
+      console.error('tryon/compose — SIN IMAGEN. finishReason:', finishReason);
+      console.error('tryon/compose — texto Gemini:', parsed.text);
     } else {
       console.log('tryon/compose — imagen generada OK, mime:', composedMime, 'bytes aprox:', composedBase64.length);
     }
@@ -192,9 +192,17 @@ router.post('/compose', async (req, res) => {
     console.error('tryon/compose — ERROR COMPOSICIÓN:', err.message);
   }
 
-  // ── Paso 4: Opinión del estilista ─────────────────────────
+  // ── Paso 3: Opinión del estilista ─────────────────────────
   let opinion = null;
   try {
+    const catLower = (category || '').toLowerCase();
+    const placement =
+      catLower.includes('anillo')                                    ? 'en el dedo'    :
+      catLower.includes('pulsera')                                   ? 'en la muñeca'  :
+      catLower.includes('collar') || catLower.includes('gargantilla') ? 'en el cuello'  :
+      catLower.includes('pendiente')                                 ? 'en la oreja'   :
+      'en el cuerpo';
+
     const imgForOpinion  = composedBase64 ?? user_image_base64;
     const mimeForOpinion = composedBase64 ? composedMime : 'image/jpeg';
 
