@@ -3471,96 +3471,132 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ── Analizar y componer imagen final ──────────────────────
+// Convierte un canvas o una URL de imagen a base64 puro (sin prefijo data:...)
+async function tryonImageToBase64(source) {
+  if (typeof source === 'string' && source.startsWith('data:')) {
+    return source.split(',')[1];
+  }
+  if (typeof source === 'string') {
+    // URL externa → cargar en canvas para extraer base64
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const c = document.createElement('canvas');
+        c.width = img.width; c.height = img.height;
+        c.getContext('2d').drawImage(img, 0, 0);
+        resolve(c.toDataURL('image/jpeg', 0.9).split(',')[1]);
+      };
+      img.onerror = reject;
+      img.src = source;
+    });
+  }
+  // Canvas element
+  return source.toDataURL('image/jpeg', 0.9).split(',')[1];
+}
+
 async function tryonAnalyzeWithAI() {
   document.getElementById('tryonPanel3').classList.add('active');
   document.getElementById('tryonAiLoading').style.display = 'flex';
   document.getElementById('tryonResult').style.display    = 'none';
   await new Promise(r => setTimeout(r, 50));
 
+  // ── Preparar imagen del usuario (canvas → base64) ────────
   const srcCanvas = document.getElementById('tryonCanvas');
-  const resCanvas = document.getElementById('tryonResultCanvas');
-  resCanvas.width  = srcCanvas.width;
-  resCanvas.height = srcCanvas.height;
-  const ctx = resCanvas.getContext('2d');
-  ctx.drawImage(srcCanvas, 0, 0);
+  const userBase64 = await tryonImageToBase64(srcCanvas);
 
-  // Dibujar la joya usando la escala guardada antes de ocultar panel 2
+  // ── URL de la joya (el backend la descarga, sin CORS) ────
   const jewelImg = document.getElementById('tryonJewelImg');
-  if (jewelImg.src && jewelImg.complete) {
-    const ox = (tryonJewelState.x - tryonCanvasOffsetX) * tryonCanvasScaleX;
-    const oy = (tryonJewelState.y - tryonCanvasOffsetY) * tryonCanvasScaleY;
-    const ow = tryonJewelState.w * tryonCanvasScaleX;
-    const oh = ow * (jewelImg.naturalHeight / jewelImg.naturalWidth);
-    ctx.save();
-    ctx.globalAlpha = tryonJewelState.opacity;
-    ctx.translate(ox + ow/2, oy + oh/2);
-    ctx.rotate(tryonJewelState.rotation * Math.PI / 180);
-    ctx.drawImage(jewelImg, -ow/2, -oh/2, ow, oh);
-    ctx.restore();
-  }
+  const jewelUrl = (jewelImg && jewelImg.src) ? jewelImg.src : null;
 
-  // Recortar zona centrada en la joya con contexto corporal
-  const jx  = (tryonJewelState.x - tryonCanvasOffsetX) * tryonCanvasScaleX;
-  const jy  = (tryonJewelState.y - tryonCanvasOffsetY) * tryonCanvasScaleY;
-  const jw  = tryonJewelState.w * tryonCanvasScaleX;
-  const jh  = jw * ((jewelImg.naturalHeight || jw) / (jewelImg.naturalWidth || jw));
-  const pad = jw * 2.0;
+  // ── Llamar al backend /api/tryon/compose ─────────────────
+  let aiImageBase64 = null;
+  let aiImageMime   = 'image/png';
+  let opinion       = null;
 
-  const cropX = Math.max(0, jx - pad);
-  const cropY = Math.max(0, jy - pad);
-  const cropW = Math.min(resCanvas.width  - cropX, jw + pad * 2);
-  const cropH = Math.min(resCanvas.height - cropY, jh + pad * 2);
-
-  const cropCanvas = document.createElement('canvas');
-  const safeCropW  = cropW > 10 ? cropW : resCanvas.width;
-  const safeCropH  = cropH > 10 ? cropH : resCanvas.height;
-  const safeCropX  = safeCropW === resCanvas.width  ? 0 : cropX;
-  const safeCropY  = safeCropH === resCanvas.height ? 0 : cropY;
-  cropCanvas.width  = safeCropW;
-  cropCanvas.height = safeCropH;
-  cropCanvas.getContext('2d').drawImage(resCanvas, safeCropX, safeCropY, safeCropW, safeCropH, 0, 0, safeCropW, safeCropH);
-
-  resCanvas.width  = safeCropW;
-  resCanvas.height = safeCropH;
-  resCanvas.getContext('2d').drawImage(cropCanvas, 0, 0);
-
-  // Opinión del estilista — llama al backend (Gemini), con fallback local si falla
-  let opinion = null;
-  try {
-    // Extraer base64 puro (sin el prefijo "data:image/jpeg;base64,")
-    const dataURL    = cropCanvas.toDataURL('image/jpeg', 0.85);
-    const base64Data = dataURL.split(',')[1];
-
-    const resp = await fetch(`${API_URL}/tryon/analyze`, {
-      method : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body   : JSON.stringify({
-        image_base64 : base64Data,
-        product_name : tryonProduct?.name     || '',
-        material     : tryonProduct?.material || '',
-      }),
-    });
-
-    if (resp.ok) {
-      const data = await resp.json();
-      opinion = data.opinion || null;
-    }
-  } catch(e) {
-    // Red caída o servidor no disponible → fallback local
-    console.warn('tryon: backend no disponible, usando análisis local', e);
-  }
-
-  // Si el backend no devolvió opinión usamos el motor local como fallback
-  if (!opinion) {
+  if (jewelUrl) {
     try {
-      opinion = tryonGenerateLocalOpinion(cropCanvas, tryonProduct);
+      const resp = await fetch(`${API_URL}/tryon/compose`, {
+        method : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body   : JSON.stringify({
+          user_image_base64 : userBase64,
+          jewel_url         : jewelUrl,
+          product_name      : tryonProduct?.name     || '',
+          material          : tryonProduct?.material || '',
+          category          : tryonProduct?.category || '',
+        }),
+      });
+      if (resp.ok) {
+        const data  = await resp.json();
+        aiImageBase64 = data.image_base64 || null;
+        aiImageMime   = data.image_mime   || 'image/png';
+        opinion       = data.opinion      || null;
+      }
     } catch(e) {
-      opinion = `${tryonProduct?.name || 'Esta joya'} luce perfecta. Pulsa "Añadir al carrito" para hacerla tuya.`;
+      console.warn('tryon: compose falló, usando fallback manual', e);
     }
   }
 
+  // ── Mostrar resultado ─────────────────────────────────────
+  const resCanvas = document.getElementById('tryonResultCanvas');
+
+  if (aiImageBase64) {
+    // ✅ IA generó imagen → mostrarla directamente
+    await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        resCanvas.width  = img.width;
+        resCanvas.height = img.height;
+        resCanvas.getContext('2d').drawImage(img, 0, 0);
+        resolve();
+      };
+      img.onerror = reject;
+      img.src = `data:${aiImageMime};base64,${aiImageBase64}`;
+    });
+  } else {
+    // ⚠️ Fallback: superposición manual (como antes)
+    resCanvas.width  = srcCanvas.width;
+    resCanvas.height = srcCanvas.height;
+    const ctx = resCanvas.getContext('2d');
+    ctx.drawImage(srcCanvas, 0, 0);
+    if (jewelImg && jewelImg.src && jewelImg.complete) {
+      const ox = (tryonJewelState.x - tryonCanvasOffsetX) * tryonCanvasScaleX;
+      const oy = (tryonJewelState.y - tryonCanvasOffsetY) * tryonCanvasScaleY;
+      const ow = tryonJewelState.w * tryonCanvasScaleX;
+      const oh = ow * (jewelImg.naturalHeight / jewelImg.naturalWidth);
+      ctx.save();
+      ctx.globalAlpha = tryonJewelState.opacity;
+      ctx.translate(ox + ow/2, oy + oh/2);
+      ctx.rotate(tryonJewelState.rotation * Math.PI / 180);
+      ctx.drawImage(jewelImg, -ow/2, -oh/2, ow, oh);
+      ctx.restore();
+    }
+    // Si no tenemos opinión de la IA pedirla al endpoint de solo texto
+    if (!opinion) {
+      try {
+        const cropBase64 = await tryonImageToBase64(resCanvas);
+        const r = await fetch(`${API_URL}/tryon/analyze`, {
+          method : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body   : JSON.stringify({
+            image_base64 : cropBase64,
+            product_name : tryonProduct?.name     || '',
+            material     : tryonProduct?.material || '',
+          }),
+        });
+        if (r.ok) { const d = await r.json(); opinion = d.opinion || null; }
+      } catch(e) { /* ignora */ }
+    }
+    if (!opinion) {
+      try { opinion = tryonGenerateLocalOpinion(resCanvas, tryonProduct); } catch(e) {}
+    }
+  }
+
+  // ── Mostrar opinión del estilista ─────────────────────────
   document.getElementById('tryonAiOpinion').innerHTML =
-    `<strong style="color:var(--gold);font-style:normal;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;">✦ Opinión de tu estilista</strong><br><br>${opinion}`;
+    `<strong style="color:var(--gold);font-style:normal;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;">✦ Opinión de tu estilista</strong><br><br>` +
+    (opinion || `${tryonProduct?.name || 'La joya'} luce perfecta. Pulsa "Añadir al carrito" para hacerla tuya.`);
 
   document.getElementById('tryonAiLoading').style.display = 'none';
   document.getElementById('tryonResult').style.display    = 'block';
