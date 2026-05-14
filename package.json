@@ -8,6 +8,7 @@
     "node": ">=18.0.0"
   },
   "scripts": {
+    "build": "npm install",
     "start": "node server.js",
     "dev": "node --watch server.js",
     "db:init": "psql $DATABASE_URL -f schema.sql"
