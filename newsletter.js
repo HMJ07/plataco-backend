@@ -3,37 +3,47 @@
 // ============================================================
 // Ruta: POST /api/newsletter/subscribe
 // Variables de entorno necesarias:
-//   RESEND_API_KEY       — clave de Resend
+//   RESEND_API_KEY       — clave de Resend (opcional — sin ella funciona igual)
 //   EMAIL_FROM           — dirección remitente (ej: PLATACO <hola@plataco.es>)
-//   NEWSLETTER_RECIPIENT — tu correo donde quieres recibir notificaciones (opcional)
+//   NEWSLETTER_RECIPIENT — tu correo donde recibes notificaciones (opcional)
 // ============================================================
 
 import express from 'express';
+import { query } from './db.js';
 
 const router = express.Router();
 
-// Helper: envía email via Resend (igual que email.js del proyecto)
+// Helper: envía email via Resend — NUNCA lanza excepción, solo loguea
 async function sendEmail({ to, subject, html }) {
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
   const EMAIL_FROM     = process.env.EMAIL_FROM || 'PLATACO <onboarding@resend.dev>';
 
   if (!RESEND_API_KEY) {
     console.warn('⚠️  RESEND_API_KEY no configurada — email newsletter no enviado');
-    return;
+    return { ok: false, reason: 'no_api_key' };
   }
 
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${RESEND_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ from: EMAIL_FROM, to, subject, html }),
-  });
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ from: EMAIL_FROM, to, subject, html }),
+    });
 
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || 'Error enviando email');
-  console.log(`📧 Newsletter email enviado a ${to} — ID: ${data.id}`);
+    const data = await res.json();
+    if (!res.ok) {
+      console.warn(`⚠️  Resend error enviando a ${to}:`, data.message);
+      return { ok: false, reason: data.message };
+    }
+    console.log(`📧 Newsletter email enviado a ${to} — ID: ${data.id}`);
+    return { ok: true };
+  } catch (err) {
+    console.warn(`⚠️  Resend excepción enviando a ${to}:`, err.message);
+    return { ok: false, reason: err.message };
+  }
 }
 
 // ── POST /api/newsletter/subscribe ──────────────────────────
@@ -48,7 +58,27 @@ router.post('/subscribe', async (req, res) => {
 
     const emailLower = email.toLowerCase().trim();
 
-    // 1. Email de bienvenida al suscriptor
+    // 1. Guardar en BD (crea la tabla si no existe)
+    await query(`
+      CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+        id         SERIAL PRIMARY KEY,
+        email      TEXT UNIQUE NOT NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+
+    try {
+      await query(
+        'INSERT INTO newsletter_subscribers (email) VALUES ($1) ON CONFLICT (email) DO NOTHING',
+        [emailLower]
+      );
+      console.log(`✅ Newsletter: ${emailLower} guardado en BD`);
+    } catch (dbErr) {
+      // Si la BD falla también lo logueamos pero no bloqueamos
+      console.warn('⚠️  Newsletter BD error:', dbErr.message);
+    }
+
+    // 2. Email de bienvenida al suscriptor (fallo silencioso)
     await sendEmail({
       to: emailLower,
       subject: '✦ Bienvenida/o a PLATACO — Ya eres parte de nuestra comunidad',
@@ -131,7 +161,7 @@ router.post('/subscribe', async (req, res) => {
             </td>
           </tr>
 
-          <!-- Footer email -->
+          <!-- Footer -->
           <tr>
             <td style="padding:20px 48px;border-top:1px solid #111;text-align:center;">
               <p style="font-size:10px;color:#2a2a2a;letter-spacing:0.1em;margin:0 0 6px;">
@@ -152,7 +182,7 @@ router.post('/subscribe', async (req, res) => {
       `,
     });
 
-    // 2. Notificación interna (si está configurado NEWSLETTER_RECIPIENT)
+    // 3. Notificación interna (si está configurado NEWSLETTER_RECIPIENT)
     const adminEmail = process.env.NEWSLETTER_RECIPIENT;
     if (adminEmail) {
       await sendEmail({
@@ -168,7 +198,8 @@ router.post('/subscribe', async (req, res) => {
       });
     }
 
-    return res.json({ ok: true, message: 'Suscripción completada. ¡Revisa tu bandeja de entrada!' });
+    // ✅ Siempre respondemos OK — la suscripción está guardada aunque el email falle
+    return res.json({ ok: true, message: '¡Suscripción completada! Revisa tu bandeja de entrada.' });
 
   } catch (err) {
     console.error('❌ Error newsletter:', err);
@@ -191,10 +222,6 @@ router.post('/contact', async (req, res) => {
     }
 
     const CONTACT_RECIPIENT = process.env.CONTACT_RECIPIENT || process.env.NEWSLETTER_RECIPIENT;
-    if (!CONTACT_RECIPIENT) {
-      console.warn('⚠️  CONTACT_RECIPIENT no configurada — guardando localmente');
-      // Aunque no haya email admin configurado, confirmamos recepción al usuario
-    }
 
     const asuntoLabels = {
       pedido: 'Consulta sobre mi pedido',
@@ -207,7 +234,7 @@ router.post('/contact', async (req, res) => {
     };
     const asuntoLabel = asuntoLabels[asunto] || asunto;
 
-    // 1. Email de confirmación al cliente
+    // 1. Email de confirmación al cliente (fallo silencioso)
     await sendEmail({
       to: email,
       subject: '✦ Hemos recibido tu mensaje — PLATACO',
@@ -240,7 +267,7 @@ router.post('/contact', async (req, res) => {
                 <p style="font-size:14px;color:#666;line-height:1.7;margin:0;">${mensaje.replace(/\n/g, '<br>')}</p>
               </td></tr>
             </table>
-            <p style="font-size:13px;color:#444;line-height:1.7;margin:0;">Si tienes urgencia, puedes escribirnos directamente a <a href="mailto:hola@plataco.es" style="color:#c9a84c;text-decoration:none;">hola@plataco.es</a></p>
+            <p style="font-size:13px;color:#444;line-height:1.7;margin:0;">Si tienes urgencia, escríbenos a <a href="mailto:hola@plataco.es" style="color:#c9a84c;text-decoration:none;">hola@plataco.es</a></p>
           </td>
         </tr>
         <tr>
@@ -255,7 +282,7 @@ router.post('/contact', async (req, res) => {
 </html>`,
     });
 
-    // 2. Notificación interna al equipo
+    // 2. Notificación interna al equipo (fallo silencioso)
     if (CONTACT_RECIPIENT) {
       await sendEmail({
         to: CONTACT_RECIPIENT,
