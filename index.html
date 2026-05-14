@@ -3524,15 +3524,43 @@ async function tryonAnalyzeWithAI() {
   resCanvas.height = safeCropH;
   resCanvas.getContext('2d').drawImage(cropCanvas, 0, 0);
 
-  // Opinión del estilista
+  // Opinión del estilista — llama al backend (Gemini), con fallback local si falla
+  let opinion = null;
   try {
-    const opinion = tryonGenerateLocalOpinion(cropCanvas, tryonProduct);
-    document.getElementById('tryonAiOpinion').innerHTML =
-      `<strong style="color:var(--gold);font-style:normal;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;">✦ Opinión de tu estilista</strong><br><br>${opinion}`;
+    // Extraer base64 puro (sin el prefijo "data:image/jpeg;base64,")
+    const dataURL    = cropCanvas.toDataURL('image/jpeg', 0.85);
+    const base64Data = dataURL.split(',')[1];
+
+    const resp = await fetch(`${API_URL}/tryon/analyze`, {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify({
+        image_base64 : base64Data,
+        product_name : tryonProduct?.name     || '',
+        material     : tryonProduct?.material || '',
+      }),
+    });
+
+    if (resp.ok) {
+      const data = await resp.json();
+      opinion = data.opinion || null;
+    }
   } catch(e) {
-    document.getElementById('tryonAiOpinion').innerHTML =
-      `<strong style="color:var(--gold);font-style:normal;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;">✦ Vista previa lista</strong><br><br>La joya luce perfecta. Pulsa "Añadir al carrito" para hacerla tuya.`;
+    // Red caída o servidor no disponible → fallback local
+    console.warn('tryon: backend no disponible, usando análisis local', e);
   }
+
+  // Si el backend no devolvió opinión usamos el motor local como fallback
+  if (!opinion) {
+    try {
+      opinion = tryonGenerateLocalOpinion(cropCanvas, tryonProduct);
+    } catch(e) {
+      opinion = `${tryonProduct?.name || 'Esta joya'} luce perfecta. Pulsa "Añadir al carrito" para hacerla tuya.`;
+    }
+  }
+
+  document.getElementById('tryonAiOpinion').innerHTML =
+    `<strong style="color:var(--gold);font-style:normal;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;">✦ Opinión de tu estilista</strong><br><br>${opinion}`;
 
   document.getElementById('tryonAiLoading').style.display = 'none';
   document.getElementById('tryonResult').style.display    = 'block';
