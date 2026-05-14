@@ -1,45 +1,34 @@
 // backend/tryon.js
 // ============================================================
-// Probador Virtual IA
+// Probador Virtual IA — sin dependencias nuevas, solo Gemini
 //
 //  POST /api/tryon/compose
 //    1. Descarga la imagen de la joya (server-side, sin CORS)
-//    2. Quita el fondo con @imgly/background-removal-node
-//       → devuelve PNG con canal alpha (fondo transparente)
-//    3. Llama a Gemini 2.5 Flash Image con la foto del usuario
-//       + la joya recortada → genera imagen realista compuesta
+//    2. Llama a Gemini 2.5 Flash Image para quitar el fondo
+//       → devuelve la joya sola sobre fondo blanco/transparente
+//    3. Llama a Gemini 2.5 Flash Image para componer la imagen
+//       final: persona + joya limpia → foto realista
 //    4. Pide opinión del estilista a Gemini 2.0 Flash (texto)
 //    Devuelve: { image_base64, image_mime, opinion }
 //
-//  POST /api/tryon/analyze  — solo opinión (compatibilidad)
+//  POST /api/tryon/analyze — solo opinión (compatibilidad)
 //    Devuelve: { opinion }
 //
-// Deps nuevas: @imgly/background-removal-node
-//   npm install @imgly/background-removal-node
+// Solo requiere GEMINI_API_KEY en .env — sin deps nuevas.
 // ============================================================
 
-import { Router }    from 'express';
-import { removeBackground } from '@imgly/background-removal-node';
+import { Router } from 'express';
 
 const router = Router();
 
-// ── Descargar imagen externa → Buffer + mime ───────────────
-async function fetchImageBuffer(url) {
+// ── Descargar imagen externa → base64 + mime ──────────────
+async function fetchImageAsBase64(url) {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`No se pudo descargar imagen: ${res.status} ${url}`);
   const contentType = res.headers.get('content-type') || 'image/jpeg';
   const mime   = contentType.split(';')[0].trim();
   const buffer = Buffer.from(await res.arrayBuffer());
-  return { buffer, mime };
-}
-
-// ── Quitar fondo de la joya → PNG base64 transparente ─────
-async function removeJewelBackground(imageBuffer) {
-  // removeBackground acepta Buffer y devuelve un Blob con el PNG resultante
-  const blob       = await removeBackground(imageBuffer);
-  const arrayBuf   = await blob.arrayBuffer();
-  const pngBuffer  = Buffer.from(arrayBuf);
-  return pngBuffer.toString('base64'); // base64 de PNG con alpha
+  return { base64: buffer.toString('base64'), mime };
 }
 
 // ── Llamar a Gemini ────────────────────────────────────────
@@ -64,7 +53,7 @@ async function callGemini({ parts, expectImage = false }) {
 
   if (!res.ok) {
     const body = await res.text();
-    throw new Error(`Gemini ${res.status}: ${body.slice(0, 300)}`);
+    throw new Error(`Gemini ${res.status}: ${body.slice(0, 400)}`);
   }
   return res.json();
 }
@@ -77,7 +66,10 @@ function parseGeminiResponse(data) {
   let imageMime   = 'image/png';
   for (const p of parts) {
     if (p.text)       text += p.text;
-    if (p.inlineData) { imageBase64 = p.inlineData.data; imageMime = p.inlineData.mimeType || 'image/png'; }
+    if (p.inlineData) {
+      imageBase64 = p.inlineData.data;
+      imageMime   = p.inlineData.mimeType || 'image/png';
+    }
   }
   return { text: text.trim(), imageBase64, imageMime };
 }
@@ -100,6 +92,7 @@ function fallbackOpinion(productName, material) {
 // Body: { user_image_base64, jewel_url, product_name, material, category }
 // ══════════════════════════════════════════════════════════
 router.post('/compose', async (req, res) => {
+  console.log('tryon/compose — llamada recibida, jewel_url:', req.body?.jewel_url?.slice(0, 80));
   const {
     user_image_base64,
     jewel_url,
@@ -123,64 +116,80 @@ router.post('/compose', async (req, res) => {
     'en el lugar apropiado del cuerpo';
 
   // ── Paso 1: Descargar imagen de la joya ───────────────────
-  let jewelBuffer, jewelMime;
+  let jewelBase64, jewelMime;
   try {
-    const downloaded = await fetchImageBuffer(jewel_url);
-    jewelBuffer = downloaded.buffer;
+    const downloaded = await fetchImageAsBase64(jewel_url);
+    jewelBase64 = downloaded.base64;
     jewelMime   = downloaded.mime;
   } catch (err) {
     console.error('tryon/compose — descarga joya:', err.message);
     return res.status(400).json({ error: `No se pudo obtener la imagen de la joya: ${err.message}` });
   }
 
-  // ── Paso 2: Quitar fondo de la joya ───────────────────────
-  let jewelBase64 = null;
-  let jewelFinalMime = 'image/png';
+  // ── Paso 2: Quitar fondo de la joya con Gemini ────────────
+  // Le pedimos que devuelva solo la joya sobre fondo blanco puro,
+  // sin packaging, sin sombras, sin nada más.
+  let jewelCleanBase64 = jewelBase64;
+  let jewelCleanMime   = jewelMime;
   try {
-    jewelBase64     = await removeJewelBackground(jewelBuffer);
-    jewelFinalMime  = 'image/png'; // removeBackground siempre devuelve PNG
-    console.log('tryon/compose — fondo eliminado correctamente');
-  } catch (err) {
-    console.warn('tryon/compose — no se pudo quitar fondo, usando imagen original:', err.message);
-    // Fallback: usar imagen original sin recortar
-    jewelBase64    = jewelBuffer.toString('base64');
-    jewelFinalMime = jewelMime;
-  }
-
-  // ── Paso 3: Generar imagen compuesta con Gemini ───────────
-  let composedBase64 = null;
-  let composedMime   = 'image/png';
-
-  try {
-    const prompt =
-      `You are a professional jewelry photo retoucher.\n\n` +
-      `TASK: Edit the FIRST image (person photo) so the person is wearing the jewelry from the SECOND image.\n\n` +
-      `The SECOND image is a PNG with a transparent background — it contains only the jewelry piece with no background.\n\n` +
-      `Instructions:\n` +
-      `- Place "${name}" (${mat}) ${placement} as it would naturally appear when worn.\n` +
-      `- Keep the person's face, skin tone, clothing, pose and background EXACTLY as they are.\n` +
-      `- Match the jewelry lighting and shadows to the photo's existing light source so it looks real.\n` +
-      `- Use a realistic, proportional size for the jewelry on the person's body.\n` +
-      `- Output a single photorealistic image. No text, no watermarks, no borders.`;
-
-    const data = await callGemini({
+    const bgData = await callGemini({
       parts: [
-        { text: prompt },
-        { inline_data: { mime_type: 'image/jpeg', data: user_image_base64 } },
-        { inline_data: { mime_type: jewelFinalMime, data: jewelBase64     } },
+        { text:
+          'You are a professional photo editor.\n' +
+          'Remove the background from this jewelry product image completely.\n' +
+          'Output ONLY the jewelry piece itself on a pure white background.\n' +
+          'Remove any packaging, boxes, surfaces, shadows, or other elements.\n' +
+          'Keep the jewelry sharp and detailed. Output a clean product photo.'
+        },
+        { inline_data: { mime_type: jewelMime, data: jewelBase64 } },
       ],
       expectImage: true,
     });
+    const parsed = parseGeminiResponse(bgData);
+    if (parsed.imageBase64) {
+      jewelCleanBase64 = parsed.imageBase64;
+      jewelCleanMime   = parsed.imageMime;
+      console.log('tryon/compose — fondo eliminado con Gemini');
+    } else {
+      console.warn('tryon/compose — Gemini no devolvió imagen en paso de recorte, usando original');
+    }
+  } catch (err) {
+    console.warn('tryon/compose — error quitando fondo, usando imagen original:', err.message);
+  }
 
-    const parsed   = parseGeminiResponse(data);
+  // ── Paso 3: Componer imagen final con Gemini ─────────────
+  let composedBase64 = null;
+  let composedMime   = 'image/png';
+  try {
+    const composeData = await callGemini({
+      parts: [
+        { text:
+          'You are a professional jewelry photo retoucher.\n\n' +
+          'TASK: Edit the FIRST image (person photo) so the person is wearing the jewelry from the SECOND image.\n\n' +
+          `The SECOND image shows only the jewelry "${name}" (${mat}) on a white background — place it ${placement} as it would naturally appear when worn.\n\n` +
+          'Rules:\n' +
+          '- Keep the person\'s face, skin tone, clothing, pose and background EXACTLY as they are. Do not alter them.\n' +
+          '- Integrate the jewelry naturally: correct size, angle, lighting and shadows matching the photo.\n' +
+          '- The result must look like a real photo, not a montage.\n' +
+          '- Output a single photorealistic image. No text, no watermarks, no borders.'
+        },
+        { inline_data: { mime_type: 'image/jpeg',      data: user_image_base64 } },
+        { inline_data: { mime_type: jewelCleanMime,    data: jewelCleanBase64  } },
+      ],
+      expectImage: true,
+    });
+    const parsed   = parseGeminiResponse(composeData);
     composedBase64 = parsed.imageBase64;
     composedMime   = parsed.imageMime;
 
     if (!composedBase64) {
-      console.warn('tryon/compose — Gemini no devolvió imagen:', parsed.text?.slice(0, 200));
+      console.error('tryon/compose — SIN IMAGEN. Texto Gemini:', parsed.text);
+      console.error('tryon/compose — Raw candidates:', JSON.stringify(composeData?.candidates?.[0]?.finishReason));
+    } else {
+      console.log('tryon/compose — imagen generada OK, mime:', composedMime, 'bytes aprox:', composedBase64.length);
     }
   } catch (err) {
-    console.error('tryon/compose — error Gemini imagen:', err.message);
+    console.error('tryon/compose — ERROR COMPOSICIÓN:', err.message);
   }
 
   // ── Paso 4: Opinión del estilista ─────────────────────────
@@ -193,12 +202,12 @@ router.post('/compose', async (req, res) => {
       parts: [
         { inline_data: { mime_type: mimeForOpinion, data: imgForOpinion } },
         { text:
-            `Eres un estilista de joyería de lujo. Analiza cómo luce "${name}" (${mat}) ${placement} en la imagen.\n` +
-            `Escribe exactamente 3 frases en español:\n` +
-            `1) Cómo luce la joya en esa zona del cuerpo.\n` +
-            `2) Qué favorece del estilo o tono de piel.\n` +
-            `3) Una ocasión o combinación recomendada.\n` +
-            `Tono: cálido, sofisticado, personal. Sin numeración, escribe las 3 frases seguidas.`
+          `Eres un estilista de joyería de lujo. Analiza cómo luce "${name}" (${mat}) ${placement} en la imagen.\n` +
+          'Escribe exactamente 3 frases en español:\n' +
+          '1) Cómo luce la joya en esa zona del cuerpo.\n' +
+          '2) Qué favorece del estilo o tono de piel.\n' +
+          '3) Una ocasión o combinación recomendada.\n' +
+          'Tono: cálido, sofisticado, personal. Sin numeración, escribe las 3 frases seguidas.'
         },
       ],
       expectImage: false,
@@ -231,12 +240,12 @@ router.post('/analyze', async (req, res) => {
       parts: [
         { inline_data: { mime_type: 'image/jpeg', data: image_base64 } },
         { text:
-            `Eres un estilista de joyería de lujo. Analiza cómo luce "${product_name || 'esta joya'}" (${material || ''}) en la imagen.\n` +
-            `Escribe exactamente 3 frases en español:\n` +
-            `1) Cómo luce la joya en esa zona del cuerpo.\n` +
-            `2) Qué favorece del estilo o tono de piel.\n` +
-            `3) Una ocasión o combinación recomendada.\n` +
-            `Tono: cálido, sofisticado, personal. Sin numeración, escribe las 3 frases seguidas.`
+          `Eres un estilista de joyería de lujo. Analiza cómo luce "${product_name || 'esta joya'}" (${material || ''}) en la imagen.\n` +
+          'Escribe exactamente 3 frases en español:\n' +
+          '1) Cómo luce la joya en esa zona del cuerpo.\n' +
+          '2) Qué favorece del estilo o tono de piel.\n' +
+          '3) Una ocasión o combinación recomendada.\n' +
+          'Tono: cálido, sofisticado, personal. Sin numeración, escribe las 3 frases seguidas.'
         },
       ],
       expectImage: false,
