@@ -37,7 +37,7 @@ async function callGemini({ parts, expectImage = false }) {
   if (!apiKey) throw new Error('GEMINI_API_KEY no configurada');
 
   const model = expectImage
-    ? 'gemini-2.5-flash-image-preview'
+    ? 'gemini-2.0-flash-preview-image-generation'
     : 'gemini-2.0-flash';
 
   const generationConfig = expectImage
