@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin-panel.html
+Disallow: /checkout.html
+Disallow: /cuenta.html
+Disallow: /reset-password.html
+
+Sitemap: https://plataco.netlify.app/sitemap.xml
